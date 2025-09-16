@@ -1,0 +1,203 @@
+.avatar-sm {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+}
+
+.avatar-lg {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.02);
+}
+
+.badge {
+    font-weight: 500;
+    border-radius: 6px;
+}
+
+.card {
+    border-radius: 12px;
+}
+
+.btn {
+    border-radius: 8px;
+}
+
+.modal-content {
+    border-radius: 15px;
+}
+
+.btn-group .btn {
+    border-radius: 6px;
+}
+
+.btn-group .btn:not(:last-child) {
+    margin-right: 2px;
+}
+
+.progress {
+    border-radius: 3px;
+}
+
+.border-white-25 {
+    border-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+.text-white-25 {
+    color: rgba(255, 255, 255, 0.25) !important;
+}
+
+.text-white-50 {
+    color: rgba(255, 255, 255, 0.75) !important;
+}
+
+.text-white-75 {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.bg-white-25 {
+    background-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+.stat-card {
+    border: none;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card .stat-icon {
+    font-size: 2.5rem;
+    transition: transform 0.3s ease;
+}
+
+.stat-card-primary {
+    background: #ffffff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    color: #0d6efd;
+}
+
+.stat-card-success {
+    background: #ffffff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    color: #198754;
+}
+
+.stat-card-warning {
+    background: #ffffff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    color: #ffc107;
+}
+
+.stat-card-danger {
+    background: #ffffff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    color: #dc3545;
+}
+
+.stat-card:hover {
+    transform: translateY(-8px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.stat-card:hover .stat-icon {
+    transform: rotate(0deg) scale(1.1);
+}
+
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeInUp 0.8s ease forwards;
+}
+
+.weekly-stats-card {
+    border-radius: 16px;
+    transition: box-shadow 0.3s ease;
+}
+
+.weekly-stats-card:hover {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.weekly-stat-item {
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.weekly-stat-item:hover {
+    background: rgba(0, 0, 0, 0.05);
+    transform: translateX(8px);
+}
+
+.progress-animated .progress-bar {
+    transition: width 1.2s ease-in-out;
+}
+
+.stat-icon-primary {
+    color: #2575fc;
+    transition: transform 0.3s ease;
+}
+
+.stat-icon-success {
+    color: #38ef7d;
+    transition: transform 0.3s ease;
+}
+
+.stat-icon-warning {
+    color: #ffd200;
+    transition: transform 0.3s ease;
+}
+
+.weekly-stat-item:hover .stat-icon-primary,
+.weekly-stat-item:hover .stat-icon-success,
+.weekly-stat-item:hover .stat-icon-warning,
+.weekly-stat-item:hover .stat-icon-danger,
+.weekly-stat-item:hover .stat-icon-info {
+    transform: scale(1.3) rotate(10deg);
+}
+
+.text-gradient {
+    background: linear-gradient(90deg, #0d6efd, #6610f2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+}
+
+.logo-text-enhanced {
+    background: none;
+    -webkit-background-clip: unset;
+    -webkit-text-fill-color: unset;
+    background-clip: unset;
+    color: #000000;
+    display: inline-block;
+    transition: transform 0.2s ease-in-out;
+    text-shadow: none;
+}
+
+.logo-text-enhanced span {
+    color: #000000;
+    text-shadow: none;
+    transition: transform 0.2s ease-in-out;
+}
+
+.logo-text-enhanced:hover,
+.logo-text-enhanced span:hover {
+    transform: scale(1.05);
+}
+
