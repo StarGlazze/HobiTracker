@@ -7,23 +7,6 @@
                     <i class="ti ti-menu-2"></i>
                 </a>
             </li>
-
-            {{-- Notification (opsional, bisa dihapus kalau gak dipakai) --}}
-            <li class="nav-item dropdown">
-                <a class="nav-link" href="javascript:void(0)" id="notifDropdown" data-bs-toggle="dropdown"
-                    aria-expanded="false">
-                    <i class="ti ti-bell"></i>
-                    {{-- Notifikasi bulat biru hanya muncul jika ada notif --}}
-                    @if (session('has_notification', false))
-                        <div class="notification bg-primary rounded-circle"></div>
-                    @endif
-                </a>
-                <div class="dropdown-menu dropdown-menu-animate-up" aria-labelledby="notifDropdown">
-                    <div class="message-body">
-                        <a href="javascript:void(0)" class="dropdown-item">No new notifications</a>
-                    </div>
-                </div>
-            </li>
         </ul>
         <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
             <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
