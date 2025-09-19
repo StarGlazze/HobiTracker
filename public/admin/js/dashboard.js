@@ -1,6 +1,4 @@
 $(function () {
-
-
   // -----------------------------------------------------------------------
   // sales overview
   // -----------------------------------------------------------------------
@@ -59,7 +57,7 @@ $(function () {
       show: true,
       width: 5,
       lineCap: "butt",
-      colors: ["transparent"],
+      colors: ["var(--bs-primary)", "var(--bs-secondary)"],
     },
     xaxis: {
       type: "category",
@@ -83,6 +81,5 @@ $(function () {
     document.querySelector("#sales-overview"),
     options_sales_overview
   );
-
-
-})
+  chart_column_basic.render();
+});
