@@ -12,8 +12,9 @@ class HobiController extends Controller
     public function index()
     {
         $userId = Auth::id();
-        $hobis = Hobi::where('user_id', $userId)->get();
-        return view('admin.hobi', ['hobis' => $hobis]);
+        $hobis = Hobi::where('user_id', $userId)->with('kategoriHobi')->get();
+        $kategoriHobis = \App\Models\KategoriHobi::all();
+        return view('admin.hobi', ['hobis' => $hobis, 'kategoriHobis' => $kategoriHobis]);
     }
 
     // Menampilkan form untuk membuat hobi baru

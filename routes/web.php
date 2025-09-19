@@ -13,9 +13,7 @@ Route::get('/dashboard', function () {
     return view('admin.dashboard');
 });
 
-Route::get('/hobi', function () {
-    return view('admin.hobi');
-});
+
 
 Route::get('/aktivitas', function () {
     return view('admin.aktivitas');

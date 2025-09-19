@@ -4,6 +4,20 @@
 
 @section('content')
     <div class="container-fluid" style="padding-top: 20px">
+        <!-- Success/Error Messages -->
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="ti ti-check-circle me-2"></i>{{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="ti ti-alert-circle me-2"></i>{{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
         <!-- Page Header -->
         <div class="row mb-4">
             <div class="col-12">
@@ -113,7 +127,8 @@
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body text-center p-4">
                         <div class="mb-3">
-                            <div class="avatar-lg bg-primary-subtle rounded-circle d-inline-flex align-items-center justify-content-center">
+                            <div
+                                class="avatar-lg bg-primary-subtle rounded-circle d-inline-flex align-items-center justify-content-center">
                                 <i class="ti ti-book-2 text-primary" style="font-size: 2rem;"></i>
                             </div>
                         </div>
@@ -127,7 +142,8 @@
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body text-center p-4">
                         <div class="mb-3">
-                            <div class="avatar-lg bg-success-subtle rounded-circle d-inline-flex align-items-center justify-content-center">
+                            <div
+                                class="avatar-lg bg-success-subtle rounded-circle d-inline-flex align-items-center justify-content-center">
                                 <i class="ti ti-bike text-success" style="font-size: 2rem;"></i>
                             </div>
                         </div>
@@ -141,7 +157,8 @@
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body text-center p-4">
                         <div class="mb-3">
-                            <div class="avatar-lg bg-info-subtle rounded-circle d-inline-flex align-items-center justify-content-center">
+                            <div
+                                class="avatar-lg bg-info-subtle rounded-circle d-inline-flex align-items-center justify-content-center">
                                 <i class="ti ti-music text-info" style="font-size: 2rem;"></i>
                             </div>
                         </div>
@@ -206,112 +223,59 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr class="border-bottom">
-                                <td class="px-4 py-3">
-                                    <span class="px-2 py-1">1</span>
-                                </td>
-                                <td class="py-3">
-                                    <div class="d-flex align-items-center">
-                                        <div>
-                                            <h6 class="mb-1 fw-semibold">Membaca</h6>
+                            @forelse ($hobis as $index => $hobi)
+                                <tr class="border-bottom">
+                                    <td class="px-4 py-3">
+                                        <span class="px-2 py-1">{{ $index + 1 }}</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div>
+                                                <h6 class="mb-1 fw-semibold">{{ $hobi->nama_hobi }}</h6>
+                                            </div>
                                         </div>
-                                    </div>
-                                </td>
-                                <td class="py-3">
-                                    <span class="badge bg-primary-subtle text-primary px-3 py-2">
-                                        <i class="ti ti-book me-1"></i>Membaca & Literasi
-                                    </span>
-                                </td>
-                                <td class="py-3">
-                                    <div class="text-truncate" style="max-width: 250px;" data-bs-toggle="tooltip" 
-                                         title="Membaca buku fiksi maupun non-fiksi untuk menambah wawasan dan pengetahuan">
-                                        Membaca buku fiksi maupun non-fiksi untuk menambah wawasan.
-                                    </div>
-                                </td>
-                                <td class="py-3 text-center">
-                                    <div class="btn-group" role="group">
-                                        <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editHobiModal" title="Edit Hobi">
-                                            <i class="ti ti-pencil"></i>
-                                        </button>
-                                        <button class="btn btn-danger btn-sm" data-bs-toggle="tooltip" title="Hapus Hobi">
-                                            <i class="ti ti-trash"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr class="border-bottom">
-                                <td class="px-4 py-3">
-                                    <span class="px-2 py-1">2</span>
-                                </td>
-                                <td class="py-3">
-                                    <div class="d-flex align-items-center">
-                                        <div>
-                                            <h6 class="mb-1 fw-semibold">Bersepeda</h6>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-primary-subtle text-primary px-3 py-2">
+                                            <i class="ti ti-book me-1"></i>{{ $hobi->kategoriHobi->nama_kategori ?? 'Tidak Diketahui' }}
+                                        </span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="text-truncate" style="max-width: 250px;" data-bs-toggle="tooltip"
+                                            title="{{ $hobi->deskripsi }}">
+                                            {{ $hobi->deskripsi }}
                                         </div>
-                                    </div>
-                                </td>
-                                <td class="py-3">
-                                    <span class="badge bg-success-subtle text-success px-3 py-2">
-                                        <i class="ti ti-bike me-1"></i>Olahraga & Kebugaran
-                                    </span>
-                                </td>
-                                <td class="py-3">
-                                    <div class="text-truncate" style="max-width: 250px;" data-bs-toggle="tooltip"
-                                         title="Menjelajahi alam dan perkotaan dengan sepeda sambil menjaga kesehatan">
-                                        Menjelajahi alam dan perkotaan dengan sepeda.
-                                    </div>
-                                </td>
-                                <td class="py-3 text-center">
-                                    <div class="btn-group" role="group">
-                                        <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editHobiModal" title="Edit Hobi">
-                                            <i class="ti ti-pencil"></i>
-                                        </button>
-                                        <button class="btn btn-danger btn-sm" data-bs-toggle="tooltip" title="Hapus Hobi">
-                                            <i class="ti ti-trash"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr class="border-bottom">
-                                <td class="px-4 py-3">
-                                    <span class=" px-2 py-1">3</span>
-                                </td>
-                                <td class="py-3">
-                                    <div class="d-flex align-items-center">
-                                        <div>
-                                            <h6 class="mb-1 fw-semibold">Menyanyi</h6>
+                                    </td>
+                                    <td class="py-3 text-center">
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-warning btn-sm" data-bs-toggle="modal"
+                                                data-bs-target="#editHobiModal" title="Edit Hobi" data-id="{{ $hobi->id }}" data-nama="{{ $hobi->nama_hobi }}" data-kategori="{{ $hobi->kategori_id }}" data-deskripsi="{{ $hobi->deskripsi }}">
+                                                <i class="ti ti-pencil"></i>
+                                            </button>
+                                            <form action="{{ route('hobi.destroy', $hobi->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus hobi ini?');" style="display:inline;">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" title="Hapus Hobi">
+                                                    <i class="ti ti-trash"></i>
+                                                </button>
+                                            </form>
                                         </div>
-                                    </div>
-                                </td>
-                                <td class="py-3">
-                                    <span class="badge bg-info-subtle text-info px-3 py-2">
-                                        <i class="ti ti-music me-1"></i>Musik & Performing Arts
-                                    </span>
-                                </td>
-                                <td class="py-3">
-                                    <div class="text-truncate" style="max-width: 250px;" data-bs-toggle="tooltip"
-                                         title="Mencoba bernyanyi di kamar mandi agar suaranya kedengeran bagus dan berlatih vokal">
-                                        Mencoba bernyanyi di kamar mandi agar suaranya kedengeran bagus.
-                                    </div>
-                                </td>
-                                <td class="py-3 text-center">
-                                    <div class="btn-group" role="group">
-                                        <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editHobiModal" title="Edit Hobi">
-                                            <i class="ti ti-pencil"></i>
-                                        </button>
-                                        <button class="btn btn-danger btn-sm" data-bs-toggle="tooltip" title="Hapus Hobi">
-                                            <i class="ti ti-trash"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="text-center py-4">
+                                        Belum ada hobi yang ditambahkan.
+                                    </td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
             </div>
 
             <!-- Empty State (if no data) -->
-            
+
             <div class="card-body text-center py-5" id="empty-state" style="display: none;">
                 <div class="mb-4">
                     <i class="ti ti-heart text-muted" style="font-size: 4rem;"></i>
@@ -322,15 +286,17 @@
                     <i class="ti ti-plus me-2"></i>Tambah Hobi Pertama
                 </button>
             </div>
-        
+
         </div>
     </div>
 
     <!-- Enhanced Modal -->
-    <div class="modal fade" id="tambahHobiModal" tabindex="-1" aria-labelledby="tambahHobiModalLabel" aria-hidden="true">
+    <div class="modal fade" id="tambahHobiModal" tabindex="-1" aria-labelledby="tambahHobiModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow">
-                <form>
+                <form method="POST" action="{{ route('hobi.store') }}">
+                    @csrf
                     <div class="modal-header bg-primary text-white border-0">
                         <h5 class="modal-title" id="tambahHobiModalLabel">
                             <i class="ti ti-plus-circle me-2"></i>Tambah Hobi Baru
@@ -343,15 +309,20 @@
                             <i class="ti ti-info-circle me-2"></i>
                             Definisikan hobi baru Anda agar bisa mulai melacak dan mencatat semua aktivitasnya
                         </p>
-                        
+
                         <div class="row">
                             <div class="col-md-8">
                                 <div class="mb-3">
                                     <label for="namaHobi" class="form-label fw-semibold">
                                         <i class="ti ti-heart text-danger me-2"></i>Nama Hobi
                                     </label>
-                                    <input type="text" class="form-control" id="namaHobi"
-                                        placeholder="Contoh: Bermain Gitar, Memasak, Fotografi" required>
+                                    <input type="text" class="form-control @error('nama_hobi') is-invalid @enderror"
+                                        id="namaHobi" name="nama_hobi"
+                                        placeholder="Contoh: Bermain Gitar, Memasak, Fotografi"
+                                        value="{{ old('nama_hobi') }}" required>
+                                    @error('nama_hobi')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                         </div>
@@ -360,29 +331,32 @@
                             <label for="kategoriHobi" class="form-label fw-semibold">
                                 <i class="ti ti-category text-success me-2"></i>Kategori Hobi
                             </label>
-                            <select class="form-select" id="kategoriHobi" required>
-                                <option value="" selected disabled>Pilih Kategori Hobi...</option>
-                                <option value="olahraga-kebugaran" data-icon="ti-bike">Olahraga & Kebugaran</option>
-                                <option value="seni-kreativitas" data-icon="ti-palette">Seni & Kreativitas</option>
-                                <option value="musik-performing" data-icon="ti-music">Musik & Performing Arts</option>
-                                <option value="membaca-literasi" data-icon="ti-book-2">Membaca & Literasi</option>
-                                <option value="gaming-esports" data-icon="ti-device-gamepad-2">Gaming & E-Sports</option>
-                                <option value="kuliner-memasak" data-icon="ti-chef-hat">Kuliner & Memasak</option>
-                                <option value="travel-outdoor" data-icon="ti-mountain">Travel & Outdoor</option>
-                                <option value="komunitas-sosial" data-icon="ti-users"> Komunitas & Sosial</option>
-                                <option value="koleksi-khusus" data-icon="ti-collection">Koleksi & Hobi Khusus</option>
-                                <option value="teknologi-sains" data-icon="ti-cpu">Teknologi & Sains</option>
-                                <option value="relaksasi-lifestyle" data-icon="ti-lotus">Relaksasi & Lifestyle</option>
-                                <option value="lainnya" data-icon="ti-dots">Lainnya</option>
+                            <select class="form-select @error('kategori_id') is-invalid @enderror" id="kategoriHobi"
+                                name="kategori_id" required>
+                                <option value="" disabled {{ old('kategori_id') ? '' : 'selected' }}>Pilih Kategori
+                                    Hobi...</option>
+                                @foreach ($kategoriHobis as $kategori)
+                                    <option value="{{ $kategori->id }}" data-icon="{{ $kategori->icon ?? '' }}"
+                                        {{ old('kategori_id') == $kategori->id ? 'selected' : '' }}>
+                                        {{ $kategori->nama_kategori }}
+                                    </option>
+                                @endforeach
                             </select>
+                            @error('kategori_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="mb-3">
                             <label for="deskripsiHobi" class="form-label fw-semibold">
                                 <i class="ti ti-notes text-info me-2"></i>Deskripsi Hobi
                             </label>
-                            <textarea class="form-control" id="deskripsiHobi" rows="3" 
-                                placeholder="Ceritakan tentang hobi ini, mengapa Anda menyukainya, atau apa yang ingin Anda capai..."></textarea>
+                            <textarea class="form-control @error('deskripsi') is-invalid @enderror" id="deskripsiHobi" name="deskripsi"
+                                rows="3"
+                                placeholder="Ceritakan tentang hobi ini, mengapa Anda menyukainya, atau apa yang ingin Anda capai...">{{ old('deskripsi') }}</textarea>
+                            @error('deskripsi')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                             <div class="form-text">
                                 <i class="ti ti-bulb me-1"></i>
                                 Tip: Deskripsi yang baik akan membantu Anda mengingat motivasi awal memulai hobi ini
