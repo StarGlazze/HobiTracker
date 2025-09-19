@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('aktivitas', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('hobi_id')->constrained('hobis')->onDelete('cascade');
+            $table->string('nama_aktivitas');
+            $table->integer('durasi_menit');
+            $table->text('catatan')->nullable();
+            $table->string('file_bukti');
             $table->timestamps();
         });
     }

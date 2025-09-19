@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('hobis', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('kategori_id')->constrained('kategori_hobis')->onDelete('cascade');
+            $table->string('nama_hobi');
+            $table->text('deskripsi')->nullable();
             $table->timestamps();
         });
     }

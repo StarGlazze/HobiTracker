@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('progres_targets', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('target_id')->constrained('target_hobis')->onDelete('cascade');
+            $table->enum('status', ['pending', 'completed', 'failed'])->default('pending');
+            $table->string('file_bukti');
+            $table->text('catatan')->nullable();
             $table->timestamps();
         });
     }
