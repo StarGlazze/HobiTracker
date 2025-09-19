@@ -4,62 +4,89 @@ namespace App\Http\Controllers;
 
 use App\Models\Hobi;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class HobiController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // Menampilkan daftar hobi milik user yang sedang login
     public function index()
     {
-        //
+        $userId = Auth::id();
+        $hobis = Hobi::where('user_id', $userId)->get();
+        return view('admin.hobi', ['hobis' => $hobis]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    // Menampilkan form untuk membuat hobi baru
     public function create()
     {
-        //
+        return view('admin.hobi_create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    // Menyimpan data hobi baru
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'kategori_id' => 'required|exists:kategori_hobis,id',
+            'nama_hobi' => 'required|string|max:255',
+            'deskripsi' => 'nullable|string',
+        ]);
+
+        $hobi = new Hobi();
+        $hobi->user_id = Auth::id();
+        $hobi->kategori_id = $request->kategori_id;
+        $hobi->nama_hobi = $request->nama_hobi;
+        $hobi->deskripsi = $request->deskripsi;
+        $hobi->save();
+
+        return redirect()->route('hobi.index')->with('success', 'Hobi berhasil dibuat');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Hobi $hobi)
+    // Menampilkan form edit hobi
+    public function edit($id)
     {
-        //
+        $hobi = Hobi::find($id);
+
+        if (!$hobi || $hobi->user_id != Auth::id()) {
+            return redirect()->route('hobi.index')->with('error', 'Hobi tidak ditemukan atau tidak punya akses');
+        }
+
+        return view('admin.hobi_edit', ['hobi' => $hobi]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Hobi $hobi)
+    // Mengupdate data hobi
+    public function update(Request $request, $id)
     {
-        //
+        $hobi = Hobi::find($id);
+
+        if (!$hobi || $hobi->user_id != Auth::id()) {
+            return redirect()->route('hobi.index')->with('error', 'Hobi tidak ditemukan atau tidak punya akses');
+        }
+
+        $request->validate([
+            'kategori_id' => 'required|exists:kategori_hobis,id',
+            'nama_hobi' => 'required|string|max:255',
+            'deskripsi' => 'nullable|string',
+        ]);
+
+        $hobi->kategori_id = $request->kategori_id;
+        $hobi->nama_hobi = $request->nama_hobi;
+        $hobi->deskripsi = $request->deskripsi;
+        $hobi->save();
+
+        return redirect()->route('hobi.index')->with('success', 'Hobi berhasil diupdate');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Hobi $hobi)
+    // Menghapus data hobi
+    public function destroy($id)
     {
-        //
-    }
+        $hobi = Hobi::find($id);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Hobi $hobi)
-    {
-        //
+        if (!$hobi || $hobi->user_id != Auth::id()) {
+            return redirect()->route('hobi.index')->with('error', 'Hobi tidak ditemukan atau tidak punya akses');
+        }
+
+        $hobi->delete();
+
+        return redirect()->route('hobi.index')->with('success', 'Hobi berhasil dihapus');
     }
 }
