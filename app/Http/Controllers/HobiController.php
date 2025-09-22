@@ -14,7 +14,10 @@ class HobiController extends Controller
         $userId = Auth::id();
         $hobis = Hobi::where('user_id', $userId)->with('kategoriHobi')->get();
         $kategoriHobis = \App\Models\KategoriHobi::all();
-        return view('admin.hobi', ['hobis' => $hobis, 'kategoriHobis' => $kategoriHobis]);
+        $topKategoriHobis = \App\Models\KategoriHobi::withCount(['hobis' => function ($query) use ($userId) {
+            $query->where('user_id', $userId);
+        }])->having('hobis_count', '>', 0)->orderBy('hobis_count', 'desc')->take(3)->get();
+        return view('admin.hobi', ['hobis' => $hobis, 'kategoriHobis' => $kategoriHobis, 'topKategoriHobis' => $topKategoriHobis]);
     }
 
     // Menampilkan form untuk membuat hobi baru
@@ -26,6 +29,11 @@ class HobiController extends Controller
     // Menyimpan data hobi baru
     public function store(Request $request)
     {
+        // Check if user is authenticated
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Anda harus login terlebih dahulu untuk menambah hobi');
+        }
+
         $request->validate([
             'kategori_id' => 'required|exists:kategori_hobis,id',
             'nama_hobi' => 'required|string|max:255',

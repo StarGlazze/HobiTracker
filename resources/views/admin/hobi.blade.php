@@ -3,6 +3,7 @@
 @section('title', 'Hobi - HobiTracker')
 
 @section('content')
+
     <div class="container-fluid" style="padding-top: 20px">
         <!-- Success/Error Messages -->
         @if(session('success'))
@@ -117,58 +118,30 @@
         </div>
 
         <!-- Category Distribution Cards -->
+        @if($topKategoriHobis->count() > 0)
         <div class="row mb-4">
             <div class="col-12">
                 <h5 class="fw-semibold mb-3">
                     <i class="ti ti-chart-pie text-primary me-2"></i>Distribusi Kategori
                 </h5>
             </div>
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body text-center p-4">
-                        <div class="mb-3">
-                            <div
-                                class="avatar-lg bg-primary-subtle rounded-circle d-inline-flex align-items-center justify-content-center">
-                                <i class="ti ti-book-2 text-primary" style="font-size: 2rem;"></i>
+            @foreach($topKategoriHobis as $kategori)
+                <div class="col-4 mb-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center p-4">
+                            <div class="mb-3">
+                                <div class="avatar-lg {{ $kategori->background_color ?? 'bg-primary' }}-subtle rounded-circle d-inline-flex align-items-center justify-content-center">
+                                    <i class="ti {{ $kategori->icon ?? 'ti-book' }} text-dark" style="font-size: 2rem;"></i>
+                                </div>
                             </div>
+                            <h6 class="fw-semibold">{{ $kategori->nama_kategori }}</h6>
+                            <span class="badge {{ $kategori->background_color ?? 'bg-primary' }} text-white px-3 py-2">{{ $kategori->hobis_count }} Hobi</span>
                         </div>
-                        <h6 class="fw-semibold">Membaca & Literasi</h6>
-                        <p class="text-muted small mb-3">Hobi yang berkaitan dengan membaca dan pembelajaran</p>
-                        <span class="badge bg-primary-subtle text-primary px-3 py-2">1 Hobi</span>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body text-center p-4">
-                        <div class="mb-3">
-                            <div
-                                class="avatar-lg bg-success-subtle rounded-circle d-inline-flex align-items-center justify-content-center">
-                                <i class="ti ti-bike text-success" style="font-size: 2rem;"></i>
-                            </div>
-                        </div>
-                        <h6 class="fw-semibold">Olahraga & Kebugaran</h6>
-                        <p class="text-muted small mb-3">Aktivitas fisik dan menjaga kesehatan tubuh</p>
-                        <span class="badge bg-success-subtle text-success px-3 py-2">1 Hobi</span>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body text-center p-4">
-                        <div class="mb-3">
-                            <div
-                                class="avatar-lg bg-info-subtle rounded-circle d-inline-flex align-items-center justify-content-center">
-                                <i class="ti ti-music text-info" style="font-size: 2rem;"></i>
-                            </div>
-                        </div>
-                        <h6 class="fw-semibold">Musik & Performing Arts</h6>
-                        <p class="text-muted small mb-3">Seni pertunjukan dan ekspresi musikal</p>
-                        <span class="badge bg-info-subtle text-info px-3 py-2">1 Hobi</span>
-                    </div>
-                </div>
-            </div>
+            @endforeach
         </div>
+        @endif
 
         <!-- Main Table Card -->
         <div class="card border-0 shadow-sm">
@@ -236,9 +209,7 @@
                                         </div>
                                     </td>
                                     <td class="py-3">
-                                        <span class="badge bg-primary-subtle text-primary px-3 py-2">
-                                            <i class="ti ti-book me-1"></i>{{ $hobi->kategoriHobi->nama_kategori ?? 'Tidak Diketahui' }}
-                                        </span>
+                                        <strong>{{ $hobi->kategoriHobi->nama_kategori ?? 'Tidak Diketahui' }}</strong>
                                     </td>
                                     <td class="py-3">
                                         <div class="text-truncate" style="max-width: 250px;" data-bs-toggle="tooltip"
@@ -335,11 +306,19 @@
                                 name="kategori_id" required>
                                 <option value="" disabled {{ old('kategori_id') ? '' : 'selected' }}>Pilih Kategori
                                     Hobi...</option>
+                                @php
+                                    $uniqueKategori = [];
+                                @endphp
                                 @foreach ($kategoriHobis as $kategori)
-                                    <option value="{{ $kategori->id }}" data-icon="{{ $kategori->icon ?? '' }}"
-                                        {{ old('kategori_id') == $kategori->id ? 'selected' : '' }}>
-                                        {{ $kategori->nama_kategori }}
-                                    </option>
+                                    @if (!in_array($kategori->id, $uniqueKategori))
+                                        @php
+                                            $uniqueKategori[] = $kategori->id;
+                                        @endphp
+                                        <option value="{{ $kategori->id }}" data-icon="{{ $kategori->icon ?? '' }}"
+                                            {{ old('kategori_id') == $kategori->id ? 'selected' : '' }}>
+                                            {{ $kategori->nama_kategori }}
+                                        </option>
+                                    @endif
                                 @endforeach
                             </select>
                             @error('kategori_id')
@@ -380,7 +359,9 @@
     <div class="modal fade" id="editHobiModal" tabindex="-1" aria-labelledby="editHobiModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow">
-                <form>
+                <form method="POST" id="editHobiForm">
+                    @csrf
+                    @method('PUT')
                     <div class="modal-header bg-warning text-white border-0">
                         <h5 class="modal-title" id="editHobiModalLabel">
                             <i class="ti ti-edit me-2"></i>Edit Hobi
@@ -400,8 +381,11 @@
                                     <label for="editNamaHobi" class="form-label fw-semibold">
                                         <i class="ti ti-heart text-danger me-2"></i>Nama Hobi
                                     </label>
-                                    <input type="text" class="form-control" id="editNamaHobi"
+                                    <input type="text" class="form-control @error('nama_hobi') is-invalid @enderror" id="editNamaHobi" name="nama_hobi"
                                         placeholder="Contoh: Bermain Gitar, Memasak, Fotografi" required>
+                                    @error('nama_hobi')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                         </div>
@@ -410,29 +394,28 @@
                             <label for="editKategoriHobi" class="form-label fw-semibold">
                                 <i class="ti ti-category text-success me-2"></i>Kategori Hobi
                             </label>
-                            <select class="form-select" id="editKategoriHobi" required>
-                                <option value="" selected disabled>Pilih Kategori Hobi...</option>
-                                <option value="olahraga-kebugaran" data-icon="ti-bike">Olahraga & Kebugaran</option>
-                                <option value="seni-kreativitas" data-icon="ti-palette">Seni & Kreativitas</option>
-                                <option value="musik-performing" data-icon="ti-music">Musik & Performing Arts</option>
-                                <option value="membaca-literasi" data-icon="ti-book-2">Membaca & Literasi</option>
-                                <option value="gaming-esports" data-icon="ti-device-gamepad-2">Gaming & E-Sports</option>
-                                <option value="kuliner-memasak" data-icon="ti-chef-hat">Kuliner & Memasak</option>
-                                <option value="travel-outdoor" data-icon="ti-mountain">Travel & Outdoor</option>
-                                <option value="komunitas-sosial" data-icon="ti-users"> Komunitas & Sosial</option>
-                                <option value="koleksi-khusus" data-icon="ti-collection">Koleksi & Hobi Khusus</option>
-                                <option value="teknologi-sains" data-icon="ti-cpu">Teknologi & Sains</option>
-                                <option value="relaksasi-lifestyle" data-icon="ti-lotus">Relaksasi & Lifestyle</option>
-                                <option value="lainnya" data-icon="ti-dots">Lainnya</option>
+                            <select class="form-select @error('kategori_id') is-invalid @enderror" id="editKategoriHobi" name="kategori_id" required>
+                                <option value="" disabled selected>Pilih Kategori Hobi...</option>
+                                @foreach ($kategoriHobis as $kategori)
+                                    <option value="{{ $kategori->id }}" data-icon="{{ $kategori->icon ?? '' }}">
+                                        {{ $kategori->nama_kategori }}
+                                    </option>
+                                @endforeach
                             </select>
+                            @error('kategori_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="mb-3">
                             <label for="editDeskripsiHobi" class="form-label fw-semibold">
                                 <i class="ti ti-notes text-info me-2"></i>Deskripsi Hobi
                             </label>
-                            <textarea class="form-control" id="editDeskripsiHobi" rows="3"
+                            <textarea class="form-control @error('deskripsi') is-invalid @enderror" id="editDeskripsiHobi" name="deskripsi" rows="3"
                                 placeholder="Ceritakan tentang hobi ini, mengapa Anda menyukainya, atau apa yang ingin Anda capai..."></textarea>
+                            @error('deskripsi')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                             <div class="form-text">
                                 <i class="ti ti-bulb me-1"></i>
                                 Tip: Deskripsi yang baik akan membantu Anda mengingat motivasi awal memulai hobi ini
@@ -451,5 +434,7 @@
             </div>
         </div>
     </div>
+
+    <script src="{{ asset('js/hobi.js') }}"></script>
 
 @endsection
