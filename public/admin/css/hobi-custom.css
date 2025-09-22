@@ -201,3 +201,53 @@
     transform: scale(1.05);
 }
 
+/* Custom Background Colors for Kategori Hobi */
+.bg-purple {
+    background-color: #6f42c1 !important;
+}
+
+.bg-teal {
+    background-color: #20c997 !important;
+}
+
+.bg-orange {
+    background-color: #fd7e14 !important;
+}
+
+.bg-pink {
+    background-color: #d63384 !important;
+}
+
+/* Custom Subtle Background Colors for Kategori Hobi */
+.bg-purple-subtle {
+    background-color: rgba(111, 66, 193, 0.1) !important;
+}
+
+.bg-teal-subtle {
+    background-color: rgba(32, 201, 151, 0.1) !important;
+}
+
+.bg-orange-subtle {
+    background-color: rgba(253, 126, 20, 0.1) !important;
+}
+
+.bg-pink-subtle {
+    background-color: rgba(214, 51, 132, 0.1) !important;
+}
+
+/* Custom Text Colors for Kategori Hobi */
+.text-purple {
+    color: #6f42c1 !important;
+}
+
+.text-teal {
+    color: #20c997 !important;
+}
+
+.text-orange {
+    color: #fd7e14 !important;
+}
+
+.text-pink {
+    color: #d63384 !important;
+}

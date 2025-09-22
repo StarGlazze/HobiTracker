@@ -4,12 +4,14 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'HobiTracker')</title>
     <link rel="shortcut icon" type="image/png" href="{{ asset('./admin/images/logos/favicon-v2.png')}}" />
     <link rel="stylesheet" href="{{ asset('./admin/css/styles.min.css')}}" />
     <link rel="stylesheet" href="{{ asset('./admin/css/hover-effects.css')}}" />
     <link rel="stylesheet" href="{{ asset('./admin/css/achievement.css')}}" />
     <link rel="stylesheet" href="{{ asset('./admin/css/hobi-custom.css')}}" />
+    <link rel="stylesheet" href="{{ asset('./admin/css/color-fixes.css')}}" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 </head>

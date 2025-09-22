@@ -36,14 +36,77 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Form validation (basic)
-    const forms = document.querySelectorAll('#settingsTabContent form');
-    forms.forEach(form => {
-        form.addEventListener('submit', function(e) {
-            // Add validation logic here if needed
-            console.log('Form submitted:', form.id);
+    // Save settings functionality
+    const saveSettingsBtn = Array.from(document.querySelectorAll('button')).find(btn =>
+        btn.textContent.trim().includes('Simpan Pengaturan')
+    );
+    if (saveSettingsBtn) {
+        saveSettingsBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            // Collect form data from all tabs
+            const formData = new FormData();
+
+            // General tab
+            const siteName = document.getElementById('site_name')?.value || 'HobiTracker';
+            const siteDescription = document.getElementById('site_description')?.value || '';
+            const siteLogo = document.getElementById('site_logo')?.files[0];
+            const favicon = document.getElementById('favicon')?.files[0];
+
+            if (siteName) formData.append('nama_website', siteName);
+            if (siteDescription) formData.append('deskripsi', siteDescription);
+            if (siteLogo) formData.append('logo', siteLogo);
+            if (favicon) formData.append('favicon', favicon);
+
+            // Contact tab
+            const contactEmail = document.getElementById('contact_email')?.value || '';
+            const contactPhone = document.getElementById('contact_phone')?.value || '';
+            const address = document.getElementById('address')?.value || '';
+            const whatsapp = document.getElementById('whatsapp')?.value || '';
+            const telegram = document.getElementById('telegram')?.value || '';
+
+            if (contactEmail) formData.append('contact_email', contactEmail);
+            if (contactPhone) formData.append('contact_phone', contactPhone);
+            if (address) formData.append('address', address);
+            if (whatsapp) formData.append('whatsapp', whatsapp);
+            if (telegram) formData.append('telegram', telegram);
+
+            // Social media tab
+            const facebook = document.getElementById('facebook')?.value || '';
+            const instagram = document.getElementById('instagram')?.value || '';
+            const twitter = document.getElementById('twitter')?.value || '';
+            const linkedin = document.getElementById('linkedin')?.value || '';
+            const youtube = document.getElementById('youtube')?.value || '';
+
+            if (facebook) formData.append('facebook', facebook);
+            if (instagram) formData.append('instagram', instagram);
+            if (twitter) formData.append('twitter', twitter);
+            if (linkedin) formData.append('linkedin', linkedin);
+            if (youtube) formData.append('youtube', youtube);
+
+            // Send AJAX request
+            fetch('/setting/save-settings', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json',
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat menyimpan pengaturan');
+            });
         });
-    });
+    }
 
     // Tab switching enhancement
     const tabs = document.querySelectorAll('#settingsTab .nav-link');
@@ -55,59 +118,130 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Hobby categories modal logic
     const addCategoryBtn = document.getElementById('addCategoryBtn');
-    const newCategoryInput = document.getElementById('new_category');
+    const newCategoryNameInput = document.getElementById('new_category_name');
+    const newCategoryIconInput = document.getElementById('new_category_icon');
+    const newCategoryColorInput = document.getElementById('new_category_color');
     const categoriesList = document.getElementById('categoriesList');
-    const saveCategoriesBtn = document.getElementById('saveCategoriesBtn');
 
-    function removeCategory(button) {
-        const item = button.closest('.list-group-item');
-        if (item) {
-            item.remove();
+    function removeCategory(categoryId) {
+        if (confirm('Apakah Anda yakin ingin menghapus kategori ini?')) {
+            fetch(`/setting/remove-category/${categoryId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Remove the item from the list
+                    const item = document.querySelector(`[data-id="${categoryId}"]`);
+                    if (item) {
+                        item.remove();
+                    }
+                    alert(data.message);
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat menghapus kategori');
+            });
         }
     }
     window.removeCategory = removeCategory;
 
-    if (addCategoryBtn && newCategoryInput && categoriesList) {
+    if (addCategoryBtn && newCategoryNameInput && newCategoryIconInput && newCategoryColorInput && categoriesList) {
         addCategoryBtn.addEventListener('click', () => {
-            const newCategory = newCategoryInput.value.trim();
-            if (newCategory === '') {
+            const categoryName = newCategoryNameInput.value.trim();
+            const categoryIcon = newCategoryIconInput.value;
+            const categoryColor = newCategoryColorInput.value;
+
+            if (categoryName === '') {
                 alert('Nama kategori tidak boleh kosong.');
                 return;
             }
+            if (categoryIcon === '') {
+                alert('Silakan pilih icon untuk kategori.');
+                return;
+            }
+            if (categoryColor === '') {
+                alert('Silakan pilih warna untuk kategori.');
+                return;
+            }
+
             // Check for duplicates
             const existingCategories = Array.from(categoriesList.children).map(el => el.textContent.trim());
-            if (existingCategories.includes(newCategory)) {
+            if (existingCategories.includes(categoryName)) {
                 alert('Kategori sudah ada.');
                 return;
             }
-            // Create new category item
-            const newItem = document.createElement('div');
-            newItem.className = 'list-group-item d-flex justify-content-between align-items-center';
-            newItem.textContent = newCategory;
 
-            const removeBtn = document.createElement('button');
-            removeBtn.className = 'btn btn-sm btn-outline-danger';
-            removeBtn.type = 'button';
-            removeBtn.innerHTML = '<i class="ti ti-trash"></i>';
-            removeBtn.onclick = () => removeCategory(removeBtn);
+            // Send AJAX request to add category
+            fetch('/setting/add-category', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    nama_kategori: categoryName,
+                    icon: categoryIcon,
+                    background_color: categoryColor
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.category && data.category.id) {
+                    // Create new category item
+                    const newItem = document.createElement('div');
+                    newItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+                    newItem.setAttribute('data-id', data.category.id);
 
-            newItem.appendChild(removeBtn);
-            categoriesList.appendChild(newItem);
-            newCategoryInput.value = '';
-        });
-    }
+                    const itemContent = document.createElement('div');
+                    itemContent.className = 'd-flex align-items-center';
 
-    if (saveCategoriesBtn) {
-        saveCategoriesBtn.addEventListener('click', () => {
-            // Collect categories
-            const categories = Array.from(categoriesList.children).map(el => el.firstChild.textContent.trim());
-            // TODO: Save categories via AJAX or form submission
-            alert('Kategori hobi disimpan: ' + categories.join(', '));
-            // Close modal
-            const modal = bootstrap.Modal.getInstance(document.getElementById('hobbyCategoriesModal'));
-            if (modal) {
-                modal.hide();
-            }
+                    const icon = document.createElement('i');
+                    icon.className = `ti ${categoryIcon} me-2`;
+                    itemContent.appendChild(icon);
+
+                    const nameSpan = document.createElement('span');
+                    nameSpan.textContent = categoryName;
+                    itemContent.appendChild(nameSpan);
+
+                    const badge = document.createElement('span');
+                    badge.className = `badge ${categoryColor} ms-2`;
+                    badge.textContent = '0 hobi';
+                    itemContent.appendChild(badge);
+
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'btn btn-sm btn-outline-danger';
+                    removeBtn.type = 'button';
+                    removeBtn.innerHTML = '<i class="ti ti-trash"></i>';
+                    removeBtn.onclick = () => removeCategory(data.category.id);
+
+                    newItem.appendChild(itemContent);
+                    newItem.appendChild(removeBtn);
+                    categoriesList.appendChild(newItem);
+
+                    // Clear form
+                    newCategoryNameInput.value = '';
+                    newCategoryIconInput.value = '';
+                    newCategoryColorInput.value = '';
+
+                    alert(data.message);
+                } else {
+                    alert(data.message || 'Gagal menambahkan kategori');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat menambahkan kategori');
+            });
         });
     }
 });

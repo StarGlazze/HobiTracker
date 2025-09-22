@@ -13,5 +13,18 @@ class WebSetting extends Model
         'nama_website',
         'logo',
         'deskripsi',
+        'contact_email',
+        'contact_phone',
+        'address',
+        'whatsapp',
+        'telegram',
+        'facebook',
+        'instagram',
+        'twitter',
+        'linkedin',
+        'youtube',
     ];
+
+    
+    
 }

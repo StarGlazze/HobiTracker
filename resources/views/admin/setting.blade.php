@@ -238,51 +238,73 @@
                                     <div class="modal-body">
                                         <div class="mb-3">
                                             <label for="new_category" class="form-label">Tambah Kategori Baru</label>
-                                            <div class="input-group">
-                                                <input type="text" class="form-control" id="new_category"
-                                                    placeholder="Masukkan nama kategori">
-                                                <button class="btn btn-primary" type="button" id="addCategoryBtn">
-                                                    <i class="ti ti-plus me-2"></i>Tambah
-                                                </button>
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <input type="text" class="form-control" id="new_category_name"
+                                                        placeholder="Nama kategori">
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <select class="form-select" id="new_category_icon">
+                                                        <option value="">Pilih Icon</option>
+                                                        <option value="ti-barbell">Dumbbell (Olahraga)</option>
+                                                        <option value="ti-palette">Palette (Seni)</option>
+                                                        <option value="ti-music">Music (Musik)</option>
+                                                        <option value="ti-book">Book (Membaca)</option>
+                                                        <option value="ti-device-gamepad">Gamepad (Gaming)</option>
+                                                        <option value="ti-chef-hat">Chef Hat (Kuliner)</option>
+                                                        <option value="ti-map-pin">Map Pin (Travel)</option>
+                                                        <option value="ti-users">Users (Sosial)</option>
+                                                        <option value="ti-archive">Archive (Koleksi)</option>
+                                                        <option value="ti-cpu">CPU (Teknologi)</option>
+                                                        <option value="ti-spa">Spa (Relaksasi)</option>
+                                                        <option value="ti-dots">Dots (Lainnya)</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <select class="form-select" id="new_category_color">
+                                                        <option value="">Pilih Warna</option>
+                                                        <option value="bg-success">Hijau (Success)</option>
+                                                        <option value="bg-warning">Kuning (Warning)</option>
+                                                        <option value="bg-info">Biru Muda (Info)</option>
+                                                        <option value="bg-primary">Biru (Primary)</option>
+                                                        <option value="bg-dark">Hitam (Dark)</option>
+                                                        <option value="bg-danger">Merah (Danger)</option>
+                                                        <option value="bg-secondary">Abu-abu (Secondary)</option>
+                                                        <option value="bg-indigo">Indigo (Biru + Ungu dikit)</option>
+                                                        <option value="bg-purple">Purple (Ungu)</option>
+                                                        <option value="bg-teal">Teal (Ijo Godong)</option>
+                                                        <option value="bg-orange">Orange (Oren)</option>
+                                                        <option value="bg-pink">Pink (Pink)</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <button class="btn btn-primary w-100" type="button" id="addCategoryBtn">
+                                                        <i class="ti ti-plus me-1"></i>Tambah
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="mb-3">
                                             <label class="form-label">Daftar Kategori</label>
                                             <div id="categoriesList" class="list-group">
-                                                <!-- Categories will be populated here -->
-                                                <div
-                                                    class="list-group-item d-flex justify-content-between align-items-center">
-                                                    Olahraga
-                                                    <button class="btn btn-sm btn-outline-danger"
-                                                        onclick="removeCategory(this)">
+                                                @foreach($kategoriHobis as $kategori)
+                                                <div class="list-group-item d-flex justify-content-between align-items-center" data-id="{{ $kategori->id }}">
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="ti {{ $kategori->icon ?? 'ti-book' }} me-2"></i>
+                                                        <span>{{ $kategori->nama_kategori }}</span>
+                                                        <span class="badge {{ $kategori->background_color ?? 'bg-primary' }} ms-2">{{ $kategori->hobis_count ?? 0 }} hobi</span>
+                                                    </div>
+                                                    <button class="btn btn-sm btn-outline-danger" onclick="removeCategory({{ $kategori->id }})">
                                                         <i class="ti ti-trash"></i>
                                                     </button>
                                                 </div>
-                                                <div
-                                                    class="list-group-item d-flex justify-content-between align-items-center">
-                                                    Musik
-                                                    <button class="btn btn-sm btn-outline-danger"
-                                                        onclick="removeCategory(this)">
-                                                        <i class="ti ti-trash"></i>
-                                                    </button>
-                                                </div>
-                                                <div
-                                                    class="list-group-item d-flex justify-content-between align-items-center">
-                                                    Membaca
-                                                    <button class="btn btn-sm btn-outline-danger"
-                                                        onclick="removeCategory(this)">
-                                                        <i class="ti ti-trash"></i>
-                                                    </button>
-                                                </div>
+                                                @endforeach
                                             </div>
                                         </div>
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary"
                                             data-bs-dismiss="modal">Tutup</button>
-                                        <button type="button" class="btn btn-primary" id="saveCategoriesBtn">
-                                            <i class="ti ti-device-floppy me-2"></i>Simpan Perubahan
-                                        </button>
                                     </div>
                                 </div>
                             </div>
