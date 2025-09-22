@@ -14,10 +14,40 @@ class HobiController extends Controller
         $userId = Auth::id();
         $hobis = Hobi::where('user_id', $userId)->with('kategoriHobi')->get();
         $kategoriHobis = \App\Models\KategoriHobi::all();
+
+        $totalHobi = $hobis->count();
+
+        $hobiTerpopuler = null;
+        $maxAktivitas = 0;
+        foreach ($hobis as $hobi) {
+            $aktivitasCount = $hobi->aktivitas()->count();
+            if ($aktivitasCount > $maxAktivitas) {
+                $maxAktivitas = $aktivitasCount;
+                $hobiTerpopuler = $hobi;
+            }
+        }
+
+        $kategoriAktif = $hobis->groupBy('kategori_id')->count();
+
+        $hobiBulanIni = $hobis->filter(function ($hobi) {
+            return $hobi->created_at->isCurrentMonth();
+        })->count();
+
+
         $topKategoriHobis = \App\Models\KategoriHobi::withCount(['hobis' => function ($query) use ($userId) {
             $query->where('user_id', $userId);
         }])->having('hobis_count', '>', 0)->orderBy('hobis_count', 'desc')->take(3)->get();
-        return view('admin.hobi', ['hobis' => $hobis, 'kategoriHobis' => $kategoriHobis, 'topKategoriHobis' => $topKategoriHobis]);
+
+        return view('admin.hobi', [
+            'hobis' => $hobis,
+            'kategoriHobis' => $kategoriHobis,
+            'topKategoriHobis' => $topKategoriHobis,
+            'totalHobi' => $totalHobi,
+            'hobiTerpopuler' => $hobiTerpopuler,
+            'maxAktivitas' => $maxAktivitas,
+            'kategoriAktif' => $kategoriAktif,
+            'hobiBulanIni' => $hobiBulanIni,
+        ]);
     }
 
     // Menampilkan form untuk membuat hobi baru

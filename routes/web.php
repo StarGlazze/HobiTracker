@@ -11,10 +11,8 @@ Route::get('/', function () {
     return view('landing.welcome');
 });
 
-Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
         return view('admin.dashboard');
-    });
 
     Route::get('/aktivitas', function () {
         return view('admin.aktivitas');
@@ -33,13 +31,12 @@ Route::middleware('auth')->group(function () {
     });
 });
 
-Route::middleware('auth')->group(function () {
+ 
     Route::get('/setting', [WebSettingController::class, 'index'])->name('setting.index');
     Route::post('/setting/add-category', [WebSettingController::class, 'addCategory'])->name('setting.add-category');
     Route::delete('/setting/remove-category/{id}', [WebSettingController::class, 'removeCategory'])->name('setting.remove-category');
     Route::get('/setting/get-categories', [WebSettingController::class, 'getCategories'])->name('setting.get-categories');
     Route::post('/setting/save-settings', [WebSettingController::class, 'saveSettings'])->name('setting.save-settings');
-});
 
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [AuthController::class, 'register']);
@@ -49,6 +46,4 @@ Route::post('/login', [AuthController::class, 'login']);
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::middleware('auth')->group(function () {
-    Route::resource('hobi', HobiControllerFixed::class);
-});
+Route::resource('hobi', HobiControllerFixed::class);

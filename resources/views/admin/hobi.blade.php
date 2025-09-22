@@ -6,13 +6,13 @@
 
     <div class="container-fluid" style="padding-top: 20px">
         <!-- Success/Error Messages -->
-        @if(session('success'))
+        @if (session('success'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <i class="ti ti-check-circle me-2"></i>{{ session('success') }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
-        @if(session('error'))
+        @if (session('error'))
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <i class="ti ti-alert-circle me-2"></i>{{ session('error') }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -49,7 +49,7 @@
                                     <i class="ti ti-heart me-2" style="font-size: 1.5rem;"></i>
                                     <h6 class="text-white-50 mb-0">Total Hobi</h6>
                                 </div>
-                                <h2 class="fw-bold mb-1">3</h2>
+                                <h2 class="fw-bold mb-1">{{ $totalHobi ?? 0 }}</h2>
                                 <small class="text-white-75">Hobi yang terdaftar</small>
                             </div>
                             <div class="text-white-25">
@@ -59,7 +59,15 @@
                         <div class="mt-3 pt-3 border-top border-white-25">
                             <div class="d-flex align-items-center">
                                 <i class="ti ti-trending-up me-2"></i>
-                                <small class="text-white-75">+1 hobi bulan ini</small>
+                                <small class="text-white-75">
+                                    @if ($hobiBulanIni > 0)
+                                        +{{ $hobiBulanIni }} hobi bulan ini
+                                    @elseif($totalHobi > 0)
+                                        Tidak ada hobi baru bulan ini
+                                    @else
+                                        Belum ada hobi
+                                    @endif
+                                </small>
                             </div>
                         </div>
                     </div>
@@ -74,8 +82,9 @@
                                     <i class="ti ti-medal me-2" style="font-size: 1.5rem;"></i>
                                     <h6 class="text-white-50 mb-0">Hobi Terpopuler</h6>
                                 </div>
-                                <h4 class="fw-bold mb-1">Membaca</h4>
-                                <small class="text-white-75">15 aktivitas tercatat</small>
+                                <h4 class="fw-bold mb-1">{{ $hobiTerpopuler ? $hobiTerpopuler->nama_hobi : 'Belum ada' }}
+                                </h4>
+                                <small class="text-white-75">{{ $maxAktivitas }} aktivitas tercatat</small>
                             </div>
                             <div class="text-white-25">
                                 <i class="ti ti-medal" style="font-size: 3rem; opacity: 0.3;"></i>
@@ -83,9 +92,26 @@
                         </div>
                         <div class="mt-3 pt-3 border-top border-white-25">
                             <div class="progress bg-white-25" style="height: 4px;">
-                                <div class="progress-bar bg-white" style="width: 75%"></div>
+                                @php
+                                    $percentage =
+                                        $totalHobi > 0
+                                            ? min(
+                                                ($maxAktivitas /
+                                                    max(
+                                                        $hobis->sum(function ($h) {
+                                                            return $h->aktivitas->count();
+                                                        }),
+                                                        1,
+                                                    )) *
+                                                    100,
+                                                100,
+                                            )
+                                            : 0;
+                                @endphp
+                                <div class="progress-bar bg-white" style="width: {{ $percentage }}%"></div>
                             </div>
-                            <small class="text-white-75 mt-2 d-block">75% dari total aktivitas</small>
+                            <small class="text-white-75 mt-2 d-block">{{ number_format($percentage, 1) }}% dari total
+                                aktivitas</small>
                         </div>
                     </div>
                 </div>
@@ -99,7 +125,7 @@
                                     <i class="ti ti-category me-2" style="font-size: 1.5rem;"></i>
                                     <h6 class="text-white-50 mb-0">Kategori Aktif</h6>
                                 </div>
-                                <h4 class="fw-bold mb-1">3</h4>
+                                <h4 class="fw-bold mb-1">{{ $kategoriAktif ?? 0 }}</h4>
                                 <small class="text-white-75">Kategori berbeda</small>
                             </div>
                             <div class="text-white-25">
@@ -109,7 +135,13 @@
                         <div class="mt-3 pt-3 border-top border-white-25">
                             <div class="d-flex align-items-center">
                                 <i class="ti ti-star me-2"></i>
-                                <small class="text-white-75">Membaca & Literasi paling populer</small>
+                                <small class="text-white-75">
+                                    @if ($hobiTerpopuler && $hobiTerpopuler->kategoriHobi)
+                                        {{ $hobiTerpopuler->kategoriHobi->nama_kategori }} paling populer
+                                    @else
+                                        Belum ada kategori aktif
+                                    @endif
+                                </small>
                             </div>
                         </div>
                     </div>
@@ -117,30 +149,35 @@
             </div>
         </div>
 
+
         <!-- Category Distribution Cards -->
-        @if($topKategoriHobis->count() > 0)
-        <div class="row mb-4">
-            <div class="col-12">
-                <h5 class="fw-semibold mb-3">
-                    <i class="ti ti-chart-pie text-primary me-2"></i>Distribusi Kategori
-                </h5>
-            </div>
-            @foreach($topKategoriHobis as $kategori)
-                <div class="col-4 mb-3">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body text-center p-4">
-                            <div class="mb-3">
-                                <div class="avatar-lg {{ $kategori->background_color ?? 'bg-primary' }}-subtle rounded-circle d-inline-flex align-items-center justify-content-center">
-                                    <i class="ti {{ $kategori->icon ?? 'ti-book' }} text-dark" style="font-size: 2rem;"></i>
+        @if ($topKategoriHobis->count() > 0)
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h5 class="fw-semibold mb-3">
+                        <i class="ti ti-chart-pie text-primary me-2"></i>Distribusi Kategori
+                    </h5>
+                </div>
+                @foreach ($topKategoriHobis as $kategori)
+                    <div class="col-4 mb-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body text-center p-4">
+                                <div class="mb-3">
+                                    <div
+                                        class="avatar-lg {{ $kategori->background_color ?? 'bg-primary' }}-subtle rounded-circle d-inline-flex align-items-center justify-content-center">
+                                        <i class="ti {{ $kategori->icon ?? 'ti-book' }} text-dark"
+                                            style="font-size: 2rem;"></i>
+                                    </div>
                                 </div>
+                                <h6 class="fw-semibold">{{ $kategori->nama_kategori }}</h6>
+                                <span
+                                    class="badge {{ $kategori->background_color ?? 'bg-primary' }} text-white px-3 py-2">{{ $kategori->hobis_count }}
+                                    Hobi</span>
                             </div>
-                            <h6 class="fw-semibold">{{ $kategori->nama_kategori }}</h6>
-                            <span class="badge {{ $kategori->background_color ?? 'bg-primary' }} text-white px-3 py-2">{{ $kategori->hobis_count }} Hobi</span>
                         </div>
                     </div>
-                </div>
-            @endforeach
-        </div>
+                @endforeach
+            </div>
         @endif
 
         <!-- Main Table Card -->
@@ -220,13 +257,19 @@
                                     <td class="py-3 text-center">
                                         <div class="btn-group" role="group">
                                             <button class="btn btn-warning btn-sm" data-bs-toggle="modal"
-                                                data-bs-target="#editHobiModal" title="Edit Hobi" data-id="{{ $hobi->id }}" data-nama="{{ $hobi->nama_hobi }}" data-kategori="{{ $hobi->kategori_id }}" data-deskripsi="{{ $hobi->deskripsi }}">
+                                                data-bs-target="#editHobiModal" title="Edit Hobi"
+                                                data-id="{{ $hobi->id }}" data-nama="{{ $hobi->nama_hobi }}"
+                                                data-kategori="{{ $hobi->kategori_id }}"
+                                                data-deskripsi="{{ $hobi->deskripsi }}">
                                                 <i class="ti ti-pencil"></i>
                                             </button>
-                                            <form action="{{ route('hobi.destroy', $hobi->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus hobi ini?');" style="display:inline;">
+                                            <form action="{{ route('hobi.destroy', $hobi->id) }}" method="POST"
+                                                onsubmit="return confirm('Yakin ingin menghapus hobi ini?');"
+                                                style="display:inline;">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" title="Hapus Hobi">
+                                                <button type="submit" class="btn btn-danger btn-sm"
+                                                    data-bs-toggle="tooltip" title="Hapus Hobi">
                                                     <i class="ti ti-trash"></i>
                                                 </button>
                                             </form>
@@ -381,7 +424,8 @@
                                     <label for="editNamaHobi" class="form-label fw-semibold">
                                         <i class="ti ti-heart text-danger me-2"></i>Nama Hobi
                                     </label>
-                                    <input type="text" class="form-control @error('nama_hobi') is-invalid @enderror" id="editNamaHobi" name="nama_hobi"
+                                    <input type="text" class="form-control @error('nama_hobi') is-invalid @enderror"
+                                        id="editNamaHobi" name="nama_hobi"
                                         placeholder="Contoh: Bermain Gitar, Memasak, Fotografi" required>
                                     @error('nama_hobi')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -394,7 +438,8 @@
                             <label for="editKategoriHobi" class="form-label fw-semibold">
                                 <i class="ti ti-category text-success me-2"></i>Kategori Hobi
                             </label>
-                            <select class="form-select @error('kategori_id') is-invalid @enderror" id="editKategoriHobi" name="kategori_id" required>
+                            <select class="form-select @error('kategori_id') is-invalid @enderror" id="editKategoriHobi"
+                                name="kategori_id" required>
                                 <option value="" disabled selected>Pilih Kategori Hobi...</option>
                                 @foreach ($kategoriHobis as $kategori)
                                     <option value="{{ $kategori->id }}" data-icon="{{ $kategori->icon ?? '' }}">
@@ -411,7 +456,8 @@
                             <label for="editDeskripsiHobi" class="form-label fw-semibold">
                                 <i class="ti ti-notes text-info me-2"></i>Deskripsi Hobi
                             </label>
-                            <textarea class="form-control @error('deskripsi') is-invalid @enderror" id="editDeskripsiHobi" name="deskripsi" rows="3"
+                            <textarea class="form-control @error('deskripsi') is-invalid @enderror" id="editDeskripsiHobi" name="deskripsi"
+                                rows="3"
                                 placeholder="Ceritakan tentang hobi ini, mengapa Anda menyukainya, atau apa yang ingin Anda capai..."></textarea>
                             @error('deskripsi')
                                 <div class="invalid-feedback">{{ $message }}</div>
