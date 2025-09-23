@@ -44,15 +44,21 @@ document.addEventListener('DOMContentLoaded', function() {
         saveSettingsBtn.addEventListener('click', function(e) {
             e.preventDefault();
 
+            // Show loading state
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="ti ti-loader-2 me-2"></i>Menyimpan...';
+            this.disabled = true;
+
             // Collect form data from all tabs
             const formData = new FormData();
 
-            // General tab
-            const siteName = document.getElementById('site_name')?.value || 'HobiTracker';
+            // General tab - sesuaikan dengan struktur database yang benar
+            const siteName = document.getElementById('site_name')?.value || '';
             const siteDescription = document.getElementById('site_description')?.value || '';
             const siteLogo = document.getElementById('site_logo')?.files[0];
             const favicon = document.getElementById('favicon')?.files[0];
 
+            // Gunakan nama kolom yang sesuai dengan database
             if (siteName) formData.append('nama_website', siteName);
             if (siteDescription) formData.append('deskripsi', siteDescription);
             if (siteLogo) formData.append('logo', siteLogo);
@@ -65,9 +71,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const whatsapp = document.getElementById('whatsapp')?.value || '';
             const telegram = document.getElementById('telegram')?.value || '';
 
-            if (contactEmail) formData.append('contact_email', contactEmail);
-            if (contactPhone) formData.append('contact_phone', contactPhone);
-            if (address) formData.append('address', address);
+            if (contactEmail) formData.append('email', contactEmail);
+            if (contactPhone) formData.append('telepon', contactPhone);
+            if (address) formData.append('alamat', address);
             if (whatsapp) formData.append('whatsapp', whatsapp);
             if (telegram) formData.append('telegram', telegram);
 
@@ -93,19 +99,59 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: formData
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
+                // Reset button state
+                saveSettingsBtn.innerHTML = originalText;
+                saveSettingsBtn.disabled = false;
+
                 if (data.success) {
-                    alert(data.message);
+                    // Show success message
+                    showAlert('success', data.message || 'Pengaturan berhasil disimpan!');
                 } else {
-                    alert('Error: ' + data.message);
+                    showAlert('error', data.message || 'Gagal menyimpan pengaturan');
                 }
             })
             .catch(error => {
+                // Reset button state
+                saveSettingsBtn.innerHTML = originalText;
+                saveSettingsBtn.disabled = false;
+                
                 console.error('Error:', error);
-                alert('Terjadi kesalahan saat menyimpan pengaturan');
+                showAlert('error', 'Terjadi kesalahan saat menyimpan pengaturan: ' + error.message);
             });
         });
+    }
+
+    // Alert function
+    function showAlert(type, message) {
+        // Remove existing alerts
+        const existingAlerts = document.querySelectorAll('.alert-custom');
+        existingAlerts.forEach(alert => alert.remove());
+
+        // Create new alert
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show alert-custom`;
+        alertDiv.innerHTML = `
+            <i class="ti ti-${type === 'success' ? 'check-circle' : 'alert-circle'} me-2"></i>${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+
+        // Insert at top of container
+        const container = document.querySelector('.container-fluid');
+        container.insertBefore(alertDiv, container.firstChild);
+
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
     }
 
     // Tab switching enhancement
@@ -133,7 +179,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     'Content-Type': 'application/json',
                 },
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     // Remove the item from the list
@@ -141,14 +192,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (item) {
                         item.remove();
                     }
-                    alert(data.message);
+                    showAlert('success', data.message);
                 } else {
-                    alert(data.message);
+                    showAlert('error', data.message);
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Terjadi kesalahan saat menghapus kategori');
+                showAlert('error', 'Terjadi kesalahan saat menghapus kategori: ' + error.message);
             });
         }
     }
@@ -161,24 +212,31 @@ document.addEventListener('DOMContentLoaded', function() {
             const categoryColor = newCategoryColorInput.value;
 
             if (categoryName === '') {
-                alert('Nama kategori tidak boleh kosong.');
+                showAlert('error', 'Nama kategori tidak boleh kosong.');
                 return;
             }
             if (categoryIcon === '') {
-                alert('Silakan pilih icon untuk kategori.');
+                showAlert('error', 'Silakan pilih icon untuk kategori.');
                 return;
             }
             if (categoryColor === '') {
-                alert('Silakan pilih warna untuk kategori.');
+                showAlert('error', 'Silakan pilih warna untuk kategori.');
                 return;
             }
 
             // Check for duplicates
-            const existingCategories = Array.from(categoriesList.children).map(el => el.textContent.trim());
+            const existingCategories = Array.from(categoriesList.children).map(el => 
+                el.querySelector('span').textContent.trim()
+            );
             if (existingCategories.includes(categoryName)) {
-                alert('Kategori sudah ada.');
+                showAlert('error', 'Kategori sudah ada.');
                 return;
             }
+
+            // Disable button while processing
+            const originalText = addCategoryBtn.innerHTML;
+            addCategoryBtn.innerHTML = '<i class="ti ti-loader-2 me-1"></i>Menambah...';
+            addCategoryBtn.disabled = true;
 
             // Send AJAX request to add category
             fetch('/setting/add-category', {
@@ -194,8 +252,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     background_color: categoryColor
                 })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
+                // Reset button
+                addCategoryBtn.innerHTML = originalText;
+                addCategoryBtn.disabled = false;
+
                 if (data.success && data.category && data.category.id) {
                     // Create new category item
                     const newItem = document.createElement('div');
@@ -233,14 +300,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     newCategoryIconInput.value = '';
                     newCategoryColorInput.value = '';
 
-                    alert(data.message);
+                    showAlert('success', data.message);
                 } else {
-                    alert(data.message || 'Gagal menambahkan kategori');
+                    showAlert('error', data.message || 'Gagal menambahkan kategori');
                 }
             })
             .catch(error => {
+                // Reset button
+                addCategoryBtn.innerHTML = originalText;
+                addCategoryBtn.disabled = false;
+                
                 console.error('Error:', error);
-                alert('Terjadi kesalahan saat menambahkan kategori');
+                showAlert('error', 'Terjadi kesalahan saat menambahkan kategori: ' + error.message);
             });
         });
     }

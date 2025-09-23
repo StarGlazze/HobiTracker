@@ -50,7 +50,8 @@
                                                     <i class="ti ti-world me-2 text-primary"></i>Nama Website
                                                 </label>
                                                 <input type="text" class="form-control form-control-lg" id="site_name"
-                                                    name="site_name" placeholder="Masukkan nama situs">
+                                                    name="site_name" placeholder="Masukkan nama situs"
+                                                    value="{{ $webSettings->nama_website ?? 'HobiTracker' }}">
                                             </div>
                                         </div>
                                         <div class="col-md-6">
@@ -59,7 +60,7 @@
                                                     <i class="ti ti-file-description me-2 text-info"></i>Deskripsi Website
                                                 </label>
                                                 <textarea class="form-control form-control-lg" id="site_description" name="site_description" rows="2"
-                                                    placeholder="Deskripsi singkat website"></textarea>
+                                                    placeholder="Deskripsi singkat website">{{ $webSettings->deskripsi ?? '' }}</textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -73,8 +74,9 @@
                                                 <input type="file" class="form-control" id="site_logo" name="site_logo"
                                                     accept="image/*">
                                                 <div class="mt-2">
-                                                    <img src="/admin/images/logos/HobiTracker.png" alt="Logo Situs"
-                                                        class="img-thumbnail rounded-3" style="max-height: 100px;">
+                                                    <img src="{{ $webSettings->logo_url ?? '/admin/images/logos/HobiTrackerr.png' }}"
+                                                        alt="Logo Situs" class="img-thumbnail rounded-3"
+                                                        style="max-height: 100px;">
                                                 </div>
                                             </div>
                                         </div>
@@ -86,8 +88,9 @@
                                                 <input type="file" class="form-control" id="favicon" name="favicon"
                                                     accept="image/*">
                                                 <div class="mt-2">
-                                                    <img src="/admin/images/logos/favicon-v2.png" alt="Favicon"
-                                                        class="img-thumbnail rounded-3" style="max-height: 50px;">
+                                                    <img src="{{ $webSettings->favicon_url ?? '/admin/images/logos/favicon-v2.png' }}"
+                                                        alt="Favicon" class="img-thumbnail rounded-3"
+                                                        style="max-height: 50px;">
                                                 </div>
                                             </div>
                                         </div>
@@ -120,7 +123,8 @@
                                                 </label>
                                                 <input type="email" class="form-control form-control-lg"
                                                     id="contact_email" name="contact_email"
-                                                    placeholder="Masukkan email kontak">
+                                                    placeholder="Masukkan email kontak"
+                                                    value="{{ $webSettings->email ?? '' }}">
                                             </div>
                                         </div>
                                         <div class="col-md-6">
@@ -130,7 +134,8 @@
                                                 </label>
                                                 <input type="text" class="form-control form-control-lg"
                                                     id="contact_phone" name="contact_phone"
-                                                    placeholder="Masukkan telepon kontak">
+                                                    placeholder="Masukkan telepon kontak"
+                                                    value="{{ $webSettings->telepon ?? '' }}">
                                             </div>
                                         </div>
                                     </div>
@@ -140,7 +145,7 @@
                                             <i class="ti ti-map-pin me-2 text-danger"></i>Alamat Lengkap
                                         </label>
                                         <textarea class="form-control form-control-lg" id="address" name="address" rows="3"
-                                            placeholder="Masukkan alamat lengkap"></textarea>
+                                            placeholder="Masukkan alamat lengkap">{{ $webSettings->alamat ?? '' }}</textarea>
                                     </div>
 
                                     <div class="row">
@@ -150,7 +155,8 @@
                                                     <i class="ti ti-brand-whatsapp me-2 text-success"></i>WhatsApp
                                                 </label>
                                                 <input type="text" class="form-control form-control-lg" id="whatsapp"
-                                                    name="whatsapp" placeholder="Nomor WhatsApp">
+                                                    name="whatsapp" placeholder="Nomor WhatsApp"
+                                                    value="{{ $webSettings->whatsapp ?? '' }}">
                                             </div>
                                         </div>
                                         <div class="col-md-6">
@@ -159,7 +165,8 @@
                                                     <i class="ti ti-brand-telegram me-2 text-info"></i>Telegram
                                                 </label>
                                                 <input type="text" class="form-control form-control-lg" id="telegram"
-                                                    name="telegram" placeholder="Username Telegram">
+                                                    name="telegram" placeholder="Username Telegram"
+                                                    value="{{ $webSettings->telegram ?? '' }}">
                                             </div>
                                         </div>
                                     </div>
@@ -176,7 +183,8 @@
                                                     <i class="ti ti-brand-facebook me-2 text-primary"></i>Facebook
                                                 </label>
                                                 <input type="url" class="form-control form-control-lg" id="facebook"
-                                                    name="facebook" placeholder="https://facebook.com/username">
+                                                    name="facebook" placeholder="https://facebook.com/username"
+                                                    value="{{ $webSettings->facebook ?? '' }}">
                                             </div>
                                         </div>
                                         <div class="col-md-6">
@@ -185,7 +193,8 @@
                                                     <i class="ti ti-brand-instagram me-2 text-danger"></i>Instagram
                                                 </label>
                                                 <input type="url" class="form-control form-control-lg" id="instagram"
-                                                    name="instagram" placeholder="https://instagram.com/username">
+                                                    name="instagram" placeholder="https://instagram.com/username"
+                                                    value="{{ $webSettings->instagram ?? '' }}">
                                             </div>
                                         </div>
                                     </div>
@@ -197,7 +206,8 @@
                                                     <i class="ti ti-brand-twitter me-2 text-info"></i>Twitter/X
                                                 </label>
                                                 <input type="url" class="form-control form-control-lg" id="twitter"
-                                                    name="twitter" placeholder="https://twitter.com/username">
+                                                    name="twitter" placeholder="https://twitter.com/username"
+                                                    value="{{ $webSettings->twitter ?? '' }}">
                                             </div>
                                         </div>
                                         <div class="col-md-6">
@@ -206,7 +216,8 @@
                                                     <i class="ti ti-brand-linkedin me-2 text-primary"></i>LinkedIn
                                                 </label>
                                                 <input type="url" class="form-control form-control-lg" id="linkedin"
-                                                    name="linkedin" placeholder="https://linkedin.com/in/username">
+                                                    name="linkedin" placeholder="https://linkedin.com/in/username"
+                                                    value="{{ $webSettings->linkedin ?? '' }}">
                                             </div>
                                         </div>
                                     </div>
@@ -216,7 +227,8 @@
                                             <i class="ti ti-brand-youtube me-2 text-danger"></i>YouTube
                                         </label>
                                         <input type="url" class="form-control form-control-lg" id="youtube"
-                                            name="youtube" placeholder="https://youtube.com/channel/UC...">
+                                            name="youtube" placeholder="https://youtube.com/channel/UC..."
+                                            value="{{ $webSettings->youtube ?? '' }}">
                                     </div>
                                 </form>
                             </div>
@@ -278,7 +290,8 @@
                                                     </select>
                                                 </div>
                                                 <div class="col-md-2">
-                                                    <button class="btn btn-primary w-100" type="button" id="addCategoryBtn">
+                                                    <button class="btn btn-primary w-100" type="button"
+                                                        id="addCategoryBtn">
                                                         <i class="ti ti-plus me-1"></i>Tambah
                                                     </button>
                                                 </div>
@@ -287,17 +300,21 @@
                                         <div class="mb-3">
                                             <label class="form-label">Daftar Kategori</label>
                                             <div id="categoriesList" class="list-group">
-                                                @foreach($kategoriHobis as $kategori)
-                                                <div class="list-group-item d-flex justify-content-between align-items-center" data-id="{{ $kategori->id }}">
-                                                    <div class="d-flex align-items-center">
-                                                        <i class="ti {{ $kategori->icon ?? 'ti-book' }} me-2"></i>
-                                                        <span>{{ $kategori->nama_kategori }}</span>
-                                                        <span class="badge {{ $kategori->background_color ?? 'bg-primary' }} ms-2">{{ $kategori->hobis_count ?? 0 }} hobi</span>
+                                                @foreach ($kategoriHobis as $kategori)
+                                                    <div class="list-group-item d-flex justify-content-between align-items-center"
+                                                        data-id="{{ $kategori->id }}">
+                                                        <div class="d-flex align-items-center">
+                                                            <i class="ti {{ $kategori->icon ?? 'ti-book' }} me-2"></i>
+                                                            <span>{{ $kategori->nama_kategori }}</span>
+                                                            <span
+                                                                class="badge {{ $kategori->background_color ?? 'bg-primary' }} ms-2">{{ $kategori->hobis_count ?? 0 }}
+                                                                hobi</span>
+                                                        </div>
+                                                        <button class="btn btn-sm btn-outline-danger"
+                                                            onclick="removeCategory({{ $kategori->id }})">
+                                                            <i class="ti ti-trash"></i>
+                                                        </button>
                                                     </div>
-                                                    <button class="btn btn-sm btn-outline-danger" onclick="removeCategory({{ $kategori->id }})">
-                                                        <i class="ti ti-trash"></i>
-                                                    </button>
-                                                </div>
                                                 @endforeach
                                             </div>
                                         </div>
@@ -311,9 +328,6 @@
                         </div>
 
                         <div class="d-flex justify-content-end mt-4">
-                            <button type="button" class="btn btn-secondary rounded-3 px-4 me-2">
-                                <i class="ti ti-refresh me-2"></i>Reset
-                            </button>
                             <button type="button" class="btn btn-primary rounded-3 px-4">
                                 <i class="ti ti-device-floppy me-2"></i>Simpan Pengaturan
                             </button>
@@ -327,5 +341,5 @@
 @endsection
 
 @section('scripts')
-    <script src="/admin/js/settings.js"></script>
+    <script src="{{ asset('./admin/js/settings.js') }}"></script>
 @endsection
