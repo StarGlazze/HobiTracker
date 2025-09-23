@@ -13,7 +13,7 @@ Route::get('/', function () {
 
     Route::get('/dashboard', function () {
         return view('admin.dashboard');
-
+    });    
     Route::get('/aktivitas', function () {
         return view('admin.aktivitas');
     });
@@ -29,7 +29,7 @@ Route::get('/', function () {
     Route::get('/profile', function () {
         return view('admin.profile');
     });
-});
+
 
  
     Route::get('/setting', [WebSettingController::class, 'index'])->name('setting.index');

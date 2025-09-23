@@ -191,11 +191,16 @@
                         <p class="text-muted small mb-0">Kelola dan pantau semua hobi favorit Anda</p>
                     </div>
                     <div class="col-auto">
-                        <div class="input-group input-group-sm" style="width: 280px;">
+                        <div class="input-group input-group-sm" style="width: 320px;">
                             <span class="input-group-text bg-light border-end-0">
                                 <i class="ti ti-search text-muted"></i>
                             </span>
-                            <input type="text" class="form-control border-start-0" placeholder="Cari hobi...">
+                            <input type="text" class="form-control border-start-0" placeholder="Cari hobi..."
+                                id="searchHobi">
+                            <button class="btn btn-outline-secondary border-start-0" type="button" id="clearSearchBtn"
+                                style="display: none;">
+                                <i class="ti ti-x text-muted"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -481,6 +486,8 @@
         </div>
     </div>
 
-    <script src="{{ asset('js/hobi.js') }}"></script>
+@endsection
 
+@section('scripts')
+    <script src="{{ asset('./admin/js/hobi.js') }}"></script>
 @endsection
