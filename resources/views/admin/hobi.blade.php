@@ -282,18 +282,22 @@
                                     </td>
                                 </tr>
                             @empty
-                                <tr>
-                                    <td colspan="5" class="text-center py-4">
-                                        Belum ada hobi yang ditambahkan.
-                                    </td>
-                                </tr>
+                            <tr>
+                                <td colspan="7" class="text-center py-5">
+                                    <div class="mb-4">
+                                        <i class="ti ti-heart text-muted" style="font-size: 4rem;"></i>
+                                    </div>
+                                    <h5 class="text-muted">Belum ada hobi</h5>
+                                    <p class="text-muted mb-4">Mulai dengan menambahkan hobi pertama Anda</p>
+                                </td>
+                            </tr>
                             @endforelse
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Empty State (if no data) -->
+            {{-- <!-- Empty State (if no data) -->
 
             <div class="card-body text-center py-5" id="empty-state" style="display: none;">
                 <div class="mb-4">
@@ -304,7 +308,7 @@
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tambahHobiModal">
                     <i class="ti ti-plus me-2"></i>Tambah Hobi Pertama
                 </button>
-            </div>
+            </div> --}}
 
         </div>
     </div>

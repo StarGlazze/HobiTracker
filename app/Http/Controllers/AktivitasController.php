@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Aktivitas;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AktivitasController extends Controller
 {
@@ -12,7 +13,30 @@ class AktivitasController extends Controller
      */
     public function index()
     {
-        //
+        $userId = Auth::id();
+
+        // Mengambil semua aktivitas milik user yang sedang login
+        $aktivitas = Aktivitas::whereHas('hobi', function ($query) use ($userId) {
+            $query->where('user_id', $userId);
+        })->with('hobi')->get();
+
+        // Menghitung statistik untuk dashboard cards
+        $totalAktivitas = $aktivitas->count();
+        $totalDurasi = $aktivitas->sum('durasi_menit');
+        $hobiAktif = $aktivitas->pluck('hobi')->unique('id')->count();
+        $rataRataDurasi = $totalAktivitas > 0 ? round($totalDurasi / $totalAktivitas) : 0;
+
+        // Format durasi untuk tampilan
+        $totalDurasiFormatted = $totalDurasi . 'm';
+        $rataRataDurasiFormatted = $rataRataDurasi . 'm';
+
+        return view('admin.aktivitas', [
+            'aktivitas' => $aktivitas,
+            'totalAktivitas' => $totalAktivitas,
+            'totalDurasi' => $totalDurasiFormatted,
+            'hobiAktif' => $hobiAktif,
+            'rataRataDurasi' => $rataRataDurasiFormatted,
+        ]);
     }
 
     /**

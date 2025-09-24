@@ -33,7 +33,7 @@
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
                                 <h6 class="text-white-50 mb-1">Total Aktivitas</h6>
-                                <h4 class="mb-0">3</h4>
+                                <h4 class="mb-0">{{ $totalAktivitas ?? 0 }}</h4>
                             </div>
                             <div class="ms-3">
                                 <i class="ti ti-list-check fs-1 text-white-50"></i>
@@ -48,7 +48,7 @@
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
                                 <h6 class="text-white-50 mb-1">Hobi Aktif</h6>
-                                <h4 class="mb-0">3</h4>
+                                <h4 class="mb-0">{{ $hobiAktif ?? 0 }}</h4>
                             </div>
                             <div class="ms-3">
                                 <i class="ti ti-heart fs-1 text-white-50"></i>
@@ -63,7 +63,7 @@
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
                                 <h6 class="text-white-50 mb-1">Total Durasi</h6>
-                                <h4 class="mb-0">100m</h4>
+                                <h4 class="mb-0">{{ $totalDurasi ?? '0m' }}</h4>
                             </div>
                             <div class="ms-3">
                                 <i class="ti ti-clock fs-1 text-white-50"></i>
@@ -78,7 +78,7 @@
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
                                 <h6 class="text-white-50 mb-1">Rata-rata</h6>
-                                <h4 class="mb-0">33m</h4>
+                                <h4 class="mb-0">{{ $rataRataDurasi ?? '0m' }}</h4>
                             </div>
                             <div class="ms-3">
                                 <i class="ti ti-trending-up fs-1 text-white-50"></i>
@@ -149,37 +149,41 @@
                             </tr>
                         </thead>
                         <tbody>
+                            @forelse($aktivitas as $index => $aktivitasItem)
                             <tr class="border-bottom">
                                 <td class="px-4 py-3">
-                                    <span class="px-2 py-1">1</span>
+                                    <span class="px-2 py-1">{{ $index + 1 }}</span>
                                 </td>
                                 <td class="py-3">
                                     <div class="d-flex align-items-center">
                                         <div>
-                                            <h6 class="mb-1 fw-semibold">Membaca novel "Dune"</h6>
+                                            <h6 class="mb-1 fw-semibold">{{ $aktivitasItem->nama_aktivitas }}</h6>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="py-3">
-                                    <span class="fw-semibold px-3 py-2">Membaca</span>
+                                    <span class="fw-semibold px-3 py-2">{{ $aktivitasItem->hobi->nama_hobi ?? 'N/A' }}</span>
                                 </td>
                                 <td class="py-3">
                                     <div class="d-flex align-items-center">
-
-                                        <span class="fw-semibold">60 Menit</span>
+                                        <span class="fw-semibold">{{ $aktivitasItem->durasi_menit }} Menit</span>
                                     </div>
                                 </td>
                                 <td class="py-3">
                                     <div class="text-truncate" style="max-width: 180px;" data-bs-toggle="tooltip"
-                                        title="Membaca 5 halaman setiap hari untuk mencapai target bulanan">
-                                        Membaca 5 halaman setiap hari
+                                        title="{{ $aktivitasItem->catatan ?? 'Tidak ada catatan' }}">
+                                        {{ $aktivitasItem->catatan ?? 'Tidak ada catatan' }}
                                     </div>
                                 </td>
                                 <td class="py-3 text-center">
+                                    @if($aktivitasItem->file_bukti)
                                     <button class="btn btn-sm btn-outline-primary rounded-circle" data-bs-toggle="tooltip"
                                         title="Lihat file bukti">
                                         <i class="ti ti-file-text"></i>
                                     </button>
+                                    @else
+                                    <span class="text-muted">-</span>
+                                    @endif
                                 </td>
                                 <td class="py-3 text-center">
                                     <div class="btn-group" role="group">
@@ -193,102 +197,23 @@
                                     </div>
                                 </td>
                             </tr>
-                            <tr class="border-bottom">
-                                <td class="px-4 py-3">
-                                    <span class="px-2 py-1">2</span>
-                                </td>
-                                <td class="py-3">
-                                    <div class="d-flex align-items-center">
-                                        <div>
-                                            <h6 class="mb-1 fw-semibold">Lari pagi</h6>
-                                        </div>
+                            @empty
+                            <tr>
+                                <td colspan="7" class="text-center py-5">
+                                    <div class="mb-4">
+                                        <i class="ti ti-activity text-muted" style="font-size: 4rem;"></i>
                                     </div>
-                                </td>
-                                <td class="py-3">
-                                    <span class="fw-semibold px-3 py-2">Bersepeda</span>
-                                </td>
-                                <td class="py-3">
-                                    <div class="d-flex align-items-center">
-                                        <span class="fw-semibold">30 Menit</span>
-                                    </div>
-                                </td>
-                                <td class="py-3">
-                                    <div class="text-truncate" style="max-width: 180px;" data-bs-toggle="tooltip"
-                                        title="Lari 3 km setiap pagi untuk menjaga kesehatan dan kebugaran">
-                                        Lari 3 km setiap pagi
-                                    </div>
-                                </td>
-                                <td class="py-3 text-center">
-                                    <button class="btn btn-sm btn-outline-primary rounded-circle" data-bs-toggle="tooltip"
-                                        title="Lihat file bukti">
-                                        <i class="ti ti-file-text"></i>
-                                    </button>
-                                </td>
-                                <td class="py-3 text-center">
-                                    <div class="btn-group" role="group">
-                                        <button class="btn btn-warning btn-sm" data-bs-toggle="tooltip"
-                                            title="Edit Aktivitas">
-                                            <i class="ti ti-pencil"></i>
-                                        </button>
-                                        <button class="btn btn-danger btn-sm" data-bs-toggle="tooltip"
-                                            title="Hapus Aktivitas">
-                                            <i class="ti ti-trash"></i>
-                                        </button>
-                                    </div>
+                                    <h5 class="text-muted">Belum ada aktivitas</h5>
+                                    <p class="text-muted mb-4">Mulai dengan menambahkan aktivitas hobi pertama Anda</p>
                                 </td>
                             </tr>
-                            <tr class="border-bottom">
-                                <td class="px-4 py-3">
-                                    <span class="px-2 py-1">3</span>
-                                </td>
-                                <td class="py-3">
-                                    <div class="d-flex align-items-center">
-                                        <div>
-                                            <h6 class="mb-1 fw-semibold">Menyanyi lagu "About You"</h6>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="py-3">
-                                    <span class="fw-semibold px-3 py-2">Menyanyi
-                                    </span>
-                                </td>
-                                <td class="py-3">
-                                    <div class="d-flex align-items-center">
-                                        <span class="fw-semibold">10 Menit</span>
-                                    </div>
-                                </td>
-                                <td class="py-3">
-                                    <div class="text-truncate" style="max-width: 180px;" data-bs-toggle="tooltip"
-                                        title="Lagu yang wajib dinyanyikan setiap hari untuk latihan vokal">
-                                        Lagu yang wajib dinyanyikan setiap hari
-                                    </div>
-                                </td>
-                                <td class="py-3 text-center">
-                                    <button class="btn btn-sm btn-outline-primary rounded-circle" data-bs-toggle="tooltip"
-                                        title="Lihat file bukti">
-                                        <i class="ti ti-file-text"></i>
-                                    </button>
-                                </td>
-                                <td class="py-3 text-center">
-                                    <div class="btn-group" role="group">
-                                        <button class="btn btn-warning btn-sm" data-bs-toggle="tooltip"
-                                            title="Edit Aktivitas">
-                                            <i class="ti ti-pencil"></i>
-                                        </button>
-                                        <button class="btn btn-danger btn-sm" data-bs-toggle="tooltip"
-                                            title="Hapus Aktivitas">
-                                            <i class="ti ti-trash"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
             </div>
-
             <!-- Empty State (if no data) -->
-            <div class="card-body text-center py-5" id="empty-state" style="display: none;">
+            {{-- <div class="card-body text-center py-5" id="empty-state" style="display: none;">
                 <div class="mb-4">
                     <i class="ti ti-activity text-muted" style="font-size: 4rem;"></i>
                 </div>
@@ -297,7 +222,7 @@
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tambahAktivitasModal">
                     <i class="ti ti-plus me-2"></i>Tambah Aktivitas Pertama
                 </button>
-            </div>
+            </div> --}}
         </div>
     </div>
 
