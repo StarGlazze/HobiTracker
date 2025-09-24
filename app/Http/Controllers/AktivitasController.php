@@ -3,8 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Aktivitas;
+use App\Models\Hobi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class AktivitasController extends Controller
 {
@@ -18,7 +22,7 @@ class AktivitasController extends Controller
         // Mengambil semua aktivitas milik user yang sedang login
         $aktivitas = Aktivitas::whereHas('hobi', function ($query) use ($userId) {
             $query->where('user_id', $userId);
-        })->with('hobi')->get();
+        })->with('hobi')->orderBy('created_at', 'desc')->get();
 
         // Menghitung statistik untuk dashboard cards
         $totalAktivitas = $aktivitas->count();
@@ -30,8 +34,12 @@ class AktivitasController extends Controller
         $totalDurasiFormatted = $totalDurasi . 'm';
         $rataRataDurasiFormatted = $rataRataDurasi . 'm';
 
+        // Mengambil hobi milik user untuk dropdown
+        $hobis = Hobi::where('user_id', $userId)->get();
+
         return view('admin.aktivitas', [
             'aktivitas' => $aktivitas,
+            'hobis' => $hobis,
             'totalAktivitas' => $totalAktivitas,
             'totalDurasi' => $totalDurasiFormatted,
             'hobiAktif' => $hobiAktif,
@@ -52,7 +60,52 @@ class AktivitasController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        try {
+            $userId = Auth::id();
+
+            // Validasi input
+            $validator = Validator::make($request->all(), [
+                'hobi_id' => 'required|exists:hobis,id',
+                'nama_aktivitas' => 'required|string|max:255',
+                'durasi_menit' => 'required|integer|min:1',
+                'catatan' => 'nullable|string|max:1000',
+                'file_bukti' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:51200', // Max 50MB
+                'gdrive_link' => 'nullable|url|max:500',
+            ]);
+
+            if ($validator->fails()) {
+                return redirect()->back()->withErrors($validator)->withInput();
+            }
+
+            // Pastikan hobi milik user yang sedang login
+            $hobi = Hobi::where('id', $request->hobi_id)->where('user_id', $userId)->first();
+            if (!$hobi) {
+                return redirect()->back()->with('error', 'Hobi tidak ditemukan atau bukan milik Anda')->withInput();
+            }
+
+            $filePath = null;
+
+            // Handle file upload jika ada
+            if ($request->hasFile('file_bukti')) {
+                $file = $request->file('file_bukti');
+                $filename = time() . '_' . $userId . '_' . $file->getClientOriginalName();
+                $filePath = $file->storeAs('aktivitas_bukti', $filename, 'public');
+            }
+
+            // Buat aktivitas baru
+            $aktivitas = Aktivitas::create([
+                'hobi_id' => $request->hobi_id,
+                'nama_aktivitas' => $request->nama_aktivitas,
+                'durasi_menit' => $request->durasi_menit,
+                'catatan' => $request->catatan,
+                'file_bukti' => $filePath ?: $request->gdrive_link,
+            ]);
+
+            return redirect()->back()->with('success', 'Aktivitas berhasil ditambahkan');
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan pada server: ' . $e->getMessage())->withInput();
+        }
     }
 
     /**
@@ -60,7 +113,17 @@ class AktivitasController extends Controller
      */
     public function show(Aktivitas $aktivitas)
     {
-        //
+        $userId = Auth::id();
+
+        // Load hobi relationship untuk cek kepemilikan
+        $aktivitas->load('hobi');
+
+        // Pastikan aktivitas milik user yang sedang login
+        if (!$aktivitas->hobi || $aktivitas->hobi->user_id !== $userId) {
+            return redirect()->back()->with('error', 'Aktivitas tidak ditemukan atau bukan milik Anda');
+        }
+
+        return redirect()->back()->with('aktivitas', $aktivitas);
     }
 
     /**
@@ -76,7 +139,75 @@ class AktivitasController extends Controller
      */
     public function update(Request $request, Aktivitas $aktivitas)
     {
-        //
+        try {
+            $userId = Auth::id();
+
+            // Load hobi relationship untuk cek kepemilikan
+            $aktivitas->load('hobi');
+
+            // Pastikan aktivitas milik user yang sedang login
+            if (!$aktivitas->hobi || $aktivitas->hobi->user_id !== $userId) {
+                return redirect()->back()->with('error', 'Aktivitas tidak ditemukan atau bukan milik Anda')->withInput();
+            }
+
+            // Validasi input
+            $validator = Validator::make($request->all(), [
+                'hobi_id' => 'required|exists:hobis,id',
+                'nama_aktivitas' => 'required|string|max:255',
+                'durasi_menit' => 'required|integer|min:1',
+                'catatan' => 'nullable|string|max:1000',
+                'file_bukti' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:51200', // Max 50MB
+                'gdrive_link' => 'nullable|url|max:500',
+            ]);
+
+            if ($validator->fails()) {
+                return redirect()->back()->withErrors($validator)->withInput();
+            }
+
+            // Pastikan hobi milik user yang sedang login
+            $hobi = Hobi::where('id', $request->hobi_id)->where('user_id', $userId)->first();
+            if (!$hobi) {
+                return redirect()->back()->with('error', 'Hobi tidak ditemukan atau bukan milik Anda')->withInput();
+            }
+
+            $filePath = $aktivitas->file_bukti;
+
+            // Handle file upload jika ada file baru
+            if ($request->hasFile('file_bukti')) {
+                // Hapus file lama jika ada dan bukan URL Google Drive
+                if ($aktivitas->file_bukti &&
+                    !str_contains($aktivitas->file_bukti, 'drive.google.com') &&
+                    Storage::disk('public')->exists($aktivitas->file_bukti)) {
+                    Storage::disk('public')->delete($aktivitas->file_bukti);
+                }
+
+                $file = $request->file('file_bukti');
+                $filename = time() . '_' . $userId . '_' . $file->getClientOriginalName();
+                $filePath = $file->storeAs('aktivitas_bukti', $filename, 'public');
+            } elseif ($request->gdrive_link) {
+                // Jika ada Google Drive link baru, hapus file lama jika ada
+                if ($aktivitas->file_bukti &&
+                    !str_contains($aktivitas->file_bukti, 'drive.google.com') &&
+                    Storage::disk('public')->exists($aktivitas->file_bukti)) {
+                    Storage::disk('public')->delete($aktivitas->file_bukti);
+                }
+                $filePath = $request->gdrive_link;
+            }
+
+            // Update aktivitas
+            $aktivitas->update([
+                'hobi_id' => $request->hobi_id,
+                'nama_aktivitas' => $request->nama_aktivitas,
+                'durasi_menit' => $request->durasi_menit,
+                'catatan' => $request->catatan,
+                'file_bukti' => $filePath,
+            ]);
+
+            return redirect()->back()->with('success', 'Aktivitas berhasil diperbarui');
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan pada server: ' . $e->getMessage())->withInput();
+        }
     }
 
     /**
@@ -84,6 +215,31 @@ class AktivitasController extends Controller
      */
     public function destroy(Aktivitas $aktivitas)
     {
-        //
+        try {
+            $userId = Auth::id();
+
+            // Load hobi relationship untuk cek kepemilikan
+            $aktivitas->load('hobi');
+
+            // Pastikan aktivitas milik user yang sedang login
+            if (!$aktivitas->hobi || $aktivitas->hobi->user_id !== $userId) {
+                return redirect()->back()->with('error', 'Aktivitas tidak ditemukan atau bukan milik Anda');
+            }
+
+            // Hapus file bukti jika ada dan bukan URL Google Drive
+            if ($aktivitas->file_bukti &&
+                !str_contains($aktivitas->file_bukti, 'drive.google.com') &&
+                Storage::disk('public')->exists($aktivitas->file_bukti)) {
+                Storage::disk('public')->delete($aktivitas->file_bukti);
+            }
+
+            // Hapus aktivitas
+            $aktivitas->delete();
+
+            return redirect()->back()->with('success', 'Aktivitas berhasil dihapus');
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan pada server: ' . $e->getMessage());
+        }
     }
 }

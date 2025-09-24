@@ -17,6 +17,22 @@ class Aktivitas extends Model
         'file_bukti',
     ];
 
+    /**
+     * Get the route key for the model.
+     */
+    public function getRouteKeyName()
+    {
+        return 'id';
+    }
+
+    /**
+     * Get the route key name for the model.
+     */
+    public function getRouteKey()
+    {
+        return $this->id;
+    }
+
     // Relationships
     public function hobi()
     {
