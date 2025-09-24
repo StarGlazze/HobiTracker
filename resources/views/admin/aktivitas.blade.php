@@ -24,6 +24,21 @@
             </div>
         </div>
 
+        <!-- Success/Error Messages -->
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="ti ti-check-circle me-2"></i>{{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="ti ti-alert-circle me-2"></i>{{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+
 
         <!-- Quick Stats Cards -->
         <div class="row mb-4">
@@ -108,66 +123,32 @@
                 </div>
             </div>
 
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="bg-light">
-                            <tr>
-                                <th scope="col" class="border-0 py-3 px-4" style="width: 5%;">
-                                    <span class="text-muted px-2 py-1">#</span>
-                                </th>
-                                <th scope="col" class="border-0 py-3" style="width: 30%;">
-                                    <div class="d-flex align-items-center">
-                                        <i class="ti ti-activity me-2 text-muted"></i>
-                                        <span class="fw-semibold">Aktivitas</span>
-                                    </div>
-                                </th>
-                                <th scope="col" class="border-0 py-3" style="width: 20%;">
-                                    <div class="d-flex align-items-center">
-                                        <i class="ti ti-heart me-2 text-muted"></i>
-                                        <span class="fw-semibold">Hobi</span>
-                                    </div>
-                                </th>
-                                <th scope="col" class="border-0 py-3" style="width: 15%;">
-                                    <div class="d-flex align-items-center">
-                                        <i class="ti ti-clock me-2 text-muted"></i>
-                                        <span class="fw-semibold">Durasi</span>
-                                    </div>
-                                </th>
-                                <th scope="col" class="border-0 py-3">
-                                    <div class="d-flex align-items-center">
-                                        <i class="ti ti-notes me-2 text-muted"></i>
-                                        <span class="fw-semibold">Catatan</span>
-                                    </div>
-                                </th>
-                                <th scope="col" class="border-0 py-3 text-center" style="width: 8%;">
-                                    <i class="ti ti-paperclip text-muted"></i>
-                                </th>
-                                <th scope="col" class="border-0 py-3 text-center" style="width: 12%;">
-                                    <span class="fw-semibold">Aksi</span>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($aktivitas as $index => $aktivitasItem)
-                            <tr class="border-bottom">
-                                <td class="px-4 py-3">
-                                    <span class="px-2 py-1">{{ $index + 1 }}</span>
+            {{-- Fixed table section for aktivitas.blade.php --}}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th scope="col" class="border-0 py-3 px-4" style="width: 5%;">#</th>
+                            <th scope="col" class="border-0 py-3" style="width: 30%;">Aktivitas</th>
+                            <th scope="col" class="border-0 py-3" style="width: 20%;">Hobi</th>
+                            <th scope="col" class="border-0 py-3" style="width: 15%;">Durasi</th>
+                            <th scope="col" class="border-0 py-3">Catatan</th>
+                            <th scope="col" class="border-0 py-3 text-center" style="width: 8%;">File</th>
+                            <th scope="col" class="border-0 py-3 text-center" style="width: 12%;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($aktivitas as $index => $aktivitasItem)
+                            <tr class="border-bottom" data-aktivitas-row data-id="{{ $aktivitasItem->id }}">
+                                <td class="px-4 py-3">{{ $index + 1 }}</td>
+                                <td class="py-3">
+                                    <h6 class="mb-1 fw-semibold">{{ $aktivitasItem->nama_aktivitas }}</h6>
                                 </td>
                                 <td class="py-3">
-                                    <div class="d-flex align-items-center">
-                                        <div>
-                                            <h6 class="mb-1 fw-semibold">{{ $aktivitasItem->nama_aktivitas }}</h6>
-                                        </div>
-                                    </div>
+                                    <span class="fw-semibold">{{ $aktivitasItem->hobi->nama_hobi ?? 'N/A' }}</span>
                                 </td>
                                 <td class="py-3">
-                                    <span class="fw-semibold px-3 py-2">{{ $aktivitasItem->hobi->nama_hobi ?? 'N/A' }}</span>
-                                </td>
-                                <td class="py-3">
-                                    <div class="d-flex align-items-center">
-                                        <span class="fw-semibold">{{ $aktivitasItem->durasi_menit }} Menit</span>
-                                    </div>
+                                    <span class="fw-semibold">{{ $aktivitasItem->durasi_menit }} Menit</span>
                                 </td>
                                 <td class="py-3">
                                     <div class="text-truncate" style="max-width: 180px;" data-bs-toggle="tooltip"
@@ -176,28 +157,73 @@
                                     </div>
                                 </td>
                                 <td class="py-3 text-center">
-                                    @if($aktivitasItem->file_bukti)
-                                    <button class="btn btn-sm btn-outline-primary rounded-circle" data-bs-toggle="tooltip"
-                                        title="Lihat file bukti">
-                                        <i class="ti ti-file-text"></i>
-                                    </button>
+                                    @if ($aktivitasItem->file_bukti)
+                                        @if (str_contains($aktivitasItem->file_bukti, 'drive.google.com'))
+                                            {{-- Google Drive link --}}
+                                            <button class="btn btn-sm btn-outline-primary rounded-circle"
+                                                data-bs-toggle="tooltip" title="Lihat file di Google Drive"
+                                                data-file-url="{{ $aktivitasItem->file_bukti }}" data-file-type="gdrive"
+                                                onclick="showFilePreview('{{ $aktivitasItem->file_bukti }}', 'gdrive')">
+                                                <i class="ti ti-brand-google-drive"></i>
+                                            </button>
+                                        @else
+                                            {{-- Local file - detect type --}}
+                                            @php
+                                                $extension = strtolower(
+                                                    pathinfo($aktivitasItem->file_bukti, PATHINFO_EXTENSION),
+                                                );
+                                                $imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+                                                $videoExts = ['mp4', 'mov', 'avi', 'webm'];
+
+                                                if (in_array($extension, $imageExts)) {
+                                                    $fileType = 'image';
+                                                    $icon = 'ti-photo';
+                                                } elseif (in_array($extension, $videoExts)) {
+                                                    $fileType = 'video';
+                                                    $icon = 'ti-video';
+                                                } else {
+                                                    $fileType = 'file';
+                                                    $icon = 'ti-file-text';
+                                                }
+                                            @endphp
+
+                                            <button class="btn btn-sm btn-outline-primary rounded-circle"
+                                                data-bs-toggle="tooltip" title="Lihat file bukti"
+                                                data-file-url="{{ Storage::url($aktivitasItem->file_bukti) }}"
+                                                data-file-type="{{ $fileType }}"
+                                                onclick="showFilePreview('{{ Storage::url($aktivitasItem->file_bukti) }}', '{{ $fileType }}')">
+                                                <i class="ti {{ $icon }}"></i>
+                                            </button>
+                                        @endif
                                     @else
-                                    <span class="text-muted">-</span>
+                                        <span class="text-muted">-</span>
                                     @endif
                                 </td>
                                 <td class="py-3 text-center">
                                     <div class="btn-group" role="group">
-                                        <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editAktivitasModal" title="Edit Aktivitas">
+                                        <button class="btn btn-warning btn-sm" data-bs-toggle="modal"
+                                            data-bs-target="#editAktivitasModal" data-bs-toggle="tooltip"
+                                            title="Edit Aktivitas" data-id="{{ $aktivitasItem->id }}"
+                                            data-nama="{{ $aktivitasItem->nama_aktivitas }}"
+                                            data-hobi="{{ $aktivitasItem->hobi->nama_hobi ?? '' }}"
+                                            data-durasi="{{ $aktivitasItem->durasi_menit }}"
+                                            data-catatan="{{ $aktivitasItem->catatan ?? '' }}">
                                             <i class="ti ti-pencil"></i>
                                         </button>
-                                        <button class="btn btn-danger btn-sm" data-bs-toggle="tooltip"
-                                            title="Hapus Aktivitas">
-                                            <i class="ti ti-trash"></i>
-                                        </button>
+                                        <form action="{{ route('aktivitas.destroy', $aktivitasItem->id) }}"
+                                            method="POST"
+                                            onsubmit="return confirm('Apakah Anda yakin ingin menghapus aktivitas ini?');"
+                                            style="display:inline;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger btn-sm" title="Hapus Aktivitas">
+                                                <i class="ti ti-trash"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>
-                            @empty
+                        @empty
                             <tr>
                                 <td colspan="7" class="text-center py-5">
                                     <div class="mb-4">
@@ -207,10 +233,9 @@
                                     <p class="text-muted mb-4">Mulai dengan menambahkan aktivitas hobi pertama Anda</p>
                                 </td>
                             </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
             <!-- Empty State (if no data) -->
             {{-- <div class="card-body text-center py-5" id="empty-state" style="display: none;">
@@ -231,7 +256,8 @@
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow">
-                <form>
+                <form method="POST" action="{{ route('aktivitas.store') }}" enctype="multipart/form-data">
+                    @csrf
                     <div class="modal-header bg-primary text-white border-0">
                         <h5 class="modal-title" id="tambahAktivitasModalLabel">
                             <i class="ti ti-plus-circle me-2"></i>Tambah Aktivitas Baru
@@ -251,11 +277,11 @@
                                     <label for="pilihHobi" class="form-label fw-semibold">
                                         <i class="ti ti-heart text-danger me-2"></i>Pilih Hobi
                                     </label>
-                                    <select class="form-select" id="pilihHobi" required>
+                                    <select class="form-select" id="pilihHobi" name="hobi_id" required>
                                         <option value="" selected disabled>Pilih Hobi Terkait...</option>
-                                        <option value="1">Membaca</option>
-                                        <option value="2">Bersepeda</option>
-                                        <option value="3">Menyanyi</option>
+                                        @foreach ($hobis ?? [] as $hobi)
+                                            <option value="{{ $hobi->id }}">{{ $hobi->nama_hobi }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                             </div>
@@ -264,7 +290,7 @@
                                     <label for="durasiMenit" class="form-label fw-semibold">
                                         <i class="ti ti-clock text-info me-2"></i>Durasi (menit)
                                     </label>
-                                    <input type="number" class="form-control" id="durasiMenit"
+                                    <input type="number" class="form-control" id="durasiMenit" name="durasi_menit"
                                         placeholder="Contoh: 30, 120" min="1" required>
                                 </div>
                             </div>
@@ -274,7 +300,7 @@
                             <label for="namaAktivitas" class="form-label fw-semibold">
                                 <i class="ti ti-activity text-primary me-2"></i>Nama Aktivitas
                             </label>
-                            <input type="text" class="form-control" id="namaAktivitas"
+                            <input type="text" class="form-control" id="namaAktivitas" name="nama_aktivitas"
                                 placeholder="Contoh: Baca novel Dune chapter 1-3, Lari keliling taman 5km" required>
                         </div>
 
@@ -282,7 +308,7 @@
                             <label for="catatanAktivitas" class="form-label fw-semibold">
                                 <i class="ti ti-notes text-warning me-2"></i>Catatan
                             </label>
-                            <textarea class="form-control" id="catatanAktivitas" rows="3"
+                            <textarea class="form-control" id="catatanAktivitas" name="catatan" rows="3"
                                 placeholder="Deskripsi tambahan, target yang ingin dicapai, atau catatan lainnya..."></textarea>
                         </div>
 
@@ -290,8 +316,8 @@
                             <label for="fileBukti" class="form-label fw-semibold">
                                 <i class="ti ti-paperclip text-success me-2"></i>File Bukti
                             </label>
-                            <input class="form-control" type="file" id="fileBukti"
-                                accept="image/*,video/*" required>
+                            <input class="form-control" type="file" id="fileBukti" name="file_bukti"
+                                accept="image/*,video/*">
                             <div class="form-text">
                                 <i class="ti ti-info-circle me-1"></i>
                                 Format yang didukung: Gambar (max 5MB) dan Video (max 50MB)
@@ -302,7 +328,7 @@
                             <label for="gdriveLink" class="form-label fw-semibold">
                                 <i class="ti ti-link text-info me-2"></i>Link Google Drive (Alternatif)
                             </label>
-                            <input type="url" class="form-control" id="gdriveLink"
+                            <input type="url" class="form-control" id="gdriveLink" name="gdrive_link"
                                 placeholder="https://drive.google.com/file/...">
                             <div class="form-text">
                                 <i class="ti ti-info-circle me-1"></i>
@@ -323,11 +349,14 @@
         </div>
     </div>
 
-    <!-- Edit Aktivitas Modal -->
-    <div class="modal fade" id="editAktivitasModal" tabindex="-1" aria-labelledby="editAktivitasModalLabel" aria-hidden="true">
+    {{-- Modal untuk edit - PERBAIKAN FORM ID --}}
+    <div class="modal fade" id="editAktivitasModal" tabindex="-1" aria-labelledby="editAktivitasModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow">
-                <form>
+                <form method="POST" action="" id="editAktivitasForm" enctype="multipart/form-data">
+                    @csrf
+                    @method('PUT')
                     <div class="modal-header bg-warning text-white border-0">
                         <h5 class="modal-title" id="editAktivitasModalLabel">
                             <i class="ti ti-edit me-2"></i>Edit Aktivitas
@@ -347,11 +376,11 @@
                                     <label for="editPilihHobi" class="form-label fw-semibold">
                                         <i class="ti ti-heart text-danger me-2"></i>Pilih Hobi
                                     </label>
-                                    <select class="form-select" id="editPilihHobi" required>
+                                    <select class="form-select" id="editPilihHobi" name="hobi_id" required>
                                         <option value="" selected disabled>Pilih Hobi Terkait...</option>
-                                        <option value="1">Membaca</option>
-                                        <option value="2">Bersepeda</option>
-                                        <option value="3">Menyanyi</option>
+                                        @foreach ($hobis ?? [] as $hobi)
+                                            <option value="{{ $hobi->id }}">{{ $hobi->nama_hobi }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                             </div>
@@ -360,7 +389,7 @@
                                     <label for="editDurasiMenit" class="form-label fw-semibold">
                                         <i class="ti ti-clock text-info me-2"></i>Durasi (menit)
                                     </label>
-                                    <input type="number" class="form-control" id="editDurasiMenit"
+                                    <input type="number" class="form-control" id="editDurasiMenit" name="durasi_menit"
                                         placeholder="Contoh: 30, 120" min="1" required>
                                 </div>
                             </div>
@@ -370,7 +399,7 @@
                             <label for="editNamaAktivitas" class="form-label fw-semibold">
                                 <i class="ti ti-activity text-primary me-2"></i>Nama Aktivitas
                             </label>
-                            <input type="text" class="form-control" id="editNamaAktivitas"
+                            <input type="text" class="form-control" id="editNamaAktivitas" name="nama_aktivitas"
                                 placeholder="Contoh: Baca novel Dune chapter 1-3, Lari keliling taman 5km" required>
                         </div>
 
@@ -378,7 +407,7 @@
                             <label for="editCatatanAktivitas" class="form-label fw-semibold">
                                 <i class="ti ti-notes text-warning me-2"></i>Catatan
                             </label>
-                            <textarea class="form-control" id="editCatatanAktivitas" rows="3"
+                            <textarea class="form-control" id="editCatatanAktivitas" name="catatan" rows="3"
                                 placeholder="Deskripsi tambahan, target yang ingin dicapai, atau catatan lainnya..."></textarea>
                         </div>
 
@@ -386,7 +415,7 @@
                             <label for="editFileBukti" class="form-label fw-semibold">
                                 <i class="ti ti-paperclip text-success me-2"></i>File Bukti
                             </label>
-                            <input class="form-control" type="file" id="editFileBukti"
+                            <input class="form-control" type="file" id="editFileBukti" name="file_bukti"
                                 accept="image/*,video/*">
                             <div class="form-text">
                                 <i class="ti ti-info-circle me-1"></i>
@@ -398,7 +427,7 @@
                             <label for="editGdriveLink" class="form-label fw-semibold">
                                 <i class="ti ti-link text-info me-2"></i>Link Google Drive (Alternatif)
                             </label>
-                            <input type="url" class="form-control" id="editGdriveLink"
+                            <input type="url" class="form-control" id="editGdriveLink" name="gdrive_link"
                                 placeholder="https://drive.google.com/file/...">
                             <div class="form-text">
                                 <i class="ti ti-info-circle me-1"></i>
@@ -419,4 +448,148 @@
         </div>
     </div>
 
+    <div class="modal fade" id="filePreviewModal" tabindex="-1" aria-labelledby="filePreviewModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-primary text-white border-0">
+                    <h5 class="modal-title" id="filePreviewModalLabel">
+                        <i class="ti ti-file-text me-2"></i>Preview File
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    {{-- Content will be loaded dynamically --}}
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="ti ti-x me-2"></i>Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+@endsection
+
+@section('scripts')
+    <script>
+        // Simple form population for edit modal
+        document.addEventListener('DOMContentLoaded', function() {
+            const editButtons = document.querySelectorAll('button[data-bs-target="#editAktivitasModal"]');
+
+            editButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    const nama = this.getAttribute('data-nama');
+                    const hobi = this.getAttribute('data-hobi');
+                    const durasi = this.getAttribute('data-durasi');
+                    const catatan = this.getAttribute('data-catatan');
+
+                    // Populate form fields
+                    document.getElementById('editNamaAktivitas').value = nama;
+                    document.getElementById('editDurasiMenit').value = durasi;
+                    document.getElementById('editCatatanAktivitas').value = catatan;
+
+                    // Set hobi selection
+                    const hobiSelect = document.getElementById('editPilihHobi');
+                    for (let option of hobiSelect.options) {
+                        if (option.text.trim() === hobi) {
+                            option.selected = true;
+                            break;
+                        }
+                    }
+
+                    // Set form action
+                    document.getElementById('editAktivitasForm').action =
+                        `{{ url('aktivitas') }}/${id}`;
+                });
+            });
+
+            // Simple search functionality
+            const searchInput = document.querySelector('input[placeholder="Cari aktivitas..."]');
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    const searchTerm = this.value.toLowerCase();
+                    const rows = document.querySelectorAll('tbody tr[data-aktivitas-row]');
+
+                    rows.forEach(row => {
+                        const text = row.textContent.toLowerCase();
+                        if (text.includes(searchTerm)) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+                });
+            }
+        });
+
+        // File preview modal function
+        function showFilePreview(fileUrl, fileType) {
+            const modal = document.getElementById('filePreviewModal');
+            const modalBody = modal.querySelector('.modal-body');
+            const modalTitle = modal.querySelector('.modal-title');
+
+            // Clear previous content
+            modalBody.innerHTML = '';
+
+            if (fileType === 'gdrive') {
+                modalTitle.textContent = 'File dari Google Drive';
+                modalBody.innerHTML = `
+                    <div class="text-center">
+                        <i class="ti ti-brand-google-drive text-primary mb-3" style="font-size: 3rem;"></i>
+                        <p class="mb-3">File disimpan di Google Drive</p>
+                        <a href="${fileUrl}" target="_blank" class="btn btn-primary">
+                            <i class="ti ti-external-link me-2"></i>Buka di Google Drive
+                        </a>
+                    </div>
+                `;
+            } else if (fileType === 'image') {
+                modalTitle.textContent = 'Preview Gambar';
+                modalBody.innerHTML = `
+                    <div class="text-center">
+                        <img src="${fileUrl}" class="img-fluid" style="max-height: 500px;" alt="Preview">
+                    </div>
+                `;
+            } else if (fileType === 'video') {
+                modalTitle.textContent = 'Preview Video';
+                modalBody.innerHTML = `
+                    <div class="text-center">
+                        <video controls class="img-fluid" style="max-height: 500px;">
+                            <source src="${fileUrl}" type="video/mp4">
+                            Browser Anda tidak mendukung video.
+                        </video>
+                    </div>
+                `;
+            } else {
+                modalTitle.textContent = 'File Bukti';
+                modalBody.innerHTML = `
+                    <div class="text-center">
+                        <i class="ti ti-file text-muted mb-3" style="font-size: 3rem;"></i>
+                        <p class="mb-3">File tidak dapat dipratinjau</p>
+                        <a href="${fileUrl}" target="_blank" class="btn btn-primary">
+                            <i class="ti ti-download me-2"></i>Download File
+                        </a>
+                    </div>
+                `;
+            }
+
+            // Show modal
+            const bsModal = new bootstrap.Modal(modal);
+            bsModal.show();
+        }
+
+        // Auto refresh after successful operations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if there's a success message and refresh after 2 seconds
+            const successAlert = document.querySelector('.alert-success');
+            if (successAlert) {
+                setTimeout(function() {
+                    location.reload();
+                }, 2000);
+            }
+        });
+    </script>
 @endsection
