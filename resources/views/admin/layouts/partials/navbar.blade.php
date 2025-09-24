@@ -12,7 +12,9 @@
             <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
                 {{-- Tulisan Hai Rihan di kanan --}}
                 <li class="nav-item d-none d-sm-block me-3">
-                    <span class="nav-link">Hai Rihan</span>
+                    <span class="nav-link">
+                        Hai {{ auth()->user()->email === 'Admin' ? auth()->user()->email : auth()->user()->name }}
+                    </span>
                 </li>
                 {{-- Profile dropdown --}}
                 <li class="nav-item dropdown">

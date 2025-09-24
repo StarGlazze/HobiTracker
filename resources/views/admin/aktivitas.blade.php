@@ -592,4 +592,6 @@
             }
         });
     </script>
+
+    <script src="{{ asset('./admin/js/aktivitas.js') }}"></script>
 @endsection

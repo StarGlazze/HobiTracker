@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Check routes configuration
     if (!window.routes || !window.routes.aktivitas) {
-        showNotification('Konfigurasi routes tidak ditemukan. Silakan refresh halaman.', 'error');
+        console.warn('Routes configuration not found. Some functionality may not work.');
         return;
     }
 
@@ -208,20 +208,17 @@ function handleTambahAktivitas(e) {
     })
     .then(data => {
         if (data.success) {
-            showNotification('Aktivitas berhasil ditambahkan!', 'success');
             closeModal('tambahAktivitasModal');
             form.reset();
             setTimeout(() => window.location.reload(), 1500);
         } else if (data.errors) {
             showValidationErrors(data.errors);
-            showNotification('Periksa kembali form Anda', 'warning');
         } else {
-            showNotification(data.message || 'Terjadi kesalahan', 'error');
+            console.error('Error:', data.message || 'Terjadi kesalahan');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        showNotification('Terjadi kesalahan saat menyimpan data.', 'error');
     })
     .finally(() => {
         resetButton(submitBtn, originalText);
@@ -235,13 +232,11 @@ function loadAktivitasData(aktivitasId) {
     // Find the button and row
     const editButton = document.querySelector(`button[data-bs-target="#editAktivitasModal"][data-id="${aktivitasId}"]`);
     if (!editButton) {
-        showNotification('Tombol edit tidak ditemukan', 'error');
         return;
     }
 
     const row = editButton.closest('tr');
     if (!row) {
-        showNotification('Data baris tidak ditemukan', 'error');
         return;
     }
 
