@@ -29,7 +29,7 @@ Route::get('/profile', function () {
 });
 
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/setting', [WebSettingController::class, 'index'])->name('setting.index');
     Route::post('/setting/save-settings', [WebSettingController::class, 'saveSettings'])->name('setting.save');
     Route::post('/setting/add-category', [WebSettingController::class, 'addCategory'])->name('setting.add.category');

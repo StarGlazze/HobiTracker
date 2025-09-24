@@ -75,6 +75,7 @@
                         </a>
                     </li>
 
+                     @if(auth()->user()->email === 'admin@example.com')
                      <li class="sidebar-item">
                         <a class="sidebar-link justify-content-between" href="/setting" aria-expanded="false">
                             <div class="d-flex align-items-center gap-3">
@@ -86,6 +87,7 @@
 
                         </a>
                     </li>
+                    @endif
                 </ul>
             </nav>
             <!-- End Sidebar navigation -->
