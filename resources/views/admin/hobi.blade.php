@@ -354,19 +354,11 @@
                                 name="kategori_id" required>
                                 <option value="" disabled {{ old('kategori_id') ? '' : 'selected' }}>Pilih Kategori
                                     Hobi...</option>
-                                @php
-                                    $uniqueKategori = [];
-                                @endphp
                                 @foreach ($kategoriHobis as $kategori)
-                                    @if (!in_array($kategori->id, $uniqueKategori))
-                                        @php
-                                            $uniqueKategori[] = $kategori->id;
-                                        @endphp
-                                        <option value="{{ $kategori->id }}" data-icon="{{ $kategori->icon ?? '' }}"
-                                            {{ old('kategori_id') == $kategori->id ? 'selected' : '' }}>
-                                            {{ $kategori->nama_kategori }}
-                                        </option>
-                                    @endif
+                                    <option value="{{ $kategori->id }}" data-icon="{{ $kategori->icon ?? '' }}"
+                                        {{ old('kategori_id') == $kategori->id ? 'selected' : '' }}>
+                                        {{ $kategori->nama_kategori }}
+                                    </option>
                                 @endforeach
                             </select>
                             @error('kategori_id')

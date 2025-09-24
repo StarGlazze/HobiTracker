@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use App\Models\KategoriHobi;
 
 class KategoriHobiSeeder extends Seeder
 {
@@ -12,12 +12,18 @@ class KategoriHobiSeeder extends Seeder
      */
     public function run(): void
     {
+        // Check if categories already exist to avoid duplicates
+        if (KategoriHobi::count() > 0) {
+            $this->command->info('KategoriHobi records already exist. Skipping seeder.');
+            return;
+        }
+
         $kategoriHobis = [
             ['nama_kategori' => 'Olahraga & Kebugaran', 'icon' => 'ti-barbell', 'background_color' => 'bg-success'],
             ['nama_kategori' => 'Seni & Kreativitas', 'icon' => 'ti-palette', 'background_color' => 'bg-warning'],
             ['nama_kategori' => 'Musik & Performing Arts', 'icon' => 'ti-music', 'background_color' => 'bg-info'],
             ['nama_kategori' => 'Membaca & Literasi', 'icon' => 'ti-book', 'background_color' => 'bg-primary'],
-            ['nama_kategori' => 'Gaming & E-Sports', 'icon' => 'ti-device-gamepad', 'background_color' => 'bg-dark'],
+            ['nama_kategori' => 'Gaming & E-Sports', 'icon' => 'ti-device-gamepad text-white', 'background_color' => 'bg-dark'],
             ['nama_kategori' => 'Kuliner & Memasak', 'icon' => 'ti-chef-hat', 'background_color' => 'bg-danger'],
             ['nama_kategori' => 'Travel & Outdoor', 'icon' => 'ti-map-pin', 'background_color' => 'bg-secondary'],
             ['nama_kategori' => 'Komunitas & Sosial', 'icon' => 'ti-users', 'background_color' => 'bg-indigo'],
@@ -27,6 +33,10 @@ class KategoriHobiSeeder extends Seeder
             ['nama_kategori' => 'Lainnya', 'icon' => 'ti-dots', 'background_color' => 'bg-pink'],
         ];
 
-        DB::table('kategori_hobis')->insert($kategoriHobis);
+        foreach ($kategoriHobis as $kategori) {
+            KategoriHobi::create($kategori);
+        }
+
+        $this->command->info('KategoriHobi seeder completed successfully!');
     }
 }

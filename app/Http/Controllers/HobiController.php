@@ -59,11 +59,6 @@ class HobiController extends Controller
     // Menyimpan data hobi baru
     public function store(Request $request)
     {
-        // Check if user is authenticated
-        if (!Auth::check()) {
-            return redirect()->route('login')->with('error', 'Anda harus login terlebih dahulu untuk menambah hobi');
-        }
-
         $request->validate([
             'kategori_id' => 'required|exists:kategori_hobis,id',
             'nama_hobi' => 'required|string|max:255',
@@ -83,11 +78,7 @@ class HobiController extends Controller
     // Menampilkan form edit hobi
     public function edit($id)
     {
-        $hobi = Hobi::find($id);
-
-        if (!$hobi || $hobi->user_id != Auth::id()) {
-            return redirect()->route('hobi.index')->with('error', 'Hobi tidak ditemukan atau tidak punya akses');
-        }
+        $hobi = Hobi::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
 
         return view('admin.hobi_edit', ['hobi' => $hobi]);
     }
@@ -95,11 +86,7 @@ class HobiController extends Controller
     // Mengupdate data hobi
     public function update(Request $request, $id)
     {
-        $hobi = Hobi::find($id);
-
-        if (!$hobi || $hobi->user_id != Auth::id()) {
-            return redirect()->route('hobi.index')->with('error', 'Hobi tidak ditemukan atau tidak punya akses');
-        }
+        $hobi = Hobi::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
 
         $request->validate([
             'kategori_id' => 'required|exists:kategori_hobis,id',
@@ -118,11 +105,7 @@ class HobiController extends Controller
     // Menghapus data hobi
     public function destroy($id)
     {
-        $hobi = Hobi::find($id);
-
-        if (!$hobi || $hobi->user_id != Auth::id()) {
-            return redirect()->route('hobi.index')->with('error', 'Hobi tidak ditemukan atau tidak punya akses');
-        }
+        $hobi = Hobi::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
 
         $hobi->delete();
 

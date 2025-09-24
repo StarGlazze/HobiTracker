@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HobiController;
 use App\Http\Controllers\WebSettingController;
@@ -45,4 +46,12 @@ Route::post('/login', [AuthController::class, 'login']);
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::resource('hobi', HobiController::class);
+Route::middleware(['auth'])->group(function () {
+    Route::resource('hobi', HobiController::class);
+
+    // Temporary route to run seeder
+    Route::get('/seed-categories', function () {
+        Artisan::call('db:seed', ['--class' => 'KategoriHobiSeeder']);
+        return redirect()->route('hobi.index')->with('success', 'Kategori berhasil di-seed!');
+    });
+});

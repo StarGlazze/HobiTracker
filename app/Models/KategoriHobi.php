@@ -11,6 +11,8 @@ class KategoriHobi extends Model
 
     protected $fillable = [
         'nama_kategori',
+        'icon',
+        'background_color',
     ];
 
     // Relationships

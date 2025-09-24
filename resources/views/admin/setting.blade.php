@@ -74,7 +74,7 @@
                                                 <input type="file" class="form-control" id="site_logo" name="site_logo"
                                                     accept="image/*">
                                                 <div class="mt-2">
-                                                    <img src="{{ $webSettings->logo_url ?? '/admin/images/logos/HobiTrackerr.png' }}"
+                                                    <img src="{{ $webSettings->logo_url ?? '/admin/images/logos/HobiTracker.png' }}"
                                                         alt="Logo Situs" class="img-thumbnail rounded-3"
                                                         style="max-height: 100px;">
                                                 </div>
@@ -262,7 +262,7 @@
                                                         <option value="ti-palette">Palette (Seni)</option>
                                                         <option value="ti-music">Music (Musik)</option>
                                                         <option value="ti-book">Book (Membaca)</option>
-                                                        <option value="ti-device-gamepad">Gamepad (Gaming)</option>
+                                                        <option value="ti-device-gamepad text-white">gamepad (Gaming)</option>
                                                         <option value="ti-chef-hat">Chef Hat (Kuliner)</option>
                                                         <option value="ti-map-pin">Map Pin (Travel)</option>
                                                         <option value="ti-users">Users (Sosial)</option>
