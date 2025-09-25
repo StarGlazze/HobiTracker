@@ -452,14 +452,15 @@
 
                         {{-- File Bukti Section untuk Edit dengan Validasi --}}
                         <div class="mb-4">
-                            <div class="alert alert-warning border-0">
+                            <div class="alert alert-info border-0">
                                 <h6 class="alert-heading mb-2">
-                                    <i class="ti ti-info-circle me-2"></i>Update Bukti Aktivitas
+                                    <i class="ti ti-info-circle me-2"></i>Update Bukti Aktivitas (Opsional)
                                 </h6>
-                                <p class="mb-2">Anda dapat mengubah bukti aktivitas atau tetap menggunakan yang ada:</p>
+                                <p class="mb-2">Aktivitas ini sudah memiliki bukti yang tersimpan. Anda bisa:</p>
                                 <small class="text-muted">
-                                    <i class="ti ti-check me-1"></i>Kosongkan kedua field jika tidak ingin mengubah bukti<br>
-                                    <i class="ti ti-check me-1"></i>Isi salah satu untuk mengganti bukti yang ada
+                                    <i class="ti ti-check me-1"></i>Tetap menggunakan bukti yang ada (kosongkan kedua field)<br>
+                                    <i class="ti ti-check me-1"></i>Mengganti dengan file baru<br>
+                                    <i class="ti ti-check me-1"></i>Mengganti dengan link Google Drive baru
                                 </small>
                             </div>
                         </div>

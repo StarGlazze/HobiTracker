@@ -178,22 +178,15 @@ class AktivitasController extends Controller
                 return redirect()->back()->withErrors($validator)->withInput();
             }
 
-            // **VALIDASI KUSTOM UNTUK UPDATE: Minimal satu bukti harus ada**
+            // **VALIDASI KUSTOM UNTUK UPDATE: Lebih fleksibel**
             $hasFile = $request->hasFile('file_bukti') && $request->file('file_bukti')->isValid();
             $hasGdriveLink = !empty($request->gdrive_link);
             $hasExistingFile = !empty($aktivitas->file_bukti);
 
-            // Jika tidak ada file baru DAN tidak ada gdrive link baru DAN tidak ada file existing
-            if (!$hasFile && !$hasGdriveLink && !$hasExistingFile) {
+            // Hanya validasi jika tidak ada file existing DAN tidak ada input baru
+            if (!$hasExistingFile && !$hasFile && !$hasGdriveLink) {
                 return redirect()->back()
                     ->withErrors(['file_bukti' => 'Minimal satu bukti harus ada: File Bukti atau Link Google Drive'])
-                    ->withInput();
-            }
-
-            // Jika user mengosongkan semua input bukti (menghapus yang ada)
-            if (!$hasFile && !$hasGdriveLink && $hasExistingFile) {
-                return redirect()->back()
-                    ->withErrors(['file_bukti' => 'Tidak dapat menghapus semua bukti. Minimal satu bukti harus ada.'])
                     ->withInput();
             }
 
