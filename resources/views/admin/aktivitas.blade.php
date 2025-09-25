@@ -39,6 +39,19 @@
             </div>
         @endif
 
+        {{-- Display validation errors --}}
+        @if($errors->any())
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="ti ti-alert-triangle me-2"></i>
+                <strong>Terjadi kesalahan:</strong>
+                <ul class="mb-0 mt-2">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
 
         <!-- Quick Stats Cards -->
         <div class="row mb-4">
@@ -237,21 +250,10 @@
                     </tbody>
                 </table>
             </div>
-            <!-- Empty State (if no data) -->
-            {{-- <div class="card-body text-center py-5" id="empty-state" style="display: none;">
-                <div class="mb-4">
-                    <i class="ti ti-activity text-muted" style="font-size: 4rem;"></i>
-                </div>
-                <h5 class="text-muted">Belum ada aktivitas</h5>
-                <p class="text-muted mb-4">Mulai dengan menambahkan aktivitas hobi pertama Anda</p>
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tambahAktivitasModal">
-                    <i class="ti ti-plus me-2"></i>Tambah Aktivitas Pertama
-                </button>
-            </div> --}}
         </div>
     </div>
 
-    <!-- Enhanced Modal -->
+    <!-- Enhanced Modal Tambah Aktivitas -->
     <div class="modal fade" id="tambahAktivitasModal" tabindex="-1" aria-labelledby="tambahAktivitasModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -277,12 +279,17 @@
                                     <label for="pilihHobi" class="form-label fw-semibold">
                                         <i class="ti ti-heart text-danger me-2"></i>Pilih Hobi
                                     </label>
-                                    <select class="form-select" id="pilihHobi" name="hobi_id" required>
+                                    <select class="form-select @error('hobi_id') is-invalid @enderror" id="pilihHobi" name="hobi_id" required>
                                         <option value="" selected disabled>Pilih Hobi Terkait...</option>
                                         @foreach ($hobis ?? [] as $hobi)
-                                            <option value="{{ $hobi->id }}">{{ $hobi->nama_hobi }}</option>
+                                            <option value="{{ $hobi->id }}" {{ old('hobi_id') == $hobi->id ? 'selected' : '' }}>
+                                                {{ $hobi->nama_hobi }}
+                                            </option>
                                         @endforeach
                                     </select>
+                                    @error('hobi_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -290,8 +297,12 @@
                                     <label for="durasiMenit" class="form-label fw-semibold">
                                         <i class="ti ti-clock text-info me-2"></i>Durasi (menit)
                                     </label>
-                                    <input type="number" class="form-control" id="durasiMenit" name="durasi_menit"
-                                        placeholder="Contoh: 30, 120" min="1" required>
+                                    <input type="number" class="form-control @error('durasi_menit') is-invalid @enderror" 
+                                           id="durasiMenit" name="durasi_menit" value="{{ old('durasi_menit') }}"
+                                           placeholder="Contoh: 30, 120" min="1" required>
+                                    @error('durasi_menit')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                         </div>
@@ -300,40 +311,68 @@
                             <label for="namaAktivitas" class="form-label fw-semibold">
                                 <i class="ti ti-activity text-primary me-2"></i>Nama Aktivitas
                             </label>
-                            <input type="text" class="form-control" id="namaAktivitas" name="nama_aktivitas"
-                                placeholder="Contoh: Baca novel Dune chapter 1-3, Lari keliling taman 5km" required>
+                            <input type="text" class="form-control @error('nama_aktivitas') is-invalid @enderror" 
+                                   id="namaAktivitas" name="nama_aktivitas" value="{{ old('nama_aktivitas') }}"
+                                   placeholder="Contoh: Baca novel Dune chapter 1-3, Lari keliling taman 5km" required>
+                            @error('nama_aktivitas')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="mb-3">
                             <label for="catatanAktivitas" class="form-label fw-semibold">
                                 <i class="ti ti-notes text-warning me-2"></i>Catatan
                             </label>
-                            <textarea class="form-control" id="catatanAktivitas" name="catatan" rows="3"
-                                placeholder="Deskripsi tambahan, target yang ingin dicapai, atau catatan lainnya..."></textarea>
+                            <textarea class="form-control @error('catatan') is-invalid @enderror" id="catatanAktivitas" name="catatan" rows="3"
+                                placeholder="Deskripsi tambahan, target yang ingin dicapai, atau catatan lainnya...">{{ old('catatan') }}</textarea>
+                            @error('catatan')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        {{-- File Bukti Section dengan Validasi --}}
+                        <div class="mb-4">
+                            <div class="alert alert-info border-0">
+                                <h6 class="alert-heading mb-2">
+                                    <i class="ti ti-info-circle me-2"></i>Bukti Aktivitas (WAJIB)
+                                </h6>
+                                <p class="mb-2">Pilih salah satu atau kedua opsi di bawah ini untuk memberikan bukti aktivitas:</p>
+                                <small class="text-muted">
+                                    <i class="ti ti-check me-1"></i>Upload file langsung (maks 50MB)<br>
+                                    <i class="ti ti-check me-1"></i>Atau berikan link Google Drive
+                                </small>
+                            </div>
                         </div>
 
                         <div class="mb-3">
                             <label for="fileBukti" class="form-label fw-semibold">
-                                <i class="ti ti-paperclip text-success me-2"></i>File Bukti
+                                <i class="ti ti-paperclip text-success me-2"></i>Opsi 1: Upload File Bukti
                             </label>
-                            <input class="form-control" type="file" id="fileBukti" name="file_bukti"
+                            <input class="form-control @error('file_bukti') is-invalid @enderror" type="file" id="fileBukti" name="file_bukti"
                                 accept="image/*,video/*">
                             <div class="form-text">
                                 <i class="ti ti-info-circle me-1"></i>
-                                Format yang didukung: Gambar (max 5MB) dan Video (max 50MB)
+                                Format yang didukung: Gambar (jpg, png, gif) dan Video (mp4, mov, avi) - maksimal 50MB
                             </div>
+                            @error('file_bukti')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="mb-3">
                             <label for="gdriveLink" class="form-label fw-semibold">
-                                <i class="ti ti-link text-info me-2"></i>Link Google Drive (Alternatif)
+                                <i class="ti ti-link text-info me-2"></i>Opsi 2: Link Google Drive
                             </label>
-                            <input type="url" class="form-control" id="gdriveLink" name="gdrive_link"
+                            <input type="url" class="form-control @error('gdrive_link') is-invalid @enderror" id="gdriveLink" name="gdrive_link"
+                                value="{{ old('gdrive_link') }}"
                                 placeholder="https://drive.google.com/file/...">
                             <div class="form-text">
                                 <i class="ti ti-info-circle me-1"></i>
-                                Gunakan jika file terlalu besar untuk diupload langsung
+                                Gunakan jika file terlalu besar atau ingin menyimpan di Google Drive
                             </div>
+                            @error('gdrive_link')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
                     <div class="modal-footer border-0 pt-0">
@@ -349,12 +388,12 @@
         </div>
     </div>
 
-    {{-- Modal untuk edit - PERBAIKAN FORM ID --}}
+    {{-- Modal untuk edit --}}
     <div class="modal fade" id="editAktivitasModal" tabindex="-1" aria-labelledby="editAktivitasModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow">
-                <form method="POST" action="" id="editAktivitasForm" enctype="multipart/form-data">
+                <form method="POST" action="" id="editAktivitasForm" enctype="multipart/form-data" data-base-url="{{ url('aktivitas') }}">
                     @csrf
                     @method('PUT')
                     <div class="modal-header bg-warning text-white border-0">
@@ -411,27 +450,41 @@
                                 placeholder="Deskripsi tambahan, target yang ingin dicapai, atau catatan lainnya..."></textarea>
                         </div>
 
+                        {{-- File Bukti Section untuk Edit dengan Validasi --}}
+                        <div class="mb-4">
+                            <div class="alert alert-warning border-0">
+                                <h6 class="alert-heading mb-2">
+                                    <i class="ti ti-info-circle me-2"></i>Update Bukti Aktivitas
+                                </h6>
+                                <p class="mb-2">Anda dapat mengubah bukti aktivitas atau tetap menggunakan yang ada:</p>
+                                <small class="text-muted">
+                                    <i class="ti ti-check me-1"></i>Kosongkan kedua field jika tidak ingin mengubah bukti<br>
+                                    <i class="ti ti-check me-1"></i>Isi salah satu untuk mengganti bukti yang ada
+                                </small>
+                            </div>
+                        </div>
+
                         <div class="mb-3">
                             <label for="editFileBukti" class="form-label fw-semibold">
-                                <i class="ti ti-paperclip text-success me-2"></i>File Bukti
+                                <i class="ti ti-paperclip text-success me-2"></i>File Bukti Baru (Opsional)
                             </label>
                             <input class="form-control" type="file" id="editFileBukti" name="file_bukti"
                                 accept="image/*,video/*">
                             <div class="form-text">
                                 <i class="ti ti-info-circle me-1"></i>
-                                Format yang didukung: Gambar (max 5MB) dan Video (max 50MB)
+                                Upload file baru jika ingin mengganti bukti yang ada
                             </div>
                         </div>
 
                         <div class="mb-3">
                             <label for="editGdriveLink" class="form-label fw-semibold">
-                                <i class="ti ti-link text-info me-2"></i>Link Google Drive (Alternatif)
+                                <i class="ti ti-link text-info me-2"></i>Link Google Drive Baru (Opsional)
                             </label>
                             <input type="url" class="form-control" id="editGdriveLink" name="gdrive_link"
                                 placeholder="https://drive.google.com/file/...">
                             <div class="form-text">
                                 <i class="ti ti-info-circle me-1"></i>
-                                Gunakan jika file terlalu besar untuk diupload langsung
+                                Masukkan link baru jika ingin mengubah ke Google Drive
                             </div>
                         </div>
                     </div>
@@ -448,6 +501,7 @@
         </div>
     </div>
 
+    {{-- Modal File Preview --}}
     <div class="modal fade" id="filePreviewModal" tabindex="-1" aria-labelledby="filePreviewModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -460,7 +514,7 @@
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
-                    {{-- Content will be loaded dynamically --}}
+                    {{-- Content will be loaded dynamically by JavaScript --}}
                 </div>
                 <div class="modal-footer border-0">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
@@ -474,124 +528,5 @@
 @endsection
 
 @section('scripts')
-    <script>
-        // Simple form population for edit modal
-        document.addEventListener('DOMContentLoaded', function() {
-            const editButtons = document.querySelectorAll('button[data-bs-target="#editAktivitasModal"]');
-
-            editButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const id = this.getAttribute('data-id');
-                    const nama = this.getAttribute('data-nama');
-                    const hobi = this.getAttribute('data-hobi');
-                    const durasi = this.getAttribute('data-durasi');
-                    const catatan = this.getAttribute('data-catatan');
-
-                    // Populate form fields
-                    document.getElementById('editNamaAktivitas').value = nama;
-                    document.getElementById('editDurasiMenit').value = durasi;
-                    document.getElementById('editCatatanAktivitas').value = catatan;
-
-                    // Set hobi selection
-                    const hobiSelect = document.getElementById('editPilihHobi');
-                    for (let option of hobiSelect.options) {
-                        if (option.text.trim() === hobi) {
-                            option.selected = true;
-                            break;
-                        }
-                    }
-
-                    // Set form action
-                    document.getElementById('editAktivitasForm').action =
-                        `{{ url('aktivitas') }}/${id}`;
-                });
-            });
-
-            // Simple search functionality
-            const searchInput = document.querySelector('input[placeholder="Cari aktivitas..."]');
-            if (searchInput) {
-                searchInput.addEventListener('input', function() {
-                    const searchTerm = this.value.toLowerCase();
-                    const rows = document.querySelectorAll('tbody tr[data-aktivitas-row]');
-
-                    rows.forEach(row => {
-                        const text = row.textContent.toLowerCase();
-                        if (text.includes(searchTerm)) {
-                            row.style.display = '';
-                        } else {
-                            row.style.display = 'none';
-                        }
-                    });
-                });
-            }
-        });
-
-        // File preview modal function
-        function showFilePreview(fileUrl, fileType) {
-            const modal = document.getElementById('filePreviewModal');
-            const modalBody = modal.querySelector('.modal-body');
-            const modalTitle = modal.querySelector('.modal-title');
-
-            // Clear previous content
-            modalBody.innerHTML = '';
-
-            if (fileType === 'gdrive') {
-                modalTitle.textContent = 'File dari Google Drive';
-                modalBody.innerHTML = `
-                    <div class="text-center">
-                        <i class="ti ti-brand-google-drive text-primary mb-3" style="font-size: 3rem;"></i>
-                        <p class="mb-3">File disimpan di Google Drive</p>
-                        <a href="${fileUrl}" target="_blank" class="btn btn-primary">
-                            <i class="ti ti-external-link me-2"></i>Buka di Google Drive
-                        </a>
-                    </div>
-                `;
-            } else if (fileType === 'image') {
-                modalTitle.textContent = 'Preview Gambar';
-                modalBody.innerHTML = `
-                    <div class="text-center">
-                        <img src="${fileUrl}" class="img-fluid" style="max-height: 500px;" alt="Preview">
-                    </div>
-                `;
-            } else if (fileType === 'video') {
-                modalTitle.textContent = 'Preview Video';
-                modalBody.innerHTML = `
-                    <div class="text-center">
-                        <video controls class="img-fluid" style="max-height: 500px;">
-                            <source src="${fileUrl}" type="video/mp4">
-                            Browser Anda tidak mendukung video.
-                        </video>
-                    </div>
-                `;
-            } else {
-                modalTitle.textContent = 'File Bukti';
-                modalBody.innerHTML = `
-                    <div class="text-center">
-                        <i class="ti ti-file text-muted mb-3" style="font-size: 3rem;"></i>
-                        <p class="mb-3">File tidak dapat dipratinjau</p>
-                        <a href="${fileUrl}" target="_blank" class="btn btn-primary">
-                            <i class="ti ti-download me-2"></i>Download File
-                        </a>
-                    </div>
-                `;
-            }
-
-            // Show modal
-            const bsModal = new bootstrap.Modal(modal);
-            bsModal.show();
-        }
-
-        // Auto refresh after successful operations
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check if there's a success message and refresh after 2 seconds
-            const successAlert = document.querySelector('.alert-success');
-            if (successAlert) {
-                setTimeout(function() {
-                    location.reload();
-                }, 2000);
-            }
-        });
-    </script>
-
     <script src="{{ asset('./admin/js/aktivitas.js') }}"></script>
 @endsection

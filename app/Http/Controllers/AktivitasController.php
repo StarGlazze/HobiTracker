@@ -63,7 +63,7 @@ class AktivitasController extends Controller
         try {
             $userId = Auth::id();
 
-            // Validasi input
+            // Validasi dasar terlebih dahulu
             $validator = Validator::make($request->all(), [
                 'hobi_id' => 'required|exists:hobis,id',
                 'nama_aktivitas' => 'required|string|max:255',
@@ -77,6 +77,16 @@ class AktivitasController extends Controller
                 return redirect()->back()->withErrors($validator)->withInput();
             }
 
+            // **VALIDASI KUSTOM: Minimal satu bukti harus ada**
+            $hasFile = $request->hasFile('file_bukti') && $request->file('file_bukti')->isValid();
+            $hasGdriveLink = !empty($request->gdrive_link);
+
+            if (!$hasFile && !$hasGdriveLink) {
+                return redirect()->back()
+                    ->withErrors(['file_bukti' => 'Minimal satu bukti harus dikirim: File Bukti atau Link Google Drive'])
+                    ->withInput();
+            }
+
             // Pastikan hobi milik user yang sedang login
             $hobi = Hobi::where('id', $request->hobi_id)->where('user_id', $userId)->first();
             if (!$hobi) {
@@ -86,10 +96,14 @@ class AktivitasController extends Controller
             $filePath = null;
 
             // Handle file upload jika ada
-            if ($request->hasFile('file_bukti')) {
+            if ($hasFile) {
                 $file = $request->file('file_bukti');
                 $filename = time() . '_' . $userId . '_' . $file->getClientOriginalName();
                 $filePath = $file->storeAs('aktivitas_bukti', $filename, 'public');
+            }
+            // Jika tidak ada file upload, gunakan Google Drive link
+            elseif ($hasGdriveLink) {
+                $filePath = $request->gdrive_link;
             }
 
             // Buat aktivitas baru
@@ -98,7 +112,7 @@ class AktivitasController extends Controller
                 'nama_aktivitas' => $request->nama_aktivitas,
                 'durasi_menit' => $request->durasi_menit,
                 'catatan' => $request->catatan,
-                'file_bukti' => $filePath ?: $request->gdrive_link,
+                'file_bukti' => $filePath,
             ]);
 
             return redirect()->back()->with('success', 'Aktivitas berhasil ditambahkan');
@@ -150,7 +164,7 @@ class AktivitasController extends Controller
                 return redirect()->back()->with('error', 'Aktivitas tidak ditemukan atau bukan milik Anda')->withInput();
             }
 
-            // Validasi input
+            // Validasi dasar terlebih dahulu
             $validator = Validator::make($request->all(), [
                 'hobi_id' => 'required|exists:hobis,id',
                 'nama_aktivitas' => 'required|string|max:255',
@@ -164,16 +178,35 @@ class AktivitasController extends Controller
                 return redirect()->back()->withErrors($validator)->withInput();
             }
 
+            // **VALIDASI KUSTOM UNTUK UPDATE: Minimal satu bukti harus ada**
+            $hasFile = $request->hasFile('file_bukti') && $request->file('file_bukti')->isValid();
+            $hasGdriveLink = !empty($request->gdrive_link);
+            $hasExistingFile = !empty($aktivitas->file_bukti);
+
+            // Jika tidak ada file baru DAN tidak ada gdrive link baru DAN tidak ada file existing
+            if (!$hasFile && !$hasGdriveLink && !$hasExistingFile) {
+                return redirect()->back()
+                    ->withErrors(['file_bukti' => 'Minimal satu bukti harus ada: File Bukti atau Link Google Drive'])
+                    ->withInput();
+            }
+
+            // Jika user mengosongkan semua input bukti (menghapus yang ada)
+            if (!$hasFile && !$hasGdriveLink && $hasExistingFile) {
+                return redirect()->back()
+                    ->withErrors(['file_bukti' => 'Tidak dapat menghapus semua bukti. Minimal satu bukti harus ada.'])
+                    ->withInput();
+            }
+
             // Pastikan hobi milik user yang sedang login
             $hobi = Hobi::where('id', $request->hobi_id)->where('user_id', $userId)->first();
             if (!$hobi) {
                 return redirect()->back()->with('error', 'Hobi tidak ditemukan atau bukan milik Anda')->withInput();
             }
 
-            $filePath = $aktivitas->file_bukti;
+            $filePath = $aktivitas->file_bukti; // Keep existing by default
 
             // Handle file upload jika ada file baru
-            if ($request->hasFile('file_bukti')) {
+            if ($hasFile) {
                 // Hapus file lama jika ada dan bukan URL Google Drive
                 if ($aktivitas->file_bukti &&
                     !str_contains($aktivitas->file_bukti, 'drive.google.com') &&
@@ -184,8 +217,10 @@ class AktivitasController extends Controller
                 $file = $request->file('file_bukti');
                 $filename = time() . '_' . $userId . '_' . $file->getClientOriginalName();
                 $filePath = $file->storeAs('aktivitas_bukti', $filename, 'public');
-            } elseif ($request->gdrive_link) {
-                // Jika ada Google Drive link baru, hapus file lama jika ada
+            } 
+            // Jika ada Google Drive link baru
+            elseif ($hasGdriveLink) {
+                // Hapus file lama jika ada dan bukan URL Google Drive
                 if ($aktivitas->file_bukti &&
                     !str_contains($aktivitas->file_bukti, 'drive.google.com') &&
                     Storage::disk('public')->exists($aktivitas->file_bukti)) {
@@ -193,6 +228,7 @@ class AktivitasController extends Controller
                 }
                 $filePath = $request->gdrive_link;
             }
+            // Jika tidak ada input baru, tetap gunakan file existing (tidak berubah)
 
             // Update aktivitas
             $aktivitas->update([

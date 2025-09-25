@@ -1,6 +1,6 @@
 /**
  * Aktivitas Management JavaScript
- * Handles CRUD operations for activities page
+ * Handles CRUD operations for activities page with improved file evidence validation
  */
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -8,18 +8,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
     if (!csrfToken) {
-        showNotification('CSRF Token tidak ditemukan!', 'error');
-        return;
-    }
-
-    // Check routes configuration
-    if (!window.routes || !window.routes.aktivitas) {
-        console.warn('Routes configuration not found. Some functionality may not work.');
-        return;
+        console.warn('CSRF Token tidak ditemukan!');
     }
 
     // Initialize all functionality
-    initAktivitasForm();
+    initFormValidation();
     initEditForm();
     initDeleteHandlers();
     initSearch();
@@ -27,18 +20,126 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /**
- * Initialize Add Activity Form
+ * Initialize Form Validation for Both Add and Edit
  */
-function initAktivitasForm() {
-    const tambahForm = document.querySelector('#tambahAktivitasForm');
-
+function initFormValidation() {
+    // Handle Add Form
+    const tambahForm = document.querySelector('#tambahAktivitasModal form');
     if (tambahForm) {
-        tambahForm.addEventListener('submit', handleTambahAktivitas);
+        tambahForm.addEventListener('submit', function(e) {
+            if (!validateFileEvidence(tambahForm)) {
+                e.preventDefault();
+                showFileEvidenceError(tambahForm, 'Minimal satu bukti harus dikirim: File Bukti atau Link Google Drive!');
+                return false;
+            }
+            clearFileEvidenceError(tambahForm);
+        });
+
+        // Real-time validation
+        const fileInput = tambahForm.querySelector('#fileBukti');
+        const linkInput = tambahForm.querySelector('#gdriveLink');
+        
+        if (fileInput && linkInput) {
+            fileInput.addEventListener('change', () => clearFileEvidenceError(tambahForm));
+            linkInput.addEventListener('input', () => clearFileEvidenceError(tambahForm));
+        }
+    }
+
+    // Handle Edit Form  
+    const editForm = document.querySelector('#editAktivitasForm');
+    if (editForm) {
+        editForm.addEventListener('submit', function(e) {
+            // For edit form, validation is more lenient - allow keeping existing evidence
+            // Only validate if user is trying to clear everything
+            const hasNewFile = editForm.querySelector('#editFileBukti').files.length > 0;
+            const hasNewLink = editForm.querySelector('#editGdriveLink').value.trim();
+            
+            // If neither new file nor new link is provided, assume keeping existing evidence
+            // Backend will handle this validation more thoroughly
+            clearFileEvidenceError(editForm);
+        });
+
+        // Real-time validation for edit form
+        const editFileInput = editForm.querySelector('#editFileBukti');
+        const editLinkInput = editForm.querySelector('#editGdriveLink');
+        
+        if (editFileInput && editLinkInput) {
+            editFileInput.addEventListener('change', () => clearFileEvidenceError(editForm));
+            editLinkInput.addEventListener('input', () => clearFileEvidenceError(editForm));
+        }
     }
 }
 
 /**
- * Initialize Edit Activity Form
+ * Validate File Evidence (at least one must be present)
+ */
+function validateFileEvidence(form) {
+    const fileInput = form.querySelector('input[name="file_bukti"]');
+    const linkInput = form.querySelector('input[name="gdrive_link"]');
+    
+    const hasFile = fileInput && fileInput.files && fileInput.files.length > 0;
+    const hasLink = linkInput && linkInput.value.trim();
+    
+    return hasFile || hasLink;
+}
+
+/**
+ * Show File Evidence Error
+ */
+function showFileEvidenceError(form, message) {
+    // Clear existing errors first
+    clearFileEvidenceError(form);
+    
+    const fileInput = form.querySelector('input[name="file_bukti"]');
+    const linkInput = form.querySelector('input[name="gdrive_link"]');
+    
+    // Add error classes
+    if (fileInput) {
+        fileInput.classList.add('is-invalid');
+    }
+    if (linkInput) {
+        linkInput.classList.add('is-invalid');
+    }
+    
+    // Create error message element
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'alert alert-danger mt-3 file-evidence-error';
+    errorDiv.innerHTML = `<i class="ti ti-alert-triangle me-2"></i>${message}`;
+    
+    // Insert error message after gdrive link input group
+    const gdriveGroup = linkInput ? linkInput.closest('.mb-3') : fileInput.closest('.mb-3');
+    if (gdriveGroup) {
+        gdriveGroup.insertAdjacentElement('afterend', errorDiv);
+    }
+    
+    // Scroll to error
+    errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+/**
+ * Clear File Evidence Error
+ */
+function clearFileEvidenceError(form) {
+    // Remove error classes
+    const fileInput = form.querySelector('input[name="file_bukti"]');
+    const linkInput = form.querySelector('input[name="gdrive_link"]');
+    
+    if (fileInput) {
+        fileInput.classList.remove('is-invalid');
+    }
+    if (linkInput) {
+        linkInput.classList.remove('is-invalid');
+    }
+    
+    // Remove error message
+    const errorAlert = form.querySelector('.file-evidence-error');
+    if (errorAlert) {
+        errorAlert.remove();
+    }
+}
+
+/**
+ * Initialize Edit Form
  */
 function initEditForm() {
     // Handle edit button clicks using event delegation
@@ -50,18 +151,12 @@ function initEditForm() {
             const aktivitasId = editButton.getAttribute('data-id');
 
             if (aktivitasId) {
-                loadAktivitasData(aktivitasId);
+                loadAktivitasData(aktivitasId, editButton);
             } else {
-                showNotification('ID aktivitas tidak ditemukan', 'error');
+                alert('ID aktivitas tidak ditemukan');
             }
         }
     });
-
-    // Handle edit form submission
-    const editForm = document.querySelector('#editAktivitasForm');
-    if (editForm) {
-        editForm.addEventListener('submit', handleEditAktivitas);
-    }
 }
 
 /**
@@ -69,15 +164,11 @@ function initEditForm() {
  */
 function initDeleteHandlers() {
     document.addEventListener('click', function(e) {
-        const deleteButton = e.target.closest('button.btn-danger[data-id]');
-
-        if (deleteButton) {
-            e.preventDefault();
-            const aktivitasId = deleteButton.getAttribute('data-id');
-
-            if (aktivitasId) {
-                handleDeleteAktivitas(aktivitasId, deleteButton);
-            }
+        // Handle delete from form submission (existing functionality)
+        const deleteForm = e.target.closest('form[action*="aktivitas"][onsubmit*="confirm"]');
+        if (deleteForm && e.target.type === 'submit') {
+            // Let the form's onsubmit handle the confirmation
+            return true;
         }
     });
 }
@@ -86,73 +177,8 @@ function initDeleteHandlers() {
  * Initialize File Preview
  */
 function initFilePreview() {
-    document.addEventListener('click', function(e) {
-        const previewButton = e.target.closest('button[data-file-url]');
-
-        if (previewButton) {
-            e.preventDefault();
-            const fileUrl = previewButton.getAttribute('data-file-url');
-            const fileType = previewButton.getAttribute('data-file-type');
-            showFilePreview(fileUrl, fileType);
-        }
-    });
-}
-
-/**
- * Show File Preview in Modal
- */
-function showFilePreview(fileUrl, fileType) {
-    const modal = document.getElementById('filePreviewModal');
-    const modalBody = modal.querySelector('.modal-body');
-    const modalTitle = modal.querySelector('.modal-title');
-
-    // Clear previous content
-    modalBody.innerHTML = '';
-
-    if (fileType === 'gdrive') {
-        modalTitle.textContent = 'File dari Google Drive';
-        modalBody.innerHTML = `
-            <div class="text-center">
-                <i class="ti ti-brand-google-drive text-primary mb-3" style="font-size: 3rem;"></i>
-                <p class="mb-3">File disimpan di Google Drive</p>
-                <a href="${fileUrl}" target="_blank" class="btn btn-primary">
-                    <i class="ti ti-external-link me-2"></i>Buka di Google Drive
-                </a>
-            </div>
-        `;
-    } else if (fileType === 'image') {
-        modalTitle.textContent = 'Preview Gambar';
-        modalBody.innerHTML = `
-            <div class="text-center">
-                <img src="${fileUrl}" class="img-fluid" style="max-height: 500px;" alt="Preview">
-            </div>
-        `;
-    } else if (fileType === 'video') {
-        modalTitle.textContent = 'Preview Video';
-        modalBody.innerHTML = `
-            <div class="text-center">
-                <video controls class="img-fluid" style="max-height: 500px;">
-                    <source src="${fileUrl}" type="video/mp4">
-                    Browser Anda tidak mendukung video.
-                </video>
-            </div>
-        `;
-    } else {
-        modalTitle.textContent = 'File Bukti';
-        modalBody.innerHTML = `
-            <div class="text-center">
-                <i class="ti ti-file text-muted mb-3" style="font-size: 3rem;"></i>
-                <p class="mb-3">File tidak dapat dipratinjau</p>
-                <a href="${fileUrl}" target="_blank" class="btn btn-primary">
-                    <i class="ti ti-download me-2"></i>Download File
-                </a>
-            </div>
-        `;
-    }
-
-    // Show modal
-    const bsModal = new bootstrap.Modal(modal);
-    bsModal.show();
+    // File preview is handled by the global showFilePreview function
+    // which is called from onclick attributes in the blade template
 }
 
 /**
@@ -174,320 +200,297 @@ function initSearch() {
                     row.style.display = 'none';
                 }
             });
+
+            // Show "no results" message if needed
+            const visibleRows = Array.from(rows).filter(row => row.style.display !== 'none');
+            const tbody = rows[0]?.closest('tbody');
+            
+            if (visibleRows.length === 0 && searchTerm && tbody) {
+                let noResultsRow = tbody.querySelector('.no-results-row');
+                if (!noResultsRow) {
+                    noResultsRow = document.createElement('tr');
+                    noResultsRow.className = 'no-results-row';
+                    noResultsRow.innerHTML = `
+                        <td colspan="7" class="text-center py-4">
+                            <div class="text-muted">
+                                <i class="ti ti-search-off mb-2" style="font-size: 2rem;"></i>
+                                <p class="mb-0">Tidak ada aktivitas yang cocok dengan pencarian "${searchTerm}"</p>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(noResultsRow);
+                }
+                noResultsRow.style.display = '';
+            } else {
+                const noResultsRow = tbody?.querySelector('.no-results-row');
+                if (noResultsRow) {
+                    noResultsRow.style.display = 'none';
+                }
+            }
         });
     }
-}
-
-/**
- * Handle Add Activity Form Submission
- */
-function handleTambahAktivitas(e) {
-    e.preventDefault();
-
-    const form = e.target;
-    const formData = new FormData(form);
-    const submitBtn = form.querySelector('button[type="submit"]');
-    const originalText = submitBtn.innerHTML;
-
-    // Show loading state
-    setButtonLoading(submitBtn, 'Menyimpan...');
-
-    fetch(window.routes.aktivitas.store, {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-CSRF-TOKEN': csrfToken,
-            'Accept': 'application/json'
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().catch(() => ({ message: 'Gagal terhubung ke server atau server error.' }));
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            closeModal('tambahAktivitasModal');
-            form.reset();
-            setTimeout(() => window.location.reload(), 1500);
-        } else if (data.errors) {
-            showValidationErrors(data.errors);
-        } else {
-            console.error('Error:', data.message || 'Terjadi kesalahan');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    })
-    .finally(() => {
-        resetButton(submitBtn, originalText);
-    });
 }
 
 /**
  * Load Activity Data for Edit Form
  */
-function loadAktivitasData(aktivitasId) {
-    // Find the button and row
-    const editButton = document.querySelector(`button[data-bs-target="#editAktivitasModal"][data-id="${aktivitasId}"]`);
-    if (!editButton) {
-        return;
-    }
-
-    const row = editButton.closest('tr');
-    if (!row) {
-        return;
-    }
-
+function loadAktivitasData(aktivitasId, editButton) {
     try {
-        // Get data from table cells
-        const cells = row.querySelectorAll('td');
-
-        if (cells.length < 7) {
-            throw new Error('Insufficient table cells');
-        }
-
-        // Extract data from specific cells
-        const namaAktivitas = cells[1].querySelector('h6')?.textContent?.trim() || '';
-        const hobiText = cells[2].querySelector('span')?.textContent?.trim() || '';
-        const durasiText = cells[3].querySelector('span')?.textContent?.trim() || '';
-        const catatan = cells[4].querySelector('.text-truncate')?.textContent?.trim() || '';
-
-        // Parse durasi
-        const durasi = parseInt(durasiText.replace(/\D/g, '')) || 0;
-
-        // Find hobi_id
-        const hobiSelect = document.getElementById('editPilihHobi');
-        let hobiId = '';
-
-        if (hobiSelect) {
-            for (let option of hobiSelect.options) {
-                if (option.text.trim() === hobiText) {
-                    hobiId = option.value;
-                    break;
-                }
-            }
-        }
+        // Get data from button attributes (fallback method)
+        const nama = editButton.getAttribute('data-nama') || '';
+        const hobi = editButton.getAttribute('data-hobi') || '';
+        const durasi = editButton.getAttribute('data-durasi') || '';
+        const catatan = editButton.getAttribute('data-catatan') || '';
 
         // Fill form fields
-        const fields = {
-            'editPilihHobi': hobiId,
-            'editNamaAktivitas': namaAktivitas,
-            'editDurasiMenit': durasi,
-            'editCatatanAktivitas': catatan === 'Tidak ada catatan' ? '' : catatan,
-            'editGdriveLink': ''
-        };
+        document.getElementById('editNamaAktivitas').value = nama;
+        document.getElementById('editDurasiMenit').value = durasi;
+        document.getElementById('editCatatanAktivitas').value = catatan === 'Tidak ada catatan' ? '' : catatan;
 
-        for (const [fieldId, value] of Object.entries(fields)) {
-            const field = document.getElementById(fieldId);
-            if (field) {
-                field.value = value;
+        // Set hobi selection
+        const hobiSelect = document.getElementById('editPilihHobi');
+        for (let option of hobiSelect.options) {
+            if (option.text.trim() === hobi.trim()) {
+                option.selected = true;
+                break;
             }
         }
 
-        // Store ID for form submission
+        // Clear file inputs
+        document.getElementById('editFileBukti').value = '';
+        document.getElementById('editGdriveLink').value = '';
+
+        // Set form action
+        const editForm = document.getElementById('editAktivitasForm');
+        const baseUrl = editForm.getAttribute('data-base-url') || '/aktivitas';
+        editForm.action = `${baseUrl}/${aktivitasId}`;
+
+        // Store ID for reference
         document.getElementById('editAktivitasModal').setAttribute('data-aktivitas-id', aktivitasId);
 
+        // Clear any existing validation errors
+        clearFileEvidenceError(editForm);
+
     } catch (error) {
-        console.error('Error extracting data:', error);
-        showNotification('Gagal memuat data aktivitas', 'error');
+        console.error('Error loading aktivitas data:', error);
+        alert('Gagal memuat data aktivitas');
     }
 }
 
 /**
- * Handle Edit Activity Form Submission
+ * Show File Preview in Modal
  */
-function handleEditAktivitas(e) {
-    e.preventDefault();
+function showFilePreview(fileUrl, fileType) {
+    const modal = document.getElementById('filePreviewModal');
+    const modalBody = modal.querySelector('.modal-body');
+    const modalTitle = modal.querySelector('.modal-title');
 
-    const form = e.target;
-    const modal = document.getElementById('editAktivitasModal');
-    const aktivitasId = modal.getAttribute('data-aktivitas-id');
+    // Clear previous content
+    modalBody.innerHTML = '';
 
-    if (!aktivitasId) {
-        showNotification('ID aktivitas tidak ditemukan', 'error');
-        return;
-    }
-
-    const formData = new FormData(form);
-    formData.append('_method', 'PUT');
-
-    const submitBtn = form.querySelector('button[type="submit"]');
-    const originalText = submitBtn.innerHTML;
-
-    // Show loading state
-    setButtonLoading(submitBtn, 'Menyimpan...');
-
-    fetch(`${window.routes.aktivitas.base}/${aktivitasId}`, {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-CSRF-TOKEN': csrfToken,
-            'Accept': 'application/json'
-        }
-    })
-    .then(response => {
-        // Cek apakah respons berhasil sebelum mencoba parse JSON
-        if (!response.ok) {
-            return response.json().catch(() => ({ message: 'Gagal terhubung ke server atau server error.' }));
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            showNotification('Aktivitas berhasil diperbarui!', 'success');
-            closeModal('editAktivitasModal');
-            setTimeout(() => window.location.reload(), 1500);
-        } else if (data.errors) {
-            showValidationErrors(data.errors, 'edit');
-            showNotification('Periksa kembali form Anda', 'warning');
-        } else {
-            showNotification(data.message || 'Terjadi kesalahan saat memperbarui aktivitas', 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Edit error:', error);
-        showNotification('Terjadi kesalahan saat memperbarui data.', 'error');
-    })
-    .finally(() => {
-        resetButton(submitBtn, originalText);
-    });
-}
-
-/**
- * Handle Delete Activity
- */
-function handleDeleteAktivitas(aktivitasId, buttonElement) {
-    const row = buttonElement.closest('tr');
-    const nameElement = row.querySelector('h6');
-    const aktivitasName = nameElement ? nameElement.textContent.trim() : 'aktivitas ini';
-
-    if (confirm(`Apakah Anda yakin ingin menghapus "${aktivitasName}"?\n\nTindakan ini tidak dapat dibatalkan.`)) {
-        const originalHTML = buttonElement.innerHTML;
-        setButtonLoading(buttonElement, '');
-
-        fetch(`${window.routes.aktivitas.base}/${aktivitasId}`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': csrfToken,
-                'Accept': 'application/json'
-            }
-        })
-        .then(response => {
-            // Cek status respons sebelum parsing
-            if (!response.ok) {
-                return response.json().catch(() => ({ message: 'Gagal terhubung ke server atau server error.' }));
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                showNotification('Aktivitas berhasil dihapus!', 'success');
-                row.style.transition = 'opacity 0.5s';
-                row.style.opacity = '0';
-                setTimeout(() => {
-                    row.remove();
-                    const remainingRows = document.querySelectorAll('tbody tr[data-aktivitas-row]');
-                    if (remainingRows.length === 0) {
-                        location.reload();
-                    }
-                }, 500);
-            } else {
-                showNotification(data.message || 'Gagal menghapus aktivitas', 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Delete error:', error);
-            showNotification('Terjadi kesalahan saat menghapus data.', 'error');
-        })
-        .finally(() => {
-            resetButton(buttonElement, originalHTML);
-        });
-    }
-}
-
-/**
- * Utility Functions
- */
-function showNotification(message, type = 'info') {
-    // Remove existing notifications
-    document.querySelectorAll('.custom-notification').forEach(n => n.remove());
-
-    const notification = document.createElement('div');
-    notification.className = `alert alert-${type} alert-dismissible fade show position-fixed custom-notification`;
-    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);';
-
-    const iconMap = {
-        success: 'ti-check-circle',
-        error: 'ti-x-circle',
-        warning: 'ti-alert-triangle',
-        info: 'ti-info-circle'
-    };
-
-    notification.innerHTML = `
-        <i class="ti ${iconMap[type] || 'ti-info-circle'} me-2"></i>
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-
-    document.body.appendChild(notification);
-
-    setTimeout(() => {
-        if (notification.parentNode) {
-            notification.remove();
-        }
-    }, 5000);
-}
-
-function showValidationErrors(errors, prefix = '') {
-    // Clear previous errors
-    document.querySelectorAll('.is-invalid').forEach(el => {
-        el.classList.remove('is-invalid');
-    });
-    document.querySelectorAll('.invalid-feedback').forEach(el => {
-        el.remove();
-    });
-
-    // Show new errors
-    for (const [field, messages] of Object.entries(errors)) {
-        let fieldId = field;
-        if (prefix) {
-            fieldId = prefix + field.charAt(0).toUpperCase() + field.slice(1);
-        }
-
-        const element = document.getElementById(fieldId) ||
-                      document.querySelector(`[name="${field}"]`);
-
-        if (element) {
-            element.classList.add('is-invalid');
-
-            const feedback = document.createElement('div');
-            feedback.className = 'invalid-feedback';
-            feedback.textContent = Array.isArray(messages) ? messages[0] : messages;
-            element.parentNode.appendChild(feedback);
-        }
-    }
-}
-
-function setButtonLoading(button, text) {
-    button.disabled = true;
-    if (text) {
-        button.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>${text}`;
+    if (fileType === 'gdrive') {
+        modalTitle.innerHTML = '<i class="ti ti-brand-google-drive me-2"></i>File dari Google Drive';
+        modalBody.innerHTML = `
+            <div class="text-center">
+                <i class="ti ti-brand-google-drive text-primary mb-3" style="font-size: 4rem;"></i>
+                <h5 class="mb-3">File disimpan di Google Drive</h5>
+                <p class="text-muted mb-4">Klik tombol di bawah untuk membuka file di Google Drive</p>
+                <a href="${fileUrl}" target="_blank" class="btn btn-primary btn-lg">
+                    <i class="ti ti-external-link me-2"></i>Buka di Google Drive
+                </a>
+            </div>
+        `;
+    } else if (fileType === 'image') {
+        modalTitle.innerHTML = '<i class="ti ti-photo me-2"></i>Preview Gambar';
+        modalBody.innerHTML = `
+            <div class="text-center">
+                <img src="${fileUrl}" class="img-fluid rounded shadow" style="max-height: 500px; max-width: 100%;" alt="Preview gambar bukti aktivitas">
+                <div class="mt-3">
+                    <a href="${fileUrl}" target="_blank" class="btn btn-outline-primary">
+                        <i class="ti ti-external-link me-2"></i>Buka di Tab Baru
+                    </a>
+                </div>
+            </div>
+        `;
+    } else if (fileType === 'video') {
+        modalTitle.innerHTML = '<i class="ti ti-video me-2"></i>Preview Video';
+        modalBody.innerHTML = `
+            <div class="text-center">
+                <video controls class="rounded shadow" style="max-height: 500px; max-width: 100%;">
+                    <source src="${fileUrl}" type="video/mp4">
+                    <source src="${fileUrl}" type="video/quicktime">
+                    <source src="${fileUrl}" type="video/x-msvideo">
+                    Browser Anda tidak mendukung pemutaran video ini.
+                </video>
+                <div class="mt-3">
+                    <a href="${fileUrl}" target="_blank" class="btn btn-outline-primary">
+                        <i class="ti ti-download me-2"></i>Download Video
+                    </a>
+                </div>
+            </div>
+        `;
     } else {
-        button.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+        modalTitle.innerHTML = '<i class="ti ti-file me-2"></i>File Bukti';
+        modalBody.innerHTML = `
+            <div class="text-center">
+                <i class="ti ti-file text-muted mb-3" style="font-size: 4rem;"></i>
+                <h5 class="mb-3">File tidak dapat dipratinjau</h5>
+                <p class="text-muted mb-4">File ini tidak dapat ditampilkan di browser. Silakan download untuk melihat isinya.</p>
+                <a href="${fileUrl}" target="_blank" class="btn btn-primary">
+                    <i class="ti ti-download me-2"></i>Download File
+                </a>
+            </div>
+        `;
+    }
+
+    // Show modal
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+}
+
+/**
+ * Handle Success Messages Auto-hide
+ */
+function handleSuccessMessages() {
+    const successAlerts = document.querySelectorAll('.alert-success');
+    successAlerts.forEach(alert => {
+        setTimeout(() => {
+            const bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
+        }, 5000); // Auto-hide after 5 seconds
+    });
+}
+
+/**
+ * Form Reset Helper
+ */
+function resetForm(formElement) {
+    if (formElement) {
+        formElement.reset();
+        
+        // Clear validation errors
+        formElement.querySelectorAll('.is-invalid').forEach(el => {
+            el.classList.remove('is-invalid');
+        });
+        
+        formElement.querySelectorAll('.invalid-feedback').forEach(el => {
+            el.remove();
+        });
+        
+        clearFileEvidenceError(formElement);
     }
 }
 
-function resetButton(button, originalText) {
-    button.disabled = false;
-    button.innerHTML = originalText;
-}
-
+/**
+ * Modal Helper Functions
+ */
 function closeModal(modalId) {
     const modalElement = document.getElementById(modalId);
     if (modalElement) {
-        const modal = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
-        modal.hide();
+        const modal = bootstrap.Modal.getInstance(modalElement);
+        if (modal) {
+            modal.hide();
+        }
     }
 }
+
+/**
+ * File Size Validation Helper
+ */
+function validateFileSize(fileInput, maxSizeMB = 50) {
+    if (!fileInput.files || fileInput.files.length === 0) {
+        return true; // No file selected is OK
+    }
+    
+    const file = fileInput.files[0];
+    const maxSizeBytes = maxSizeMB * 1024 * 1024;
+    
+    if (file.size > maxSizeBytes) {
+        alert(`Ukuran file terlalu besar! Maksimal ${maxSizeMB}MB. Ukuran file Anda: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+        fileInput.value = ''; // Clear the input
+        return false;
+    }
+    
+    return true;
+}
+
+/**
+ * Add file size validation to file inputs
+ */
+document.addEventListener('DOMContentLoaded', function() {
+    // Add file size validation
+    const fileInputs = document.querySelectorAll('input[type="file"][name="file_bukti"]');
+    fileInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            validateFileSize(this, 50); // 50MB max
+        });
+    });
+    
+    // Handle success messages
+    handleSuccessMessages();
+    
+    // Reset forms when modals are hidden
+    document.getElementById('tambahAktivitasModal')?.addEventListener('hidden.bs.modal', function() {
+        resetForm(this.querySelector('form'));
+    });
+    
+    document.getElementById('editAktivitasModal')?.addEventListener('hidden.bs.modal', function() {
+        resetForm(this.querySelector('form'));
+    });
+});
+
+/**
+ * URL validation helper
+ */
+function isValidGoogleDriveUrl(url) {
+    if (!url) return true; // Empty is OK
+    
+    const gdrivePattern = /^https:\/\/(drive|docs)\.google\.com\//;
+    return gdrivePattern.test(url);
+}
+
+/**
+ * Add Google Drive URL validation
+ */
+document.addEventListener('DOMContentLoaded', function() {
+    const gdriveInputs = document.querySelectorAll('input[name="gdrive_link"]');
+    
+    gdriveInputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.value && !isValidGoogleDriveUrl(this.value)) {
+                this.classList.add('is-invalid');
+                
+                // Remove existing feedback
+                const existingFeedback = this.parentNode.querySelector('.invalid-feedback');
+                if (existingFeedback) {
+                    existingFeedback.remove();
+                }
+                
+                // Add feedback
+                const feedback = document.createElement('div');
+                feedback.className = 'invalid-feedback';
+                feedback.textContent = 'URL harus berupa link Google Drive yang valid (https://drive.google.com/...)';
+                this.parentNode.appendChild(feedback);
+            } else {
+                this.classList.remove('is-invalid');
+                const feedback = this.parentNode.querySelector('.invalid-feedback');
+                if (feedback) {
+                    feedback.remove();
+                }
+            }
+        });
+    });
+});
+
+// Global function for file preview (called from blade template)
+window.showFilePreview = showFilePreview;
+
+// Export functions for potential external use
+window.AktivitasManager = {
+    validateFileEvidence,
+    showFilePreview,
+    resetForm,
+    closeModal,
+    validateFileSize,
+    isValidGoogleDriveUrl
+};

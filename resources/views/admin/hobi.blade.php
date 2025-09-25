@@ -296,20 +296,6 @@
                     </table>
                 </div>
             </div>
-
-            {{-- <!-- Empty State (if no data) -->
-
-            <div class="card-body text-center py-5" id="empty-state" style="display: none;">
-                <div class="mb-4">
-                    <i class="ti ti-heart text-muted" style="font-size: 4rem;"></i>
-                </div>
-                <h5 class="text-muted">Belum ada hobi</h5>
-                <p class="text-muted mb-4">Mulai dengan menambahkan hobi pertama Anda</p>
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tambahHobiModal">
-                    <i class="ti ti-plus me-2"></i>Tambah Hobi Pertama
-                </button>
-            </div> --}}
-
         </div>
     </div>
 
