@@ -10,9 +10,11 @@ class ProgresTarget extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'target_id',
         'status',
         'file_bukti',
+        'link_gdrive',
         'catatan',
     ];
 

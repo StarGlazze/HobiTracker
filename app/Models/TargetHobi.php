@@ -10,9 +10,14 @@ class TargetHobi extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'hobi_id',
         'nama_target',
         'target_deadline',
+    ];
+
+    protected $casts = [
+        'target_deadline' => 'date',
     ];
 
     // Relationships
