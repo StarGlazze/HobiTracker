@@ -7,6 +7,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HobiController;
 use App\Http\Controllers\AktivitasController;
 use App\Http\Controllers\WebSettingController;
+use App\Http\Controllers\TargetHobiController;
+use App\Http\Controllers\ProgresTargetController;
 
 Route::get('/', function () {
     return view('landing.welcome');
@@ -20,9 +22,6 @@ Route::get('/logs', function () {
     return view('admin.logs');
 });
 
-Route::get('/target', function () {
-    return view('admin.target');
-});
 
 Route::get('/profile', function () {
     return view('admin.profile');
@@ -49,4 +48,18 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('aktivitas', AktivitasController::class)->parameters([
         'aktivitas' => 'aktivitas'
     ]);
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::prefix('admin')->name('admin.')->group(function () {
+        // Target routes
+        Route::resource('target', TargetHobiController::class);
+        Route::get('target-progres', [TargetHobiController::class, 'indexProgres'])->name('target.progres');
+        
+        // Progress routes
+        Route::resource('progres', ProgresTargetController::class)->except(['store', 'update', 'destroy']);
+        Route::post('progres/store', [ProgresTargetController::class, 'store'])->name('progres.store');
+        Route::put('progres/{progresTarget}', [ProgresTargetController::class, 'update'])->name('progres.update');
+        Route::delete('progres/{progresTarget}', [ProgresTargetController::class, 'destroy'])->name('progres.destroy');
+    });
 });
