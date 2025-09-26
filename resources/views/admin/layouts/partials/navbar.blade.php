@@ -20,7 +20,7 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link" href="javascript:void(0)" id="profileDropdown" data-bs-toggle="dropdown"
                         aria-expanded="false">
-                        <img src="./admin/images/profile/user-1.jpg" alt="profile" width="35" height="35"
+                        <img src="{{ asset('admin/images/profile/user-1.jpg') }}" alt="profile" width="35" height="35"
                             class="rounded-circle">
                     </a>
                     <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up"

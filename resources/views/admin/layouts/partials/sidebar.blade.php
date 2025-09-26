@@ -3,7 +3,7 @@
         <div>
             <div class="brand-logo d-flex align-items-center justify-content-between">
                 <div class="d-flex align-items-center logo-img">
-                    <img src="admin/images/logos/HobiTracker.png" alt="Logo" class="img-fluid"
+                    <img src="{{ asset('admin/images/logos/HobiTracker.png') }}" alt="Logo" class="img-fluid"
                         style="height:50px; width: auto; margin-right: 14px;">
                     <span class="fw-bolder fs-5 logo-text-enhanced"
                         style="letter-spacing: 1.5px; font-family: 'Poppins', sans-serif;">
@@ -53,6 +53,16 @@
                         </a>
                     </li>
                     <li class="sidebar-item">
+                        <a class="sidebar-link justify-content-between" href="/admin/target" aria-expanded="false">
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="d-flex">
+                                    <i class="ti ti-target"></i>
+                                </span>
+                                <span class="hide-menu">Target Hobi</span>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
                         <a class="sidebar-link justify-content-between" href="/logs" aria-expanded="false">
                             <div class="d-flex align-items-center gap-3">
                                 <span class="d-flex">
@@ -63,30 +73,19 @@
 
                         </a>
                     </li>
-                    <li class="sidebar-item">
-                        <a class="sidebar-link justify-content-between" href="/target" aria-expanded="false">
-                            <div class="d-flex align-items-center gap-3">
-                                <span class="d-flex">
-                                    <i class="ti ti-target"></i>
-                                </span>
-                                <span class="hide-menu">Target Hobi</span>
-                            </div>
 
-                        </a>
-                    </li>
+                    @if (auth()->user()->email === 'admin@example.com')
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between" href="/setting" aria-expanded="false">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="d-flex">
+                                        <i class="ti ti-adjustments"></i>
+                                    </span>
+                                    <span class="hide-menu">Web Setting</span>
+                                </div>
 
-                     @if(auth()->user()->email === 'admin@example.com')
-                     <li class="sidebar-item">
-                        <a class="sidebar-link justify-content-between" href="/setting" aria-expanded="false">
-                            <div class="d-flex align-items-center gap-3">
-                                <span class="d-flex">
-                                    <i class="ti ti-adjustments"></i>
-                                </span>
-                                <span class="hide-menu">Web Setting</span>
-                            </div>
-
-                        </a>
-                    </li>
+                            </a>
+                        </li>
                     @endif
                 </ul>
             </nav>
