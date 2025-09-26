@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('target_hobis', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('hobi_id')->constrained('hobis')->onDelete('cascade');
             $table->string('nama_target');
             $table->date('target_deadline');
