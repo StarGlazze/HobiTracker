@@ -17,6 +17,10 @@ class Aktivitas extends Model
         'file_bukti',
     ];
 
+    protected $casts = [
+        'file_bukti' => 'array',
+    ];
+
     /**
      * Get the route key for the model.
      */

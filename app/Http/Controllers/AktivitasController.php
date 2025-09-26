@@ -93,17 +93,18 @@ class AktivitasController extends Controller
                 return redirect()->back()->with('error', 'Hobi tidak ditemukan atau bukan milik Anda')->withInput();
             }
 
-            $filePath = null;
+            $fileData = [];
 
             // Handle file upload jika ada
             if ($hasFile) {
                 $file = $request->file('file_bukti');
                 $filename = time() . '_' . $userId . '_' . $file->getClientOriginalName();
-                $filePath = $file->storeAs('aktivitas_bukti', $filename, 'public');
+                $fileData['file'] = $file->storeAs('aktivitas_bukti', $filename, 'public');
             }
-            // Jika tidak ada file upload, gunakan Google Drive link
-            elseif ($hasGdriveLink) {
-                $filePath = $request->gdrive_link;
+
+            // Handle Google Drive link jika ada
+            if ($hasGdriveLink) {
+                $fileData['gdrive'] = $request->gdrive_link;
             }
 
             // Buat aktivitas baru
@@ -112,7 +113,7 @@ class AktivitasController extends Controller
                 'nama_aktivitas' => $request->nama_aktivitas,
                 'durasi_menit' => $request->durasi_menit,
                 'catatan' => $request->catatan,
-                'file_bukti' => $filePath,
+                'file_bukti' => json_encode($fileData),
             ]);
 
             return redirect()->back()->with('success', 'Aktivitas berhasil ditambahkan');
@@ -196,32 +197,41 @@ class AktivitasController extends Controller
                 return redirect()->back()->with('error', 'Hobi tidak ditemukan atau bukan milik Anda')->withInput();
             }
 
-            $filePath = $aktivitas->file_bukti; // Keep existing by default
+            // Parse existing file data with backward compatibility
+            $rawFileBukti = $aktivitas->file_bukti;
+            if (is_array($rawFileBukti)) {
+                $existingFileData = $rawFileBukti;
+            } elseif (is_string($rawFileBukti) && !empty($rawFileBukti)) {
+                $decoded = json_decode($rawFileBukti, true);
+                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                    $existingFileData = $decoded;
+                } else {
+                    // Old format: plain string
+                    $existingFileData = str_contains($rawFileBukti, 'drive.google.com')
+                        ? ['gdrive' => $rawFileBukti]
+                        : ['file' => $rawFileBukti];
+                }
+            } else {
+                $existingFileData = [];
+            }
+            $fileData = $existingFileData; // Start with existing data
 
             // Handle file upload jika ada file baru
             if ($hasFile) {
-                // Hapus file lama jika ada dan bukan URL Google Drive
-                if ($aktivitas->file_bukti &&
-                    !str_contains($aktivitas->file_bukti, 'drive.google.com') &&
-                    Storage::disk('public')->exists($aktivitas->file_bukti)) {
-                    Storage::disk('public')->delete($aktivitas->file_bukti);
+                // Hapus file lama jika ada
+                if (isset($existingFileData['file']) && Storage::disk('public')->exists($existingFileData['file'])) {
+                    Storage::disk('public')->delete($existingFileData['file']);
                 }
 
                 $file = $request->file('file_bukti');
                 $filename = time() . '_' . $userId . '_' . $file->getClientOriginalName();
-                $filePath = $file->storeAs('aktivitas_bukti', $filename, 'public');
-            } 
-            // Jika ada Google Drive link baru
-            elseif ($hasGdriveLink) {
-                // Hapus file lama jika ada dan bukan URL Google Drive
-                if ($aktivitas->file_bukti &&
-                    !str_contains($aktivitas->file_bukti, 'drive.google.com') &&
-                    Storage::disk('public')->exists($aktivitas->file_bukti)) {
-                    Storage::disk('public')->delete($aktivitas->file_bukti);
-                }
-                $filePath = $request->gdrive_link;
+                $fileData['file'] = $file->storeAs('aktivitas_bukti', $filename, 'public');
             }
-            // Jika tidak ada input baru, tetap gunakan file existing (tidak berubah)
+
+            // Handle Google Drive link jika ada
+            if ($hasGdriveLink) {
+                $fileData['gdrive'] = $request->gdrive_link;
+            }
 
             // Update aktivitas
             $aktivitas->update([
@@ -229,7 +239,7 @@ class AktivitasController extends Controller
                 'nama_aktivitas' => $request->nama_aktivitas,
                 'durasi_menit' => $request->durasi_menit,
                 'catatan' => $request->catatan,
-                'file_bukti' => $filePath,
+                'file_bukti' => json_encode($fileData),
             ]);
 
             return redirect()->back()->with('success', 'Aktivitas berhasil diperbarui');
@@ -255,11 +265,26 @@ class AktivitasController extends Controller
                 return redirect()->back()->with('error', 'Aktivitas tidak ditemukan atau bukan milik Anda');
             }
 
-            // Hapus file bukti jika ada dan bukan URL Google Drive
-            if ($aktivitas->file_bukti &&
-                !str_contains($aktivitas->file_bukti, 'drive.google.com') &&
-                Storage::disk('public')->exists($aktivitas->file_bukti)) {
-                Storage::disk('public')->delete($aktivitas->file_bukti);
+            // Hapus file bukti jika ada
+            $rawFileBukti = $aktivitas->file_bukti;
+
+            // Handle backward compatibility
+            if (is_array($rawFileBukti)) {
+                $fileData = $rawFileBukti;
+            } elseif (is_string($rawFileBukti) && !empty($rawFileBukti)) {
+                $decoded = json_decode($rawFileBukti, true);
+                $fileData = (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) ? $decoded : [];
+                // For old string format, if it's not GDrive, it might be a file path
+                if (empty($fileData) && !str_contains($rawFileBukti, 'drive.google.com') && Storage::disk('public')->exists($rawFileBukti)) {
+                    Storage::disk('public')->delete($rawFileBukti);
+                }
+            } else {
+                $fileData = [];
+            }
+
+            // Delete file if exists
+            if (isset($fileData['file']) && Storage::disk('public')->exists($fileData['file'])) {
+                Storage::disk('public')->delete($fileData['file']);
             }
 
             // Hapus aktivitas

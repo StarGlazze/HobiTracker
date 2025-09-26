@@ -49,13 +49,6 @@ function initFormValidation() {
     const editForm = document.querySelector('#editAktivitasForm');
     if (editForm) {
         editForm.addEventListener('submit', function(e) {
-            // For edit form, validation is more lenient - allow keeping existing evidence
-            // Only validate if user is trying to clear everything
-            const hasNewFile = editForm.querySelector('#editFileBukti').files.length > 0;
-            const hasNewLink = editForm.querySelector('#editGdriveLink').value.trim();
-            
-            // If neither new file nor new link is provided, assume keeping existing evidence
-            // Backend will handle this validation more thoroughly
             clearFileEvidenceError(editForm);
         });
 
@@ -182,31 +175,38 @@ function initFilePreview() {
 }
 
 /**
- * Initialize Search Functionality
+ * Simple Search Functionality
  */
 function initSearch() {
     const searchInput = document.querySelector('input[placeholder="Cari aktivitas..."]');
 
     if (searchInput) {
         searchInput.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            const rows = document.querySelectorAll('tbody tr[data-aktivitas-row]');
+            const searchTerm = this.value.toLowerCase().trim();
+            const tableBody = document.querySelector('tbody');
+            const rows = tableBody.querySelectorAll('tr');
+            let visibleRows = 0;
 
+            // Filter rows
             rows.forEach(row => {
+                // Skip no-results row
+                if (row.classList.contains('no-results-row')) {
+                    return;
+                }
+
                 const text = row.textContent.toLowerCase();
                 if (text.includes(searchTerm)) {
                     row.style.display = '';
+                    visibleRows++;
                 } else {
                     row.style.display = 'none';
                 }
             });
 
-            // Show "no results" message if needed
-            const visibleRows = Array.from(rows).filter(row => row.style.display !== 'none');
-            const tbody = rows[0]?.closest('tbody');
+            // Handle no results message
+            let noResultsRow = tableBody.querySelector('.no-results-row');
             
-            if (visibleRows.length === 0 && searchTerm && tbody) {
-                let noResultsRow = tbody.querySelector('.no-results-row');
+            if (visibleRows === 0 && searchTerm !== '') {
                 if (!noResultsRow) {
                     noResultsRow = document.createElement('tr');
                     noResultsRow.className = 'no-results-row';
@@ -218,11 +218,10 @@ function initSearch() {
                             </div>
                         </td>
                     `;
-                    tbody.appendChild(noResultsRow);
+                    tableBody.appendChild(noResultsRow);
                 }
                 noResultsRow.style.display = '';
             } else {
-                const noResultsRow = tbody?.querySelector('.no-results-row');
                 if (noResultsRow) {
                     noResultsRow.style.display = 'none';
                 }
@@ -241,6 +240,7 @@ function loadAktivitasData(aktivitasId, editButton) {
         const hobi = editButton.getAttribute('data-hobi') || '';
         const durasi = editButton.getAttribute('data-durasi') || '';
         const catatan = editButton.getAttribute('data-catatan') || '';
+        const fileBukti = editButton.getAttribute('data-file-bukti') || '';
 
         // Fill form fields
         document.getElementById('editNamaAktivitas').value = nama;
@@ -256,9 +256,23 @@ function loadAktivitasData(aktivitasId, editButton) {
             }
         }
 
-        // Clear file inputs
+        // Clear file inputs first
         document.getElementById('editFileBukti').value = '';
         document.getElementById('editGdriveLink').value = '';
+
+        // Handle file data (now stored as JSON)
+        try {
+            const fileData = fileBukti ? JSON.parse(fileBukti) : {};
+
+            // If there's a GDrive link, populate it
+            if (fileData.gdrive) {
+                document.getElementById('editGdriveLink').value = fileData.gdrive;
+            }
+            // Note: We don't populate the file input as browsers don't allow setting file input values for security reasons
+            // The user will need to re-upload if they want to change the file
+        } catch (e) {
+            console.warn('Failed to parse file_bukti data:', e);
+        }
 
         // Set form action
         const editForm = document.getElementById('editAktivitasForm');
@@ -415,8 +429,16 @@ function validateFileSize(fileInput, maxSizeMB = 50) {
 }
 
 /**
- * Add file size validation to file inputs
+ * URL validation helper
  */
+function isValidGoogleDriveUrl(url) {
+    if (!url) return true; // Empty is OK
+    
+    const gdrivePattern = /^https:\/\/(drive|docs)\.google\.com\//;
+    return gdrivePattern.test(url);
+}
+
+// Additional event listeners
 document.addEventListener('DOMContentLoaded', function() {
     // Add file size validation
     const fileInputs = document.querySelectorAll('input[type="file"][name="file_bukti"]');
@@ -437,22 +459,8 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('editAktivitasModal')?.addEventListener('hidden.bs.modal', function() {
         resetForm(this.querySelector('form'));
     });
-});
 
-/**
- * URL validation helper
- */
-function isValidGoogleDriveUrl(url) {
-    if (!url) return true; // Empty is OK
-    
-    const gdrivePattern = /^https:\/\/(drive|docs)\.google\.com\//;
-    return gdrivePattern.test(url);
-}
-
-/**
- * Add Google Drive URL validation
- */
-document.addEventListener('DOMContentLoaded', function() {
+    // Add Google Drive URL validation
     const gdriveInputs = document.querySelectorAll('input[name="gdrive_link"]');
     
     gdriveInputs.forEach(input => {
@@ -482,7 +490,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Global function for file preview (called from blade template)
+// Global functions
 window.showFilePreview = showFilePreview;
 
 // Export functions for potential external use

@@ -170,44 +170,74 @@
                                     </div>
                                 </td>
                                 <td class="py-3 text-center">
-                                    @if ($aktivitasItem->file_bukti)
-                                        @if (str_contains($aktivitasItem->file_bukti, 'drive.google.com'))
-                                            {{-- Google Drive link --}}
-                                            <button class="btn btn-sm btn-outline-primary rounded-circle"
-                                                data-bs-toggle="tooltip" title="Lihat file di Google Drive"
-                                                data-file-url="{{ $aktivitasItem->file_bukti }}" data-file-type="gdrive"
-                                                onclick="showFilePreview('{{ $aktivitasItem->file_bukti }}', 'gdrive')">
-                                                <i class="ti ti-brand-google-drive"></i>
-                                            </button>
-                                        @else
-                                            {{-- Local file - detect type --}}
-                                            @php
-                                                $extension = strtolower(
-                                                    pathinfo($aktivitasItem->file_bukti, PATHINFO_EXTENSION),
-                                                );
-                                                $imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-                                                $videoExts = ['mp4', 'mov', 'avi', 'webm'];
+                                    @php
+                                        $rawFileBukti = $aktivitasItem->file_bukti;
 
-                                                if (in_array($extension, $imageExts)) {
-                                                    $fileType = 'image';
-                                                    $icon = 'ti-photo';
-                                                } elseif (in_array($extension, $videoExts)) {
-                                                    $fileType = 'video';
-                                                    $icon = 'ti-video';
-                                                } else {
-                                                    $fileType = 'file';
-                                                    $icon = 'ti-file-text';
-                                                }
-                                            @endphp
+                                        // Handle backward compatibility: could be array, JSON string, or plain string
+                                        if (is_array($rawFileBukti)) {
+                                            $fileData = $rawFileBukti;
+                                        } elseif (is_string($rawFileBukti) && !empty($rawFileBukti)) {
+                                            // Try to decode as JSON first
+                                            $decoded = json_decode($rawFileBukti, true);
+                                            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                                                $fileData = $decoded;
+                                            } else {
+                                                // Old format: plain string, check if it's GDrive URL
+                                                $fileData = str_contains($rawFileBukti, 'drive.google.com')
+                                                    ? ['gdrive' => $rawFileBukti]
+                                                    : ['file' => $rawFileBukti];
+                                            }
+                                        } else {
+                                            $fileData = [];
+                                        }
 
-                                            <button class="btn btn-sm btn-outline-primary rounded-circle"
-                                                data-bs-toggle="tooltip" title="Lihat file bukti"
-                                                data-file-url="{{ Storage::url($aktivitasItem->file_bukti) }}"
-                                                data-file-type="{{ $fileType }}"
-                                                onclick="showFilePreview('{{ Storage::url($aktivitasItem->file_bukti) }}', '{{ $fileType }}')">
-                                                <i class="ti {{ $icon }}"></i>
-                                            </button>
-                                        @endif
+                                        $hasFile = isset($fileData['file']) && !empty($fileData['file']);
+                                        $hasGdrive = isset($fileData['gdrive']) && !empty($fileData['gdrive']);
+                                    @endphp
+
+                                    @if ($hasFile || $hasGdrive)
+                                        <div class="d-flex gap-1 justify-content-center">
+                                            @if ($hasFile)
+                                                {{-- Local file - detect type --}}
+                                                @php
+                                                    $extension = strtolower(pathinfo($fileData['file'], PATHINFO_EXTENSION));
+                                                    $imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+                                                    $videoExts = ['mp4', 'mov', 'avi', 'webm'];
+
+                                                    if (in_array($extension, $imageExts)) {
+                                                        $fileType = 'image';
+                                                        $icon = 'ti-photo';
+                                                        $title = 'Lihat gambar bukti';
+                                                    } elseif (in_array($extension, $videoExts)) {
+                                                        $fileType = 'video';
+                                                        $icon = 'ti-video';
+                                                        $title = 'Lihat video bukti';
+                                                    } else {
+                                                        $fileType = 'file';
+                                                        $icon = 'ti-file-text';
+                                                        $title = 'Lihat file bukti';
+                                                    }
+                                                @endphp
+
+                                                <button class="btn btn-sm btn-outline-primary rounded-circle"
+                                                    data-bs-toggle="tooltip" title="{{ $title }}"
+                                                    data-file-url="{{ Storage::url($fileData['file']) }}"
+                                                    data-file-type="{{ $fileType }}"
+                                                    onclick="showFilePreview('{{ Storage::url($fileData['file']) }}', '{{ $fileType }}')">
+                                                    <i class="ti {{ $icon }}"></i>
+                                                </button>
+                                            @endif
+
+                                            @if ($hasGdrive)
+                                                {{-- Google Drive link --}}
+                                                <button class="btn btn-sm btn-outline-primary rounded-circle"
+                                                    data-bs-toggle="tooltip" title="Lihat file di Google Drive"
+                                                    data-file-url="{{ $fileData['gdrive'] }}" data-file-type="gdrive"
+                                                    onclick="showFilePreview('{{ $fileData['gdrive'] }}', 'gdrive')">
+                                                    <i class="ti ti-brand-google-drive"></i>
+                                                </button>
+                                            @endif
+                                        </div>
                                     @else
                                         <span class="text-muted">-</span>
                                     @endif
@@ -220,7 +250,8 @@
                                             data-nama="{{ $aktivitasItem->nama_aktivitas }}"
                                             data-hobi="{{ $aktivitasItem->hobi->nama_hobi ?? '' }}"
                                             data-durasi="{{ $aktivitasItem->durasi_menit }}"
-                                            data-catatan="{{ $aktivitasItem->catatan ?? '' }}">
+                                            data-catatan="{{ $aktivitasItem->catatan ?? '' }}"
+                                            data-file-bukti="{{ json_encode($aktivitasItem->file_bukti) }}">
                                             <i class="ti ti-pencil"></i>
                                         </button>
                                         <form action="{{ route('aktivitas.destroy', $aktivitasItem->id) }}"
