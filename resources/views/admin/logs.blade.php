@@ -25,7 +25,7 @@
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
                                 <h6 class="text-white-50 mb-1">Total Aktivitas</h6>
-                                <h4 class="mb-0">156</h4>
+                                <h4 class="mb-0">{{ $totalAktivitas }}</h4>
                             </div>
                             <div class="ms-3">
                                 <i class="ti ti-activity fs-1 text-white-50"></i>
@@ -40,7 +40,7 @@
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
                                 <h6 class="text-white-50 mb-1">Bulan Ini</h6>
-                                <h4 class="mb-0">23</h4>
+                                <h4 class="mb-0">{{ $bulanIni }}</h4>
                             </div>
                             <div class="ms-3">
                                 <i class="ti ti-calendar fs-1 text-white-50"></i>
@@ -55,7 +55,7 @@
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
                                 <h6 class="text-white-50 mb-1">Total Durasi</h6>
-                                <h4 class="mb-0">1,240m</h4>
+                                <h4 class="mb-0">{{ $totalDurasi }}m</h4>
                             </div>
                             <div class="ms-3">
                                 <i class="ti ti-clock fs-1 text-white-50"></i>
@@ -70,7 +70,7 @@
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
                                 <h6 class="text-white-50 mb-1">Rata-rata Harian</h6>
-                                <h4 class="mb-0">45m</h4>
+                                <h4 class="mb-0">{{ $rataRataHarian }}m</h4>
                             </div>
                             <div class="ms-3">
                                 <i class="ti ti-trending-up fs-1 text-white-50"></i>
@@ -90,12 +90,15 @@
                         <p class="text-muted small mb-0">Daftar lengkap aktivitas hobi Anda</p>
                     </div>
                     <div class="col-auto">
-                        <div class="input-group input-group-sm" style="width: 250px;">
-                            <span class="input-group-text bg-light border-end-0">
-                                <i class="ti ti-search text-muted"></i>
-                            </span>
-                            <input type="text" class="form-control border-start-0" placeholder="Cari aktivitas...">
-                        </div>
+                        <form method="GET" action="{{ route('admin.logs') }}" class="d-flex">
+                            <div class="input-group input-group-sm" style="width: 250px;">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="ti ti-search text-muted"></i>
+                                </span>
+                                <input type="text" name="search" class="form-control border-start-0" placeholder="Cari aktivitas..." value="{{ $search ?? '' }}">
+                                <button type="submit" class="btn btn-outline-secondary btn-sm">Cari</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -141,102 +144,47 @@
                             </tr>
                         </thead>
                         <tbody>
+                            @forelse($logs as $log)
                             <tr class="border-bottom">
                                 <td class="px-4 py-3">
                                     <div class="d-flex flex-column">
-                                        <span class="fw-semibold">10 September 2025</span>
+                                        <span class="fw-semibold">{{ $log->created_at->format('d F Y') }}</span>
                                     </div>
                                 </td>
                                 <td class="py-3">
                                     <div class="d-flex align-items-center">
                                         <div>
-                                            <h6 class="mb-1">Membaca novel "Dune"</h6>
+                                            <h6 class="mb-1">{{ $log->aktivitas->nama_aktivitas }}</h6>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="py-3">
-                                    <span class="fw-semibold px-3 py-2">Membaca</span>
+                                    <span class="fw-semibold px-3 py-2">{{ $log->aktivitas->hobi->nama_hobi }}</span>
                                 </td>
                                 <td class="py-3">
                                     <div class="d-flex align-items-center">
-                                        <span class="fw-semibold">60 Menit</span>
+                                        <span class="fw-semibold">{{ $log->aktivitas->durasi_menit }} Menit</span>
                                     </div>
                                 </td>
                                 <td class="py-3">
                                     <div class="text-truncate" style="max-width: 200px;">
-                                        Membaca 5 halaman setiap hari untuk mencapai target
+                                        {{ $log->catatan }}
                                     </div>
                                 </td>
                                 <td class="py-3 text-center">
-                                    <button class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#detailModal" title="Lihat Detail">
+                                    <button class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#detailModal" title="Lihat Detail" onclick="loadDetail({{ $log->id }})">
                                         <i class="ti ti-eye"></i>
                                     </button>
                                 </td>
                             </tr>
-                            <tr class="border-bottom">
-                                <td class="px-4 py-3">
-                                    <div class="d-flex flex-column">
-                                        <span class="fw-semibold">24 September 2025</span>
-                                    </div>
-                                </td>
-                                <td class="py-3">
-                                    <div class="d-flex align-items-center">
-                                        <div>
-                                            <h6 class="mb-1">Gowes pagi</h6>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="py-3">
-                                    <span class="fw-semibold px-3 py-2">Olahraga</span>
-                                </td>
-                                <td class="py-3">
-                                    <div class="d-flex align-items-center">
-                                        <span class="fw-semibold">30 Menit</span>
-                                    </div>
-                                </td>
-                                <td class="py-3">
-                                    <div class="text-truncate" style="max-width: 200px;">
-                                        Lari 3 km setiap pagi untuk menjaga kesehatan
-                                    </div>
-                                </td>
-                                <td class="py-3 text-center">
-                                    <button class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#detailModal" title="Lihat Detail">
-                                        <i class="ti ti-eye"></i>
-                                    </button>
+                            @empty
+                            <tr>
+                                <td colspan="6" class="text-center py-4">
+                                    <i class="ti ti-file-x text-muted fs-1"></i>
+                                    <p class="text-muted mt-2">Belum ada log aktivitas.</p>
                                 </td>
                             </tr>
-                            <tr class="border-bottom">
-                                <td class="px-4 py-3">
-                                    <div class="d-flex flex-column">
-                                        <span class="fw-semibold">03 Oktober 2025</span>
-                                    </div>
-                                </td>
-                                <td class="py-3">
-                                    <div class="d-flex align-items-center">
-                                        <div>
-                                            <h6 class="mb-1">Menyanyi lagu "About You"</h6>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="py-3">
-                                    <span class="fw-semibold px-3 py-2">Menyanyi</span>
-                                </td>
-                                <td class="py-3">
-                                    <div class="d-flex align-items-center">
-                                        <span class="fw-semibold">10 Menit</span>
-                                    </div>
-                                </td>
-                                <td class="py-3">
-                                    <div class="text-truncate" style="max-width: 200px;">
-                                        Lagu yang wajib dinyanyikan setiap hari
-                                    </div>
-                                </td>
-                                <td class="py-3 text-center">
-                                    <button class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#detailModal" title="Lihat Detail">
-                                        <i class="ti ti-eye"></i>
-                                    </button>
-                                </td>
-                            </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
@@ -245,20 +193,8 @@
             <!-- Pagination -->
             <div class="card-footer bg-transparent border-top-0">
                 <div class="d-flex justify-content-between align-items-center">
-                    <small class="text-muted">Menampilkan 1-10 dari 156 aktivitas</small>
-                    <nav aria-label="Page navigation">
-                        <ul class="pagination pagination-sm mb-0">
-                            <li class="page-item disabled">
-                                <a class="page-link" href="#"><i class="ti ti-chevron-left"></i></a>
-                            </li>
-                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                            <li class="page-item">
-                                <a class="page-link" href="#"><i class="ti ti-chevron-right"></i></a>
-                            </li>
-                        </ul>
-                    </nav>
+                    <small class="text-muted">Menampilkan {{ $logs->firstItem() }}-{{ $logs->lastItem() }} dari {{ $logs->total() }} aktivitas</small>
+                    {!! $logs->appends(request()->query())->links() !!}
                 </div>
             </div>
         </div>
@@ -352,4 +288,27 @@
         </div>
     </div>
 
+@endsection
+
+@section('scripts')
+<script>
+function loadDetail(id) {
+    fetch(`/admin/logs/${id}`)
+        .then(response => response.json())
+        .then(data => {
+            // Update modal fields
+            document.querySelector('#detailModal .modal-title').textContent = 'Detail Log Aktivitas';
+            document.querySelector('dt:contains("Tanggal") + dd').textContent = data.tanggal;
+            document.querySelector('dt:contains("Waktu Mulai") + dd').textContent = data.waktu_mulai;
+            document.querySelector('dt:contains("Waktu Selesai") + dd').textContent = data.waktu_selesai;
+            document.querySelector('dt:contains("Aktivitas") + dd').textContent = data.aktivitas;
+            document.querySelector('dt:contains("Hobi") + dd').textContent = data.hobi;
+            document.querySelector('dt:contains("Durasi") + dd').textContent = data.durasi;
+            document.querySelector('dt:contains("Status") + dd .badge').textContent = data.status;
+            document.querySelector('dt:contains("Catatan") + dd').textContent = data.catatan;
+            // Bukti: Placeholder, update jika ada gambar
+        })
+        .catch(error => console.error('Error:', error));
+}
+</script>
 @endsection

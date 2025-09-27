@@ -9,6 +9,7 @@ use App\Http\Controllers\AktivitasController;
 use App\Http\Controllers\WebSettingController;
 use App\Http\Controllers\TargetHobiController;
 use App\Http\Controllers\ProgresTargetController;
+use App\Http\Controllers\LogAktivitasController;
 
 Route::get('/', function () {
     return view('landing.welcome');
@@ -18,8 +19,11 @@ Route::get('/dashboard', function () {
     return view('admin.dashboard');
 });
 
-Route::get('/logs', function () {
-    return view('admin.logs');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/logs', [LogAktivitasController::class, 'index'])->name('admin.logs');
+    Route::resource('log-aktivitas', LogAktivitasController::class)->parameters([
+        'log-aktivitas' => 'logAktivitas'
+    ]);
 });
 
 
