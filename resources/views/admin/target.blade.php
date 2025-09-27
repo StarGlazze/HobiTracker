@@ -66,9 +66,9 @@
                                     <td class="py-3">{{ $target->nama_target }}</td>
                                     <td class="py-3">{{ $target->hobi->nama_hobi ?? 'N/A' }}</td>
                                     <td class="py-3">
-                                        <span class="badge bg-info-subtle text-info px-3 py-2">
+                                        <span class="badge {{ $target->hobi->kategoriHobi->background_color ?? 'bg-info-subtle' }} {{ $target->hobi->kategoriHobi->background_color ? 'text-white' : 'text-info' }} px-3 py-2">
                                             <i
-                                                class="ti ti-tag me-1"></i>{{ $target->hobi->kategoriHobi->nama_kategori ?? 'N/A' }}
+                                                class="ti {{ $target->hobi->kategoriHobi->icon ?? 'ti-tag' }} me-1"></i>{{ $target->hobi->kategoriHobi->nama_kategori ?? 'N/A' }}
                                         </span>
                                     </td>
                                     <td class="py-3">
@@ -423,9 +423,9 @@
 
                                 <dt class="col-sm-3">Kategori</dt>
                                 <dd class="col-sm-9">
-                                    <span class="badge bg-info-subtle text-info px-3 py-2">
+                                    <span class="badge {{ $target->hobi->kategoriHobi->background_color ?? 'bg-info-subtle' }} {{ $target->hobi->kategoriHobi->background_color ? 'text-white' : 'text-info' }} px-3 py-2">
                                         <i
-                                            class="ti ti-tag me-1"></i>{{ $target->hobi->kategoriHobi->nama_kategori ?? 'N/A' }}
+                                            class="ti {{ $target->hobi->kategoriHobi->icon ?? 'ti-tag' }} me-1"></i>{{ $target->hobi->kategoriHobi->nama_kategori ?? 'N/A' }}
                                     </span>
                                 </dd>
 
