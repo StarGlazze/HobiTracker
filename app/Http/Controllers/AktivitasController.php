@@ -116,7 +116,15 @@ class AktivitasController extends Controller
                 'file_bukti' => json_encode($fileData),
             ]);
 
-            return redirect()->back()->with('success', 'Aktivitas berhasil ditambahkan');
+            // Buat log aktivitas secara otomatis
+            \App\Models\LogAktivitas::create([
+                'aktivitas_id' => $aktivitas->id,
+                'user_id' => $userId,
+                'file_bukti' => json_encode($fileData),
+                'catatan' => $request->catatan,
+            ]);
+
+            return redirect()->back()->with('success', 'Aktivitas berhasil ditambahkan dan dicatat di log');
 
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan pada server: ' . $e->getMessage())->withInput();
@@ -238,6 +246,12 @@ class AktivitasController extends Controller
                 'hobi_id' => $request->hobi_id,
                 'nama_aktivitas' => $request->nama_aktivitas,
                 'durasi_menit' => $request->durasi_menit,
+                'catatan' => $request->catatan,
+                'file_bukti' => json_encode($fileData),
+            ]);
+
+            // Update semua log aktivitas terkait agar sinkron dengan perubahan aktivitas
+            $aktivitas->logAktivitas()->update([
                 'catatan' => $request->catatan,
                 'file_bukti' => json_encode($fileData),
             ]);
