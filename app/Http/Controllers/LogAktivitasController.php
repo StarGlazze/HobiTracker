@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class LogAktivitasController extends Controller
 {
@@ -16,7 +17,7 @@ class LogAktivitasController extends Controller
      */
     public function index(Request $request)
     {
-        $type = $request->get('type', 'aktivitas'); // default: aktivitas
+        $type = $request->get('type', 'aktivitas');
         $search = $request->get('search');
         $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
@@ -26,14 +27,12 @@ class LogAktivitasController extends Controller
         $isAdmin = Auth::user()->email === 'admin@example.com';
 
         if ($type === 'target') {
-            // Query untuk Target
             $query = ProgresTarget::with(['targetHobi.hobi.kategoriHobi']);
             
             if (!$isAdmin) {
                 $query->where('user_id', Auth::id());
             }
 
-            // Search
             if ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->whereHas('targetHobi', fn($sub) => $sub->where('nama_target', 'like', "%{$search}%"))
@@ -41,40 +40,31 @@ class LogAktivitasController extends Controller
                 });
             }
 
-            // Filter tanggal
             if ($startDate && $endDate) {
                 $query->whereBetween('created_at', [$startDate, $endDate]);
             }
 
-            // Sorting
             $logs = $query->orderBy($sortBy, $direction)->paginate(10);
 
-            // Stats untuk Target
             $userId = !$isAdmin ? Auth::id() : null;
             $whereUser = $userId ? "AND p.user_id = $userId" : "";
             $whereDate = ($startDate && $endDate) ? "AND p.created_at BETWEEN '$startDate' AND '$endDate'" : "";
 
             $totalAktivitas = DB::select("SELECT COUNT(*) as count FROM progres_targets p WHERE 1=1 $whereUser $whereDate")[0]->count;
             $bulanIni = DB::select("SELECT COUNT(*) as count FROM progres_targets p WHERE MONTH(created_at) = ? $whereUser $whereDate", [now()->month])[0]->count;
-            
-            // Hitung completed
             $completed = DB::select("SELECT COUNT(*) as count FROM progres_targets p WHERE status = 'completed' $whereUser $whereDate")[0]->count;
-            
-            // Hitung failed
             $failed = DB::select("SELECT COUNT(*) as count FROM progres_targets p WHERE status = 'failed' $whereUser $whereDate")[0]->count;
 
-            $totalDurasi = $completed; // Gunakan completed count sebagai "durasi"
-            $rataRataHarian = $failed; // Gunakan failed count sebagai "rata-rata"
+            $totalDurasi = $completed;
+            $rataRataHarian = $failed;
 
         } else {
-            // Query untuk Aktivitas (existing code)
             $query = LogAktivitas::with(['aktivitas.hobi']);
             
             if (!$isAdmin) {
                 $query->where('user_id', Auth::id());
             }
 
-            // Search
             if ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->whereHas('aktivitas', fn($sub) => $sub->where('nama_aktivitas', 'like', "%{$search}%"))
@@ -82,15 +72,12 @@ class LogAktivitasController extends Controller
                 });
             }
 
-            // Filter tanggal
             if ($startDate && $endDate) {
                 $query->whereBetween('created_at', [$startDate, $endDate]);
             }
 
-            // Sorting
             $logs = $query->orderBy($sortBy, $direction)->paginate(10);
 
-            // Stats untuk Aktivitas
             $userId = !$isAdmin ? Auth::id() : null;
             $whereUser = $userId ? "AND l.user_id = $userId" : "";
             $whereDate = ($startDate && $endDate) ? "AND l.created_at BETWEEN '$startDate' AND '$endDate'" : "";
@@ -110,14 +97,12 @@ class LogAktivitasController extends Controller
      */
     public function show(LogAktivitas $logAktivitas)
     {
-        // Validasi: user hanya bisa akses logs miliknya, kecuali admin
         if (Auth::user()->email !== 'admin@example.com' && $logAktivitas->user_id !== Auth::id()) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
         $logAktivitas->load(['aktivitas.hobi']);
 
-        // Decode bukti from log
         $bukti = [];
         if ($fileBukti = $logAktivitas->file_bukti) {
             $decoded = json_decode($fileBukti, true) ?: [];
@@ -147,12 +132,10 @@ class LogAktivitasController extends Controller
     {
         $progres = ProgresTarget::with(['targetHobi.hobi'])->findOrFail($id);
 
-        // Validasi: user hanya bisa akses logs miliknya, kecuali admin
         if (Auth::user()->email !== 'admin@example.com' && $progres->user_id !== Auth::id()) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        // Decode bukti from progres
         $bukti = [];
         if ($progres->file_bukti) {
             $bukti[] = Storage::url($progres->file_bukti);
@@ -174,7 +157,7 @@ class LogAktivitasController extends Controller
     }
 
     /**
-     * Export logs to CSV.
+     * Export logs to PDF.
      */
     public function export(Request $request)
     {
@@ -204,29 +187,6 @@ class LogAktivitasController extends Controller
 
             $logs = $query->orderBy('created_at', 'desc')->get();
 
-            $filename = 'logs_target_' . now()->format('Y-m-d_H-i-s') . '.csv';
-            $headers = [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => "attachment; filename=\"$filename\"",
-            ];
-
-            $callback = function() use ($logs) {
-                $file = fopen('php://output', 'w');
-                fputcsv($file, ['Tanggal', 'Target', 'Hobi', 'Status', 'Catatan']);
-
-                foreach ($logs as $log) {
-                    fputcsv($file, [
-                        $log->created_at->format('d F Y'),
-                        $log->targetHobi->nama_target,
-                        $log->targetHobi->hobi->nama_hobi,
-                        ucfirst($log->status),
-                        $log->catatan,
-                    ]);
-                }
-
-                fclose($file);
-            };
-
         } else {
             $query = LogAktivitas::with(['aktivitas.hobi']);
             
@@ -246,32 +206,20 @@ class LogAktivitasController extends Controller
             }
 
             $logs = $query->orderBy('created_at', 'desc')->get();
-
-            $filename = 'logs_aktivitas_' . now()->format('Y-m-d_H-i-s') . '.csv';
-            $headers = [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => "attachment; filename=\"$filename\"",
-            ];
-
-            $callback = function() use ($logs) {
-                $file = fopen('php://output', 'w');
-                fputcsv($file, ['Tanggal', 'Aktivitas', 'Hobi', 'Durasi (Menit)', 'Catatan']);
-
-                foreach ($logs as $log) {
-                    fputcsv($file, [
-                        $log->created_at->format('d F Y'),
-                        $log->aktivitas->nama_aktivitas,
-                        $log->aktivitas->hobi->nama_hobi,
-                        $log->aktivitas->durasi_menit,
-                        $log->catatan,
-                    ]);
-                }
-
-                fclose($file);
-            };
         }
 
-        return response()->stream($callback, 200, $headers);
+        $data = [
+            'logs' => $logs,
+            'type' => $type,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+            'generatedDate' => now()->format('d F Y H:i')
+        ];
+
+        $pdf = Pdf::loadView('admin.logs_pdf', $data);
+        $filename = 'logs_' . $type . '_' . now()->format('Y-m-d_H-i-s') . '.pdf';
+        
+        return $pdf->download($filename);
     }
 
     /**

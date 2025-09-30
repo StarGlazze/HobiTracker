@@ -23,14 +23,14 @@
             <div class="col-12">
                 <ul class="nav nav-pills">
                     <li class="nav-item">
-                        <a class="nav-link {{ $type === 'aktivitas' ? 'active' : '' }}" 
-                           href="{{ route('admin.logs', array_merge(request()->except('type'), ['type' => 'aktivitas'])) }}">
+                        <a class="nav-link {{ $type === 'aktivitas' ? 'active' : '' }}"
+                            href="{{ route('admin.logs', array_merge(request()->except('type'), ['type' => 'aktivitas'])) }}">
                             <i class="ti ti-activity me-2"></i>Log Aktivitas
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ $type === 'target' ? 'active' : '' }}" 
-                           href="{{ route('admin.logs', array_merge(request()->except('type'), ['type' => 'target'])) }}">
+                        <a class="nav-link {{ $type === 'target' ? 'active' : '' }}"
+                            href="{{ route('admin.logs', array_merge(request()->except('type'), ['type' => 'target'])) }}">
                             <i class="ti ti-target me-2"></i>Log Target
                         </a>
                     </li>
@@ -45,7 +45,8 @@
                     <div class="card-body p-3">
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
-                                <h6 class="text-white-50 mb-1">Total {{ $type === 'target' ? 'Progress' : 'Aktivitas' }}</h6>
+                                <h6 class="text-white-50 mb-1">Total {{ $type === 'target' ? 'Progress' : 'Aktivitas' }}
+                                </h6>
                                 <h4 class="mb-0">{{ $totalAktivitas }}</h4>
                             </div>
                             <div class="ms-3">
@@ -90,7 +91,8 @@
                     <div class="card-body p-3">
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
-                                <h6 class="text-white-50 mb-1">{{ $type === 'target' ? 'Failed' : 'Rata-rata Harian' }}</h6>
+                                <h6 class="text-white-50 mb-1">{{ $type === 'target' ? 'Failed' : 'Rata-rata Harian' }}
+                                </h6>
                                 <h4 class="mb-0">{{ $rataRataHarian }}{{ $type === 'aktivitas' ? 'm' : '' }}</h4>
                             </div>
                             <div class="ms-3">
@@ -108,13 +110,14 @@
                 <div class="row align-items-center">
                     <div class="col">
                         <h5 class="mb-1">Riwayat {{ $type === 'target' ? 'Target' : 'Aktivitas' }}</h5>
-                        <p class="text-muted small mb-0">Daftar lengkap {{ $type === 'target' ? 'progress target' : 'aktivitas' }} hobi Anda</p>
+                        <p class="text-muted small mb-0">Daftar lengkap
+                            {{ $type === 'target' ? 'progress target' : 'aktivitas' }} hobi Anda</p>
                     </div>
                     <div class="col-auto">
                         <div class="col-12">
                             <form method="GET" action="{{ route('admin.logs') }}" class="row g-2 align-items-center">
                                 <input type="hidden" name="type" value="{{ $type }}">
-                                
+
                                 <!-- Cari aktivitas -->
                                 <div class="col-12 col-md-4">
                                     <div class="input-group input-group-sm">
@@ -151,7 +154,8 @@
                                 <!-- Tombol reset -->
                                 @if ($search || $startDate || $endDate)
                                     <div class="col-6 col-md-auto">
-                                        <a href="{{ route('admin.logs', ['type' => $type]) }}" class="btn btn-outline-danger btn-sm w-100">
+                                        <a href="{{ route('admin.logs', ['type' => $type]) }}"
+                                            class="btn btn-outline-danger btn-sm w-100">
                                             <i class="ti ti-x"></i> Reset
                                         </a>
                                     </div>
@@ -164,7 +168,7 @@
 
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    @if($type === 'aktivitas')
+                    @if ($type === 'aktivitas')
                         <!-- Table Aktivitas -->
                         <table id="logs-table" class="table table-hover align-middle mb-0">
                             <thead class="bg-light">
@@ -176,7 +180,8 @@
                                                 class="text-decoration-none text-dark">
                                                 Tanggal
                                                 @if (request('sort') === 'created_at')
-                                                    <i class="ti ti-chevron-{{ request('direction') === 'asc' ? 'up' : 'down' }} ms-1"></i>
+                                                    <i
+                                                        class="ti ti-chevron-{{ request('direction') === 'asc' ? 'up' : 'down' }} ms-1"></i>
                                                 @endif
                                             </a>
                                         </div>
@@ -226,7 +231,8 @@
                                             </div>
                                         </td>
                                         <td class="py-3">
-                                            <span class="fw-semibold px-3 py-2">{{ $log->aktivitas->hobi->nama_hobi }}</span>
+                                            <span
+                                                class="fw-semibold px-3 py-2">{{ $log->aktivitas->hobi->nama_hobi }}</span>
                                         </td>
                                         <td class="py-3">
                                             <div class="d-flex align-items-center">
@@ -250,7 +256,8 @@
                                                     onsubmit="return confirm('Apakah Anda yakin ingin menghapus log ini?')">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-danger ms-1" title="Hapus">
+                                                    <button type="submit" class="btn btn-sm btn-danger ms-1"
+                                                        title="Hapus">
                                                         <i class="ti ti-trash"></i>
                                                     </button>
                                                 </form>
@@ -279,7 +286,8 @@
                                                 class="text-decoration-none text-dark">
                                                 Tanggal
                                                 @if (request('sort') === 'created_at')
-                                                    <i class="ti ti-chevron-{{ request('direction') === 'asc' ? 'up' : 'down' }} ms-1"></i>
+                                                    <i
+                                                        class="ti ti-chevron-{{ request('direction') === 'asc' ? 'up' : 'down' }} ms-1"></i>
                                                 @endif
                                             </a>
                                         </div>
@@ -329,7 +337,8 @@
                                             </div>
                                         </td>
                                         <td class="py-3">
-                                            <span class="fw-semibold px-3 py-2">{{ $log->targetHobi->hobi->nama_hobi }}</span>
+                                            <span
+                                                class="fw-semibold px-3 py-2">{{ $log->targetHobi->hobi->nama_hobi }}</span>
                                         </td>
                                         <td class="py-3">
                                             @if ($log->status === 'completed')
@@ -381,8 +390,8 @@
                     <div class="d-flex align-items-center gap-2">
                         {!! $logs->appends(request()->query())->links() !!}
                         <a href="{{ url('/logs/export?' . http_build_query(request()->query())) }}"
-                            class="btn btn-success btn-sm">
-                            <i class="ti ti-download"></i> Export CSV
+                            class="btn btn-danger btn-sm">
+                            <i class="ti ti-download"></i> Export PDF
                         </a>
                     </div>
                 </div>
@@ -396,24 +405,29 @@
                 height: 100% !important;
                 object-fit: contain !important;
             }
+
             video:-moz-full-screen {
                 width: 100% !important;
                 height: 100% !important;
                 object-fit: contain !important;
             }
+
             video:-ms-fullscreen {
                 width: 100% !important;
                 height: 100% !important;
                 object-fit: contain !important;
             }
+
             video:fullscreen {
                 width: 100% !important;
                 height: 100% !important;
                 object-fit: contain !important;
             }
+
             #detailModal video {
                 cursor: pointer;
             }
+
             #detailModal video::-webkit-media-controls-fullscreen-button {
                 display: block;
             }
