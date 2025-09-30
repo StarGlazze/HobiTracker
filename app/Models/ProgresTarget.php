@@ -18,7 +18,17 @@ class ProgresTarget extends Model
         'catatan',
     ];
 
-    // Relationships
+    /**
+     * Relasi ke User
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Relasi ke TargetHobi
+     */
     public function targetHobi()
     {
         return $this->belongsTo(TargetHobi::class, 'target_id');

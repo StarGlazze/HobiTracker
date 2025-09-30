@@ -17,12 +17,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-function loadDetail(id) {
+function loadDetail(id, type = 'aktivitas') {
     // Show loading and hide content
     document.getElementById('detail-loading').classList.remove('d-none');
     document.getElementById('detail-content').classList.add('d-none');
 
-    const url = `/log-aktivitas/${id}`;
+    const url = type === 'target' ? `/logs/target/${id}` : `/log-aktivitas/${id}`;
+    
     fetch(url)
         .then(response => {
             if (!response.ok) {
@@ -31,12 +32,45 @@ function loadDetail(id) {
             return response.json();
         })
         .then(data => {
-            // Update modal fields using IDs
+            // Update modal fields based on type
             document.getElementById('detail-tanggal').textContent = data.tanggal;
             document.getElementById('detail-waktu-upload').textContent = data.waktu_upload;
-            document.getElementById('detail-aktivitas').textContent = data.aktivitas;
-            document.getElementById('detail-hobi').textContent = data.hobi;
-            document.getElementById('detail-durasi').textContent = data.durasi;
+            
+            if (type === 'target') {
+                // Update for target
+                document.getElementById('detail-aktivitas').parentElement.querySelector('dt').textContent = 'Target';
+                document.getElementById('detail-aktivitas').textContent = data.target;
+                document.getElementById('detail-hobi').textContent = data.hobi;
+                
+                // Change durasi to status for target
+                document.getElementById('detail-durasi').parentElement.querySelector('dt').textContent = 'Status';
+                document.getElementById('detail-durasi').innerHTML = getStatusBadge(data.status);
+                
+                // Add deadline field if not exists
+                let deadlineRow = document.getElementById('detail-deadline-row');
+                if (!deadlineRow) {
+                    const durasiRow = document.getElementById('detail-durasi').parentElement;
+                    deadlineRow = document.createElement('div');
+                    deadlineRow.className = 'row';
+                    deadlineRow.id = 'detail-deadline-row';
+                    deadlineRow.innerHTML = '<dt class="col-sm-3">Deadline</dt><dd class="col-sm-9" id="detail-deadline">-</dd>';
+                    durasiRow.parentElement.insertBefore(deadlineRow, durasiRow.nextSibling);
+                }
+                document.getElementById('detail-deadline').textContent = data.deadline;
+            } else {
+                // Update for aktivitas
+                document.getElementById('detail-aktivitas').parentElement.querySelector('dt').textContent = 'Aktivitas';
+                document.getElementById('detail-aktivitas').textContent = data.aktivitas;
+                document.getElementById('detail-hobi').textContent = data.hobi;
+                document.getElementById('detail-durasi').parentElement.querySelector('dt').textContent = 'Durasi';
+                document.getElementById('detail-durasi').textContent = data.durasi;
+                
+                // Remove deadline row if exists
+                const deadlineRow = document.getElementById('detail-deadline-row');
+                if (deadlineRow) {
+                    deadlineRow.remove();
+                }
+            }
 
             document.getElementById('detail-catatan').textContent = data.catatan || 'tidak ada catatan';
 
@@ -74,6 +108,17 @@ function loadDetail(id) {
                                 <small class="text-muted d-block text-center mt-1">Video Bukti</small>
                             </div>
                         `;
+                        } else if (bukti.includes('.pdf')) {
+                            buktiHtml += `
+                            <div class="col-12 col-md-6">
+                                <a href="${bukti}" target="_blank" class="text-decoration-none">
+                                    <div class="bg-light rounded shadow-sm d-flex align-items-center justify-content-center" style="width: 100%; max-width: 500px; height: 300px; cursor: pointer;">
+                                        <i class="ti ti-file-text text-danger" style="font-size: 5rem;"></i>
+                                    </div>
+                                    <small class="text-muted d-block text-center mt-1">PDF Bukti</small>
+                                </a>
+                            </div>
+                        `;
                         } else {
                             buktiHtml += `
                             <div class="col-12 col-md-6">
@@ -86,7 +131,7 @@ function loadDetail(id) {
                         }
                     } else {
                         buktiHtml += `
-                            <div class="col-12 col-md-6">
+                        <div class="col-12 col-md-6">
                             <div class="bg-light rounded shadow-sm d-flex align-items-center justify-content-center" style="width: 100%; max-width: 500px; height: 300px;">
                                 <i class="ti ti-file text-muted" style="font-size: 5rem;"></i>
                             </div>
@@ -112,4 +157,15 @@ function loadDetail(id) {
                 '<div class="alert alert-danger">Gagal memuat detail log. Silakan coba lagi.</div>';
             document.getElementById('detail-content').classList.remove('d-none');
         });
+}
+
+function getStatusBadge(status) {
+    const statusLower = status.toLowerCase();
+    if (statusLower === 'completed') {
+        return '<span class="badge bg-success-subtle text-success px-3 py-2"><i class="ti ti-check-circle me-1"></i>Completed</span>';
+    } else if (statusLower === 'failed') {
+        return '<span class="badge bg-danger-subtle text-danger px-3 py-2"><i class="ti ti-x-circle me-1"></i>Failed</span>';
+    } else {
+        return '<span class="badge bg-warning-subtle text-warning px-3 py-2"><i class="ti ti-clock me-1"></i>On Progress</span>';
+    }
 }

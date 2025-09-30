@@ -21,6 +21,8 @@ Route::get('/dashboard', function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/logs', [LogAktivitasController::class, 'index'])->name('admin.logs');
+    Route::get('/logs/export', [LogAktivitasController::class, 'export'])->name('logs.export');
+    Route::get('/logs/target/{id}', [LogAktivitasController::class, 'showTarget'])->name('log.target.show');
     Route::resource('log-aktivitas', LogAktivitasController::class)->parameters([
         'log-aktivitas' => 'logAktivitas'
     ]);
