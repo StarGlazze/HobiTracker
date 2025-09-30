@@ -194,7 +194,7 @@
                                     <i class="ti ti-calendar text-success me-2"></i>Batas Waktu
                                 </label>
                                 <input type="date" class="form-control" id="target_deadline" name="target_deadline"
-                                    required>
+                                    min="{{ date('Y-m-d', strtotime('today')) }}" required>
                                 @error('target_deadline')
                                     <div class="text-danger small">{{ $message }}</div>
                                 @enderror
@@ -272,7 +272,7 @@
                                     </label>
                                     <input type="date" class="form-control" id="target_deadline{{ $target->id }}"
                                         name="target_deadline" value="{{ $target->target_deadline->format('Y-m-d') }}"
-                                        min="{{ date('Y-m-d', strtotime('+1 day')) }}" required>
+                                        min="{{ date('Y-m-d', strtotime('today')) }}" required>
                                     @error('target_deadline')
                                         <div class="text-danger small">{{ $message }}</div>
                                     @enderror

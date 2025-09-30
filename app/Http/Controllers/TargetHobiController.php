@@ -46,9 +46,9 @@ class TargetHobiController extends Controller
         $request->validate([
             'hobi_id' => 'required|exists:hobis,id',
             'nama_target' => 'required|string|max:255',
-            'target_deadline' => 'required|date|after:today',
+            'target_deadline' => 'required|date|after:yesterday',
         ], [
-            'target_deadline.after' => 'Batas waktu harus setelah hari ini.',
+            'target_deadline.after' => 'Batas waktu harus setelah hari kemarin.',
             'hobi_id.required' => 'Silakan pilih hobi.',
             'hobi_id.exists' => 'Hobi yang dipilih tidak valid.',
             'nama_target.required' => 'Nama target wajib diisi.',
@@ -111,9 +111,9 @@ class TargetHobiController extends Controller
         $request->validate([
             'hobi_id' => 'required|exists:hobis,id',
             'nama_target' => 'required|string|max:255',
-            'target_deadline' => 'required|date|after:today',
+            'target_deadline' => 'required|date|after:yesterday',
         ], [
-            'target_deadline.after' => 'Batas waktu harus setelah hari ini.',
+            'target_deadline.after' => 'Batas waktu harus setelah hari kemarin.',
             'hobi_id.required' => 'Silakan pilih hobi.',
             'hobi_id.exists' => 'Hobi yang dipilih tidak valid.',
             'nama_target.required' => 'Nama target wajib diisi.',

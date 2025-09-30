@@ -6,8 +6,11 @@ $(document).ready(function() {
         var today = new Date();
         today.setHours(0,0,0,0);
 
-        if (deadline <= today) {
-            alert('Batas waktu harus setelah hari ini.');
+        var yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        if (deadline <= yesterday) {
+            alert('Batas waktu harus setelah hari kemarin.');
             e.preventDefault();
             return false;
         }
@@ -20,8 +23,11 @@ $(document).ready(function() {
         var today = new Date();
         today.setHours(0,0,0,0);
 
-        if (deadline <= today) {
-            alert('Batas waktu harus setelah hari ini.');
+        var yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        if (deadline <= yesterday) {
+            alert('Batas waktu harus setelah hari kemarin.');
             e.preventDefault();
             return false;
         }
