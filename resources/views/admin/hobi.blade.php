@@ -159,7 +159,7 @@
                     </h5>
                 </div>
                 @foreach ($topKategoriHobis as $kategori)
-                    <div class="col-4 mb-3">
+                    <div class="col-lg-4 col-md-6 col-sm-12 mb-3">
                         <div class="card border-0 shadow-sm h-100">
                             <div class="card-body text-center p-4">
                                 <div class="mb-3">

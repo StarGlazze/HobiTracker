@@ -112,7 +112,7 @@ $(document).ready(function() {
         $('.alert').fadeOut('slow');
     }, 5000);
 
-    // Check for expired targets on page load
+    // Check for expired targets on page load - SKIP COMPLETED TARGETS
     checkExpiredTargets();
     
     function checkExpiredTargets() {
@@ -122,13 +122,19 @@ $(document).ready(function() {
         $('table tbody tr').each(function() {
             var row = $(this);
             var deadlineText = row.find('td:nth-child(5)').text().trim();
+            var statusBadge = row.find('td:nth-child(6) .badge');
+            
+            // SKIP if status is completed
+            if (statusBadge.text().includes('Completed')) {
+                return; // continue to next row
+            }
             
             if (deadlineText && deadlineText !== 'N/A') {
                 // Parse Indonesian date format "dd Month yyyy"
                 var deadlineDate = parseIndonesianDate(deadlineText);
                 
                 if (deadlineDate && deadlineDate < today) {
-                    // Mark row as expired
+                    // Mark row as expired only if not completed
                     row.addClass('table-warning');
                     row.find('td:nth-child(5)').append(' <small class="text-danger fw-bold">(EXPIRED)</small>');
                 }
@@ -379,7 +385,7 @@ $(document).ready(function() {
         }
     });
 
-    // Auto-update expired targets
+    // Auto-update expired targets - SKIP COMPLETED TARGETS
     setInterval(function() {
         var currentDate = new Date();
         currentDate.setHours(0, 0, 0, 0);
@@ -387,17 +393,20 @@ $(document).ready(function() {
         $('table tbody tr').each(function() {
             var row = $(this);
             var deadlineText = row.find('td:nth-child(5)').text().trim();
+            var statusBadge = row.find('td:nth-child(6) .badge');
+
+            // SKIP if status is completed
+            if (statusBadge.text().includes('Completed')) {
+                return; // continue to next row
+            }
 
             if (deadlineText && !deadlineText.includes('EXPIRED')) {
                 var deadline = parseIndonesianDate(deadlineText);
                 if (deadline && deadline < currentDate) {
-                    // Mark as expired and update status
+                    // Mark as expired only if not completed
                     row.addClass('table-danger');
-                    var statusBadge = row.find('.badge');
-                    if (statusBadge.hasClass('bg-warning-subtle') || statusBadge.hasClass(
-                            'bg-info-subtle')) {
-                        statusBadge.removeClass(
-                                'bg-warning-subtle text-warning bg-info-subtle text-info')
+                    if (statusBadge.hasClass('bg-warning-subtle') || statusBadge.hasClass('bg-info-subtle')) {
+                        statusBadge.removeClass('bg-warning-subtle text-warning bg-info-subtle text-info')
                             .addClass('bg-danger-subtle text-danger')
                             .html('<i class="ti ti-x-circle me-1"></i>Expired');
                     }

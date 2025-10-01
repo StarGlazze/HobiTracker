@@ -64,19 +64,22 @@
                                 <tr class="border-bottom">
                                     @php
                                         $latestProgress = $target->progresTarget->sortByDesc('created_at')->first();
-                                        $isExpired = $target->target_deadline < now()->startOfDay();
+                                        $isCompleted = $latestProgress && $latestProgress->status === 'completed';
+                                        $isExpired = $target->target_deadline < now()->startOfDay() && !$isCompleted;
                                     @endphp
                                     <td class="px-4 py-3">{{ $loop->iteration }}</td>
                                     <td class="py-3">{{ $target->nama_target }}</td>
                                     <td class="py-3">{{ $target->hobi->nama_hobi ?? 'N/A' }}</td>
                                     <td class="py-3">
-                                        <span class="badge {{ $target->hobi->kategoriHobi->background_color ?? 'bg-info-subtle' }} {{ $target->hobi->kategoriHobi->background_color ? 'text-white' : 'text-info' }} px-3 py-2">
+                                        <span
+                                            class="badge {{ $target->hobi->kategoriHobi->background_color ?? 'bg-info-subtle' }} {{ $target->hobi->kategoriHobi->background_color ? 'text-white' : 'text-info' }} px-3 py-2">
                                             <i
                                                 class="ti {{ $target->hobi->kategoriHobi->icon ?? 'ti-tag' }} me-1"></i>{{ $target->hobi->kategoriHobi->nama_kategori ?? 'N/A' }}
                                         </span>
                                     </td>
                                     <td class="py-3">
-                                        {{ \Carbon\Carbon::parse($target->target_deadline)->format('d F Y') }}</td>
+                                        {{ \Carbon\Carbon::parse($target->target_deadline)->format('d F Y') }}
+                                    </td>
                                     <td class="py-3 text-center">
                                         @if ($latestProgress)
                                             @if ($latestProgress->status === 'completed')
@@ -120,7 +123,8 @@
                                                 </button>
                                             </form>
                                             <button class="btn btn-info btn-sm" data-bs-toggle="modal"
-                                                data-bs-target="#progressModal{{ $target->id }}" title="Lihat Progress" {{ $isExpired ? 'disabled' : '' }}>
+                                                data-bs-target="#progressModal{{ $target->id }}" title="Lihat Progress"
+                                                {{ $isExpired && !$isCompleted ? 'disabled' : '' }}>
                                                 <i class="ti ti-chart-bar"></i>
                                             </button>
                                             <button class="btn btn-secondary btn-sm" data-bs-toggle="modal"
@@ -422,7 +426,8 @@
 
                                 <dt class="col-sm-3">Kategori</dt>
                                 <dd class="col-sm-9">
-                                    <span class="badge {{ $target->hobi->kategoriHobi->background_color ?? 'bg-info-subtle' }} {{ $target->hobi->kategoriHobi->background_color ? 'text-white' : 'text-info' }} px-3 py-2">
+                                    <span
+                                        class="badge {{ $target->hobi->kategoriHobi->background_color ?? 'bg-info-subtle' }} {{ $target->hobi->kategoriHobi->background_color ? 'text-white' : 'text-info' }} px-3 py-2">
                                         <i
                                             class="ti {{ $target->hobi->kategoriHobi->icon ?? 'ti-tag' }} me-1"></i>{{ $target->hobi->kategoriHobi->nama_kategori ?? 'N/A' }}
                                     </span>
