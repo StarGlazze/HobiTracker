@@ -24,13 +24,13 @@
                 <ul class="nav nav-pills">
                     <li class="nav-item">
                         <a class="nav-link {{ $type === 'aktivitas' ? 'active' : '' }}"
-                            href="{{ route('admin.logs', array_merge(request()->except('type'), ['type' => 'aktivitas'])) }}">
+                            href="{{ route('admin.logs', array_merge(request()->except(['type', 'page']), ['type' => 'aktivitas', 'page' => 1])) }}">
                             <i class="ti ti-activity me-2"></i>Log Aktivitas
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{ $type === 'target' ? 'active' : '' }}"
-                            href="{{ route('admin.logs', array_merge(request()->except('type'), ['type' => 'target'])) }}">
+                            href="{{ route('admin.logs', array_merge(request()->except(['type', 'page']), ['type' => 'target', 'page' => 1])) }}">
                             <i class="ti ti-target me-2"></i>Log Target
                         </a>
                     </li>
@@ -108,60 +108,52 @@
         <div class="card shadow-sm border-0">
             <div class="card-header bg-transparent border-bottom-0 pt-4">
                 <div class="row align-items-center">
-                    <div class="col">
+                    <div class="col-md-6 mb-3 mb-md-0">
                         <h5 class="mb-1">Riwayat {{ $type === 'target' ? 'Target' : 'Aktivitas' }}</h5>
                         <p class="text-muted small mb-0">Daftar lengkap
                             {{ $type === 'target' ? 'progress target' : 'aktivitas' }} hobi Anda</p>
                     </div>
-                    <div class="col-auto">
-                        <div class="col-12">
-                            <form method="GET" action="{{ route('admin.logs') }}" class="row g-2 align-items-center">
-                                <input type="hidden" name="type" value="{{ $type }}">
+                    <div class="col-md-6">
+                        <form method="GET" action="{{ route('admin.logs') }}" class="row g-2 align-items-center">
+                            <input type="hidden" name="type" value="{{ $type }}">
 
-                                <!-- Cari aktivitas -->
-                                <div class="col-12 col-md-4">
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-text bg-light border-end-0">
-                                            <i class="ti ti-search text-muted"></i>
-                                        </span>
-                                        <input type="text" name="search" class="form-control border-start-0"
-                                            placeholder="Cari {{ $type }}..." value="{{ $search ?? '' }}">
-                                        <button type="submit" class="btn btn-outline-secondary btn-sm">Cari</button>
-                                    </div>
+                            <!-- Search -->
+                            <div class="col-12 col-lg-4">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="ti ti-search text-muted"></i>
+                                    </span>
+                                    <input type="text" name="search" class="form-control border-start-0"
+                                        placeholder="Cari {{ $type }}..." value="{{ $search ?? '' }}">
                                 </div>
+                            </div>
 
-                                <!-- Tanggal mulai -->
-                                <div class="col-6 col-md-3">
-                                    <input type="date" name="start_date" class="form-control form-control-sm"
-                                        value="{{ $startDate ?? '' }}" placeholder="Dari Tanggal"
-                                        onfocus="this.showPicker()">
-                                </div>
+                            <!-- Date Range -->
+                            <div class="col-6 col-lg-3">
+                                <input type="date" name="start_date" class="form-control form-control-sm"
+                                    value="{{ $startDate ?? '' }}" placeholder="Dari Tanggal">
+                            </div>
 
-                                <!-- Tanggal akhir -->
-                                <div class="col-6 col-md-3">
-                                    <input type="date" name="end_date" class="form-control form-control-sm"
-                                        value="{{ $endDate ?? '' }}" placeholder="Sampai Tanggal"
-                                        onfocus="this.showPicker()">
-                                </div>
+                            <div class="col-6 col-lg-3">
+                                <input type="date" name="end_date" class="form-control form-control-sm"
+                                    value="{{ $endDate ?? '' }}" placeholder="Sampai Tanggal">
+                            </div>
 
-                                <!-- Tombol filter -->
-                                <div class="col-6 col-md-auto">
-                                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                            <!-- Buttons -->
+                            <div class="col-12 col-lg-2">
+                                <div class="d-flex gap-1">
+                                    <button type="submit" class="btn btn-primary btn-sm flex-grow-1">
                                         <i class="ti ti-filter"></i> Filter
                                     </button>
-                                </div>
-
-                                <!-- Tombol reset -->
-                                @if ($search || $startDate || $endDate)
-                                    <div class="col-6 col-md-auto">
+                                    @if ($search || $startDate || $endDate)
                                         <a href="{{ route('admin.logs', ['type' => $type]) }}"
-                                            class="btn btn-outline-danger btn-sm w-100">
-                                            <i class="ti ti-x"></i> Reset
+                                            class="btn btn-outline-danger btn-sm">
+                                            <i class="ti ti-x"></i>
                                         </a>
-                                    </div>
-                                @endif
-                            </form>
-                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -382,16 +374,62 @@
                 </div>
             </div>
 
-            <!-- Pagination -->
-            <div class="card-footer bg-transparent border-top-0">
-                <div class="d-flex justify-content-between align-items-center">
-                    <small class="text-muted">Menampilkan {{ $logs->firstItem() }}-{{ $logs->lastItem() }} dari
-                        {{ $logs->total() }} {{ $type === 'target' ? 'progress' : 'aktivitas' }}</small>
-                    <div class="d-flex align-items-center gap-2">
-                        {!! $logs->appends(request()->query())->links() !!}
+            <!-- Pagination - FIXED -->
+            <div class="card-footer bg-transparent border-top">
+                <div class="row align-items-center g-3">
+                    <!-- Info Text -->
+                    <div class="col-12 col-md-4 text-center text-md-start">
+                        <small class="text-muted">
+                            Menampilkan {{ $logs->firstItem() ?? 0 }}-{{ $logs->lastItem() ?? 0 }} dari
+                            {{ $logs->total() }} {{ $type === 'target' ? 'progress' : 'aktivitas' }}
+                        </small>
+                    </div>
+
+                    <!-- Pagination Links -->
+                    <div class="col-12 col-md-4 d-flex justify-content-center">
+                        <nav aria-label="Page navigation">
+                            @if ($logs->lastPage() > 1)
+                                <ul class="pagination pagination-sm mb-0">
+                                    {{-- Previous Page Link --}}
+                                    @if ($logs->onFirstPage())
+                                        <li class="page-item disabled" aria-disabled="true" aria-label="Previous">
+                                            <span class="page-link" aria-hidden="true">&laquo;</span>
+                                        </li>
+                                    @else
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ $logs->appends(array_merge(request()->query(), ['type' => $type]))->previousPageUrl() }}" rel="prev" aria-label="Previous">&laquo;</a>
+                                        </li>
+                                    @endif
+
+                                    {{-- Pagination Elements --}}
+                                    @foreach ($logs->getUrlRange(max($logs->currentPage() - 2, 1), min($logs->currentPage() + 2, $logs->lastPage())) as $page => $url)
+                                        @if ($page == $logs->currentPage())
+                                            <li class="page-item active" aria-current="page"><span class="page-link">{{ $page }}</span></li>
+                                        @else
+                                            <li class="page-item"><a class="page-link" href="{{ $url }}&type={{ $type }}">{{ $page }}</a></li>
+                                        @endif
+                                    @endforeach
+
+                                    {{-- Next Page Link --}}
+                                    @if ($logs->hasMorePages())
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ $logs->appends(array_merge(request()->query(), ['type' => $type]))->nextPageUrl() }}" rel="next" aria-label="Next">&raquo;</a>
+                                        </li>
+                                    @else
+                                        <li class="page-item disabled" aria-disabled="true" aria-label="Next">
+                                            <span class="page-link" aria-hidden="true">&raquo;</span>
+                                        </li>
+                                    @endif
+                                </ul>
+                            @endif
+                        </nav>
+                    </div>
+
+                    <!-- Export Button -->
+                    <div class="col-12 col-md-4 d-flex justify-content-md-end justify-content-center">
                         <a href="{{ url('/logs/export?' . http_build_query(request()->query())) }}"
                             class="btn btn-danger btn-sm">
-                            <i class="ti ti-download"></i> Export PDF
+                            <i class="ti ti-download me-1"></i> Export PDF
                         </a>
                     </div>
                 </div>
@@ -430,6 +468,13 @@
 
             #detailModal video::-webkit-media-controls-fullscreen-button {
                 display: block;
+            }
+
+            /* Pagination responsive fixes */
+            @media (max-width: 767px) {
+                .card-footer .row > div {
+                    text-align: center;
+                }
             }
         </style>
 
