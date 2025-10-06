@@ -10,20 +10,40 @@ class LogAktivitas extends Model
     use HasFactory;
 
     protected $fillable = [
-        'aktivitas_id',
         'user_id',
-        'file_bukti',
+        'hobi_id',
+        'aktivitas_id',
+        'durasi',
         'catatan',
+        'file_bukti',
+        'tanggal_aktivitas',
     ];
 
-    // Relationships
-    public function aktivitas()
-    {
-        return $this->belongsTo(Aktivitas::class);
-    }
+    protected $casts = [
+        'tanggal_aktivitas' => 'date',
+    ];
 
+    /**
+     * Relasi ke User
+     */
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Relasi ke Hobi
+     */
+    public function hobi()
+    {
+        return $this->belongsTo(Hobi::class);
+    }
+
+    /**
+     * Relasi ke Aktivitas (jika ada tabel aktivitas)
+     */
+    public function aktivitas()
+    {
+        return $this->belongsTo(Aktivitas::class);
     }
 }

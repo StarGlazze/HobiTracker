@@ -10,6 +10,7 @@ use App\Http\Controllers\WebSettingController;
 use App\Http\Controllers\TargetHobiController;
 use App\Http\Controllers\ProgresTargetController;
 use App\Http\Controllers\LogAktivitasController;
+use App\Http\Controllers\ProfileController;
 
 Route::get('/', function () {
     return view('landing.welcome');
@@ -29,8 +30,10 @@ Route::middleware(['auth'])->group(function () {
 });
 
 
-Route::get('/profile', function () {
-    return view('admin.profile');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/change-password', [ProfileController::class, 'changePassword'])->name('profile.change-password');
 });
 
 

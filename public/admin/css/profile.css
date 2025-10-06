@@ -1,0 +1,290 @@
+/* Profile Page Styling */
+/* Note: Achievement styles sudah ada di achievement.css, jadi tidak perlu duplicate */
+
+/* Profile Tabs */
+#profileTabs .nav-link {
+    color: #6c757d;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-weight: 600;
+    padding: 12px 20px;
+    transition: all 0.3s ease;
+}
+
+#profileTabs .nav-link:hover {
+    color: #0d6efd;
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+#profileTabs .nav-link.active {
+    color: #0d6efd;
+    background-color: transparent;
+    border-bottom-color: #0d6efd;
+}
+
+/* Profile Info Rows */
+.tab-pane .row {
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.tab-pane .row:last-child {
+    border-bottom: none;
+}
+
+/* Activity List */
+.list-group-item {
+    border-left: none;
+    border-right: none;
+    padding: 15px 20px;
+    transition: background-color 0.2s ease;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+}
+
+.list-group-item:first-child {
+    border-top: none;
+}
+
+.list-group-item:last-child {
+    border-bottom: none;
+}
+
+/* Form Styling in Modal */
+.modal-content {
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.modal-header.bg-primary {
+    background: #0d6efd !important;
+}
+
+.form-control-lg {
+    border-radius: 8px;
+    border: 2px solid #e0e0e0;
+    transition: all 0.3s ease;
+}
+
+.form-control-lg:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+
+/* Profile Photo Styling */
+.card-body img.rounded-circle {
+    border: 4px solid #f0f0f0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Navbar profile image styling */
+.navbar .dropdown img.rounded-circle {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid #dee2e6;
+    transition: transform 0.2s ease;
+}
+
+.navbar .dropdown img.rounded-circle:active {
+    transform: scale(1);
+}
+
+.navbar .dropdown img.rounded-circle:hover {
+    transform: scale(1.05);
+    cursor: pointer;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    #profileTabs .nav-link {
+        font-size: 14px;
+        padding: 10px 15px;
+    }
+    
+    .edit-profile-btn {
+        font-size: 12px;
+        padding: 8px 16px;
+    }
+}
+
+/* Loading Animation */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.ti-loader {
+    animation: spin 1s linear infinite;
+    display: inline-block;
+}
+
+/* Success Modal Animation */
+.modal.fade .modal-dialog {
+    transition: transform 0.3s ease-out;
+}
+
+.modal.show .modal-dialog {
+    transform: scale(1);
+}
+
+/* Card Hover Effect */
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Badge Status */
+.badge.bg-success {
+    background: linear-gradient(45deg, #28a745, #20c997) !important;
+    padding: 6px 12px;
+    font-weight: 600;
+}
+
+/* Icon Colors - Sesuaikan dengan warna yang sudah ada */
+.text-primary {
+    color: #0d6efd !important;
+}
+
+.text-info {
+    color: #0dcaf0 !important;
+}
+
+.text-warning {
+    color: #ffc107 !important;
+}
+
+.text-success {
+    color: #28a745 !important;
+}
+
+.text-danger {
+    color: #dc3545 !important;
+}
+
+.text-secondary {
+    color: #6c757d !important;
+}
+
+/* Profile Tabs */
+#profileTabs .nav-link {
+    color: #6c757d;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-weight: 600;
+    padding: 12px 20px;
+    transition: all 0.3s ease;
+}
+
+#profileTabs .nav-link:hover {
+    color: #667eea;
+    background-color: rgba(102, 126, 234, 0.05);
+}
+
+#profileTabs .nav-link.active {
+    color: #667eea;
+    background-color: transparent;
+    border-bottom-color: #667eea;
+}
+
+/* Profile Info Rows */
+.tab-pane .row {
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.tab-pane .row:last-child {
+    border-bottom: none;
+}
+
+/* Activity List */
+.list-group-item {
+    border-left: none;
+    border-right: none;
+    padding: 15px 20px;
+    transition: background-color 0.2s ease;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+}
+
+.list-group-item:first-child {
+    border-top: none;
+}
+
+.list-group-item:last-child {
+    border-bottom: none;
+}
+
+/* Form Styling in Modal */
+.modal-content {
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.modal-header.bg-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.form-control-lg {
+    border-radius: 8px;
+    border: 2px solid #e0e0e0;
+    transition: all 0.3s ease;
+}
+
+.form-control-lg:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .achievements-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .edit-profile-btn {
+        font-size: 12px;
+        padding: 8px 15px;
+    }
+    
+    #profileTabs .nav-link {
+        font-size: 14px;
+        padding: 10px 15px;
+    }
+}
+
+/* Loading Animation */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.ti-loader {
+    animation: spin 1s linear infinite;
+}
+
+/* Success Modal Animation */
+.modal.fade .modal-dialog {
+    transition: transform 0.3s ease-out;
+}
+
+.modal.show .modal-dialog {
+    transform: scale(1);
+}
+
+/* Card Hover Effect */
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+}

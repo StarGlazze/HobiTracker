@@ -108,12 +108,12 @@
         <div class="card shadow-sm border-0">
             <div class="card-header bg-transparent border-bottom-0 pt-4">
                 <div class="row align-items-center">
-                    <div class="col-md-6 mb-3 mb-md-0">
+                    <div class="col-md-5 mb-3 mb-md-0">
                         <h5 class="mb-1">Riwayat {{ $type === 'target' ? 'Target' : 'Aktivitas' }}</h5>
                         <p class="text-muted small mb-0">Daftar lengkap
                             {{ $type === 'target' ? 'progress target' : 'aktivitas' }} hobi Anda</p>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-7">
                         <form method="GET" action="{{ route('admin.logs') }}" class="row g-2 align-items-center">
                             <input type="hidden" name="type" value="{{ $type }}">
 

@@ -9,13 +9,15 @@
     <link rel="shortcut icon" type="image/png" href="{{ asset('./admin/images/logos/favicon-v2.png')}}" />
     <link rel="stylesheet" href="{{ asset('./admin/css/styles.min.css')}}" />
     <link rel="stylesheet" href="{{ asset('./admin/css/hover-effects.css')}}" />
-    <link rel="stylesheet" href="{{ asset('./admin/css/achievement.css')}}" />
     <link rel="stylesheet" href="{{ asset('./admin/css/hobi-custom.css')}}" />
     <link rel="stylesheet" href="{{ asset('./admin/css/color-fixes.css')}}" />
+    <link rel="stylesheet" href="{{ asset('./admin/css/profile.css')}}" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <!-- Tabler Icons CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons@latest/iconfont/tabler-icons.min.css">
+
+    @yield('styles')
 </head>
 
 <body>
@@ -53,7 +55,6 @@
     <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
 
     <script src="{{ asset('./admin/js/hobi-custom.js')}}"></script>
-    <script src="{{ asset('./admin/js/achievement.js')}}"></script>
      
     @yield('scripts')
 </body>
