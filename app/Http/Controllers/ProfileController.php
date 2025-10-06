@@ -149,14 +149,32 @@ class ProfileController extends Controller
     {
         $achievements = [];
 
-        // Consistency King: Check if user has logged activities for 30 consecutive days
+        // Early Bird: Login sebelum jam 7 pagi sebanyak 10 kali
+        $earlyBirdCount = LogAktivitas::where('user_id', $user->id)
+            ->whereTime('created_at', '<', '07:00:00')
+            ->count();
+        $achievements['early_bird'] = $earlyBirdCount >= 10;
+
+        // Night Owl: Selesaikan aktivitas setelah jam 10 malam sebanyak 5 kali
+        $nightOwlCount = LogAktivitas::where('user_id', $user->id)
+            ->whereTime('created_at', '>=', '22:00:00')
+            ->count();
+        $achievements['night_owl'] = $nightOwlCount >= 5;
+
+        // Explorer: Tambahkan hobi dari minimal 5 kategori berbeda
+        $distinctHobbies = Hobi::where('user_id', $user->id)
+            ->distinct('kategori_id')
+            ->count('kategori_id');
+        $achievements['explorer'] = $distinctHobbies >= 5;
+
+        // Consistency King/Queen: Login 30 hari berturut-turut
         $consecutiveDays = 0;
         $currentDate = now();
         for ($i = 0; $i < 30; $i++) {
             $hasActivity = LogAktivitas::where('user_id', $user->id)
                 ->whereDate('created_at', $currentDate->copy()->subDays($i))
                 ->exists();
-            
+
             if ($hasActivity) {
                 $consecutiveDays++;
             } else {
@@ -165,28 +183,42 @@ class ProfileController extends Controller
         }
         $achievements['consistency'] = $consecutiveDays >= 30;
 
-        // Explorer: 5 different hobbies (distinct kategori)
-        $distinctHobbies = Hobi::where('user_id', $user->id)
-            ->distinct('kategori_id')
-            ->count('kategori_id');
-        $achievements['explorer'] = $distinctHobbies >= 5;
-
-        // Master of Hobby: 10 completed targets
-        // Menggunakan tabel progres_targets dengan status 'completed'
+        // Goal Crusher: Selesaikan 20 target yang sudah dibuat
         $completedTargets = DB::table('progres_targets')
             ->where('user_id', $user->id)
             ->where('status', 'completed')
             ->distinct('target_id')
             ->count('target_id');
-        
-        $achievements['master'] = $completedTargets >= 10;
+        $achievements['goal_crusher'] = $completedTargets >= 20;
 
-        // Collector: 20 proof files
+        // Storyteller: Tambahkan deskripsi/detail lebih dari 200 karakter di sebuah hobi
+        $hasLongDescription = Hobi::where('user_id', $user->id)
+            ->whereRaw('LENGTH(deskripsi) > 200')
+            ->exists();
+        $achievements['storyteller'] = $hasLongDescription;
+
+        // Collector: Upload minimal 50 file bukti (foto/video)
         $proofFiles = LogAktivitas::where('user_id', $user->id)
             ->whereNotNull('file_bukti')
             ->where('file_bukti', '!=', '')
             ->count();
-        $achievements['collector'] = $proofFiles >= 20;
+        $achievements['collector'] = $proofFiles >= 50;
+
+        // Speedrunner: Selesaikan target dalam waktu < 24 jam sebanyak 5 kali
+        $speedrunnerCount = DB::table('progres_targets')
+            ->where('user_id', $user->id)
+            ->where('status', 'completed')
+            ->whereRaw('TIMESTAMPDIFF(HOUR, created_at, updated_at) < 24')
+            ->count();
+        $achievements['speedrunner'] = $speedrunnerCount >= 5;
+
+        // Creative Spark: Buat minimal 10 hobi berbeda
+        $totalHobbies = Hobi::where('user_id', $user->id)->count();
+        $achievements['creative_spark'] = $totalHobbies >= 10;
+
+        // Milestone Master: Selesaikan 100 aktivitas sepanjang waktu
+        $totalActivities = LogAktivitas::where('user_id', $user->id)->count();
+        $achievements['milestone_master'] = $totalActivities >= 100;
 
         return $achievements;
     }

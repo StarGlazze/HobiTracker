@@ -34,6 +34,42 @@
                     </h6>
 
                     <div class="achievements-grid">
+                        {{-- Early Bird --}}
+                        <div class="achievement-item {{ $achievements['early_bird'] ? 'achieved' : 'locked' }}">
+                            @if($achievements['early_bird'])
+                                <span class="achievement-badge">Tercapai!</span>
+                            @else
+                                <span class="achievement-badge locked">Terkunci</span>
+                            @endif
+                            <i class="ti ti-sun"></i>
+                            <div class="achievement-title">Early Bird</div>
+                            <div class="achievement-desc">Login sebelum jam 7 pagi 10 kali</div>
+                        </div>
+
+                        {{-- Night Owl --}}
+                        <div class="achievement-item {{ $achievements['night_owl'] ? 'achieved' : 'locked' }}">
+                            @if($achievements['night_owl'])
+                                <span class="achievement-badge">Tercapai!</span>
+                            @else
+                                <span class="achievement-badge locked">Terkunci</span>
+                            @endif
+                            <i class="ti ti-moon"></i>
+                            <div class="achievement-title">Night Owl</div>
+                            <div class="achievement-desc">Aktivitas setelah jam 10 malam 5 kali</div>
+                        </div>
+
+                        {{-- Explorer --}}
+                        <div class="achievement-item {{ $achievements['explorer'] ? 'achieved' : 'locked' }}">
+                            @if($achievements['explorer'])
+                                <span class="achievement-badge">Tercapai!</span>
+                            @else
+                                <span class="achievement-badge locked">Terkunci</span>
+                            @endif
+                            <i class="ti ti-compass"></i>
+                            <div class="achievement-title">Explorer</div>
+                            <div class="achievement-desc">5 kategori hobi berbeda</div>
+                        </div>
+
                         {{-- Consistency King/Queen --}}
                         <div class="achievement-item {{ $achievements['consistency'] ? 'achieved' : 'locked' }}">
                             @if($achievements['consistency'])
@@ -46,28 +82,28 @@
                             <div class="achievement-desc">Login 30 hari berturut</div>
                         </div>
 
-                        {{-- Explorer --}}
-                        <div class="achievement-item {{ $achievements['explorer'] ? 'achieved' : 'locked' }}">
-                            @if($achievements['explorer'])
+                        {{-- Goal Crusher --}}
+                        <div class="achievement-item {{ $achievements['goal_crusher'] ? 'achieved' : 'locked' }}">
+                            @if($achievements['goal_crusher'])
                                 <span class="achievement-badge">Tercapai!</span>
                             @else
                                 <span class="achievement-badge locked">Terkunci</span>
                             @endif
-                            <i class="ti ti-compass"></i>
-                            <div class="achievement-title">Explorer</div>
-                            <div class="achievement-desc">5 hobi berbeda</div>
+                            <i class="ti ti-target"></i>
+                            <div class="achievement-title">Goal Crusher</div>
+                            <div class="achievement-desc">Selesaikan 20 target</div>
                         </div>
 
-                        {{-- Master of Hobby --}}
-                        <div class="achievement-item {{ $achievements['master'] ? 'achieved' : 'locked' }}">
-                            @if($achievements['master'])
+                        {{-- Storyteller --}}
+                        <div class="achievement-item {{ $achievements['storyteller'] ? 'achieved' : 'locked' }}">
+                            @if($achievements['storyteller'])
                                 <span class="achievement-badge">Tercapai!</span>
                             @else
                                 <span class="achievement-badge locked">Terkunci</span>
                             @endif
-                            <i class="ti ti-star"></i>
-                            <div class="achievement-title">Master of Hobby</div>
-                            <div class="achievement-desc">10 target selesai</div>
+                            <i class="ti ti-book"></i>
+                            <div class="achievement-title">Storyteller</div>
+                            <div class="achievement-desc">Deskripsi >200 karakter</div>
                         </div>
 
                         {{-- Collector --}}
@@ -79,7 +115,43 @@
                             @endif
                             <i class="ti ti-photo"></i>
                             <div class="achievement-title">Collector</div>
-                            <div class="achievement-desc">20 file bukti</div>
+                            <div class="achievement-desc">Upload 50 file bukti</div>
+                        </div>
+
+                        {{-- Speedrunner --}}
+                        <div class="achievement-item {{ $achievements['speedrunner'] ? 'achieved' : 'locked' }}">
+                            @if($achievements['speedrunner'])
+                                <span class="achievement-badge">Tercapai!</span>
+                            @else
+                                <span class="achievement-badge locked">Terkunci</span>
+                            @endif
+                            <i class="ti ti-bolt"></i>
+                            <div class="achievement-title">Speedrunner</div>
+                            <div class="achievement-desc">Selesaikan target < 24 jam 5 kali</div>
+                        </div>
+
+                        {{-- Creative Spark --}}
+                        <div class="achievement-item {{ $achievements['creative_spark'] ? 'achieved' : 'locked' }}">
+                            @if($achievements['creative_spark'])
+                                <span class="achievement-badge">Tercapai!</span>
+                            @else
+                                <span class="achievement-badge locked">Terkunci</span>
+                            @endif
+                            <i class="ti ti-bulb"></i>
+                            <div class="achievement-title">Creative Spark</div>
+                            <div class="achievement-desc">Buat 10 hobi berbeda</div>
+                        </div>
+
+                        {{-- Milestone Master --}}
+                        <div class="achievement-item {{ $achievements['milestone_master'] ? 'achieved' : 'locked' }}">
+                            @if($achievements['milestone_master'])
+                                <span class="achievement-badge">Tercapai!</span>
+                            @else
+                                <span class="achievement-badge locked">Terkunci</span>
+                            @endif
+                            <i class="ti ti-trophy"></i>
+                            <div class="achievement-title">Milestone Master</div>
+                            <div class="achievement-desc">Selesaikan 100 aktivitas</div>
                         </div>
                     </div>
                 </div>
