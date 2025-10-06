@@ -180,28 +180,46 @@
             </div>
         @endif
 
-        <!-- Main Table Card -->
+        <!-- Main Table Card with Enhanced Search & Sort -->
         <div class="card border-0 shadow-sm">
-            <div class="card-header bg-transparent border-bottom-0 pt-4">
+            <div class="card-header bg-transparent border-bottom-0 pt-4 pb-3">
                 <div class="row align-items-center">
-                    <div class="col">
+                    <div class="col-md-6">
                         <h5 class="mb-1">
                             <i class="ti ti-list text-primary me-2"></i>Daftar Hobi Anda
                         </h5>
                         <p class="text-muted small mb-0">Kelola dan pantau semua hobi favorit Anda</p>
                     </div>
-                    <div class="col-auto">
-                        <div class="input-group input-group-sm" style="width: 320px;">
-                            <span class="input-group-text bg-light border-end-0">
-                                <i class="ti ti-search text-muted"></i>
-                            </span>
-                            <input type="text" class="form-control border-start-0" placeholder="Cari hobi..."
-                                id="searchHobi">
-                            <button class="btn btn-outline-secondary border-start-0" type="button" id="clearSearchBtn"
-                                style="display: none;">
-                                <i class="ti ti-x text-muted"></i>
-                            </button>
-                        </div>
+                    <div class="col-md-6">
+                        <form method="GET" action="{{ route('hobi.index') }}" id="searchForm">
+                            <!-- Preserve sorting parameters -->
+                            <input type="hidden" name="sort_by" value="{{ $sortBy ?? 'nama_hobi' }}">
+                            <input type="hidden" name="sort_direction" value="{{ $sortDirection ?? 'asc' }}">
+
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-white">
+                                    <i class="ti ti-search text-muted"></i>
+                                </span>
+                                <input type="text" class="form-control border-start-0"
+                                    placeholder="Cari hobi, kategori, atau deskripsi..." name="search" id="searchInput"
+                                    value="{{ $search ?? '' }}" autocomplete="off">
+                                <button class="btn btn-outline-primary" type="submit">
+                                    <i class="ti ti-search"></i>
+                                </button>
+                            </div>
+
+                            @if (!empty($search))
+                                <div class="mt-1">
+                                    <small class="text-muted">
+                                        Hasil untuk: <strong>"{{ $search }}"</strong>
+                                        <a href="{{ route('hobi.index', ['sort_by' => $sortBy, 'sort_direction' => $sortDirection]) }}"
+                                            class="text-primary ms-2">
+                                            <i class="ti ti-x" style="font-size: 0.7rem;"></i> Hapus
+                                        </a>
+                                    </small>
+                                </div>
+                            @endif
+                        </form>
                     </div>
                 </div>
             </div>
@@ -214,54 +232,88 @@
                                 <th scope="col" class="border-0 py-3 px-4" style="width: 5%;">
                                     <span class="text-muted px-2 py-1">#</span>
                                 </th>
-                                <th scope="col" class="border-0 py-3" style="width: 30%;">
-                                    <div class="d-flex align-items-center">
-                                        <i class="ti ti-heart me-2 text-muted"></i>
-                                        <span class="fw-semibold">Hobi</span>
-                                    </div>
-                                </th>
                                 <th scope="col" class="border-0 py-3" style="width: 25%;">
-                                    <div class="d-flex align-items-center">
-                                        <i class="ti ti-category me-2 text-muted"></i>
-                                        <span class="fw-semibold">Kategori</span>
-                                    </div>
+                                    <a href="{{ route('hobi.index', array_merge(request()->except(['sort_by', 'sort_direction']), ['sort_by' => 'nama_hobi', 'sort_direction' => $sortBy == 'nama_hobi' && $sortDirection == 'asc' ? 'desc' : 'asc'])) }}"
+                                        class="text-decoration-none text-dark d-flex align-items-center sortable-header {{ $sortBy == 'nama_hobi' ? 'active' : '' }}">
+                                        <i class="ti ti-heart me-2 text-danger"></i>
+                                        <span class="fw-semibold">Nama Hobi</span>
+                                        @if ($sortBy == 'nama_hobi')
+                                            <i
+                                                class="ti ti-arrow-{{ $sortDirection == 'asc' ? 'up' : 'down' }} ms-2 text-primary"></i>
+                                        @else
+                                            <i class="ti ti-selector ms-2 text-muted" style="opacity: 0.3;"></i>
+                                        @endif
+                                    </a>
                                 </th>
-                                <th scope="col" class="border-0 py-3">
-                                    <div class="d-flex align-items-center">
-                                        <i class="ti ti-notes me-2 text-muted"></i>
+                                <th scope="col" class="border-0 py-3" style="width: 20%;">
+                                    <a href="{{ route('hobi.index', array_merge(request()->except(['sort_by', 'sort_direction']), ['sort_by' => 'kategori', 'sort_direction' => $sortBy == 'kategori' && $sortDirection == 'asc' ? 'desc' : 'asc'])) }}"
+                                        class="text-decoration-none text-dark d-flex align-items-center sortable-header {{ $sortBy == 'kategori' ? 'active' : '' }}">
+                                        <i class="ti ti-category me-2 text-success"></i>
+                                        <span class="fw-semibold">Kategori</span>
+                                        @if ($sortBy == 'kategori')
+                                            <i
+                                                class="ti ti-arrow-{{ $sortDirection == 'asc' ? 'up' : 'down' }} ms-2 text-primary"></i>
+                                        @else
+                                            <i class="ti ti-selector ms-2 text-muted" style="opacity: 0.3;"></i>
+                                        @endif
+                                    </a>
+                                </th>
+                                <th scope="col" class="border-0 py-3" style="width: 35%;">
+                                    <a href="{{ route('hobi.index', array_merge(request()->except(['sort_by', 'sort_direction']), ['sort_by' => 'deskripsi', 'sort_direction' => $sortBy == 'deskripsi' && $sortDirection == 'asc' ? 'desc' : 'asc'])) }}"
+                                        class="text-decoration-none text-dark d-flex align-items-center sortable-header {{ $sortBy == 'deskripsi' ? 'active' : '' }}">
+                                        <i class="ti ti-notes me-2 text-info"></i>
                                         <span class="fw-semibold">Deskripsi</span>
-                                    </div>
+                                        @if ($sortBy == 'deskripsi')
+                                            <i
+                                                class="ti ti-arrow-{{ $sortDirection == 'asc' ? 'up' : 'down' }} ms-2 text-primary"></i>
+                                        @else
+                                            <i class="ti ti-selector ms-2 text-muted" style="opacity: 0.3;"></i>
+                                        @endif
+                                    </a>
                                 </th>
                                 <th scope="col" class="border-0 py-3 text-center" style="width: 15%;">
-                                    <span class="fw-semibold">Aksi</span>
+                                    <span class="fw-semibold text-muted">Aksi</span>
                                 </th>
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse ($hobis as $index => $hobi)
-                                <tr class="border-bottom">
+                            @forelse ($hobis as $hobi)
+                                <tr class="border-bottom hover-row">
                                     <td class="px-4 py-3">
-                                        <span class="px-2 py-1">{{ $index + 1 }}</span>
+                                        <span
+                                            class="text-muted">{{ ($hobis->currentPage() - 1) * $hobis->perPage() + $loop->iteration }}</span>
                                     </td>
                                     <td class="py-3">
                                         <div class="d-flex align-items-center">
                                             <div>
-                                                <h6 class="mb-1 fw-semibold">{{ $hobi->nama_hobi }}</h6>
+                                                <h6 class="mb-0 fw-semibold">{{ $hobi->nama_hobi }}</h6>
+                                                <small class="text-muted">
+                                                    <i class="ti ti-calendar-event" style="font-size: 0.75rem;"></i>
+                                                    {{ $hobi->created_at->format('d M Y') }}
+                                                </small>
                                             </div>
                                         </div>
                                     </td>
                                     <td class="py-3">
-                                        <strong>{{ $hobi->kategoriHobi->nama_kategori ?? 'Tidak Diketahui' }}</strong>
+                                        <span
+                                            class="badge bg-{{ $hobi->kategoriHobi->background_color ?? 'primary' }}-subtle text-dark px-3 py-2">
+                                            <i class="ti {{ $hobi->kategoriHobi->icon ?? 'ti-category' }} me-1"></i>
+                                            {{ $hobi->kategoriHobi->nama_kategori ?? 'Tidak Diketahui' }}
+                                        </span>
                                     </td>
                                     <td class="py-3">
-                                        <div class="text-truncate" style="max-width: 250px;" data-bs-toggle="tooltip"
-                                            title="{{ $hobi->deskripsi }}">
-                                            {{ $hobi->deskripsi }}
-                                        </div>
+                                        @if ($hobi->deskripsi)
+                                            <div class="text-truncate" style="max-width: 300px;" data-bs-toggle="tooltip"
+                                                data-bs-placement="top" title="{{ $hobi->deskripsi }}">
+                                                {{ $hobi->deskripsi }}
+                                            </div>
+                                        @else
+                                            <span class="text-muted fst-italic">Tidak ada deskripsi</span>
+                                        @endif
                                     </td>
                                     <td class="py-3 text-center">
                                         <div class="btn-group" role="group">
-                                            <button class="btn btn-warning btn-sm" data-bs-toggle="modal"
+                                            <button class="btn btn-sm btn-warning" data-bs-toggle="modal"
                                                 data-bs-target="#editHobiModal" title="Edit Hobi"
                                                 data-id="{{ $hobi->id }}" data-nama="{{ $hobi->nama_hobi }}"
                                                 data-kategori="{{ $hobi->kategori_id }}"
@@ -269,11 +321,11 @@
                                                 <i class="ti ti-pencil"></i>
                                             </button>
                                             <form action="{{ route('hobi.destroy', $hobi->id) }}" method="POST"
-                                                onsubmit="return confirm('Yakin ingin menghapus hobi ini?');"
-                                                style="display:inline;">
+                                                onsubmit="return confirm('Yakin ingin menghapus hobi \"{{ $hobi->nama_hobi }}\"?');"
+                                                class="d-inline">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-sm"
+                                                <button type="submit" class="btn btn-sm btn-danger"
                                                     data-bs-toggle="tooltip" title="Hapus Hobi">
                                                     <i class="ti ti-trash"></i>
                                                 </button>
@@ -282,21 +334,55 @@
                                     </td>
                                 </tr>
                             @empty
-                            <tr>
-                                <td colspan="7" class="text-center py-5">
-                                    <div class="mb-4">
-                                        <i class="ti ti-heart text-muted" style="font-size: 4rem;"></i>
-                                    </div>
-                                    <h5 class="text-muted">Belum ada hobi</h5>
-                                    <p class="text-muted mb-4">Mulai dengan menambahkan hobi pertama Anda</p>
-                                </td>
-                            </tr>
+                                <tr>
+                                    <td colspan="5" class="text-center py-5">
+                                        <div class="py-4">
+                                            <i class="ti ti-mood-sad text-muted mb-3" style="font-size: 4rem;"></i>
+                                            @if (!empty($search))
+                                                <h5 class="text-muted mb-2">Tidak ada hasil untuk "{{ $search }}"
+                                                </h5>
+                                                <p class="text-muted mb-3">Coba gunakan kata kunci yang berbeda</p>
+                                                <a href="{{ route('hobi.index', ['sort_by' => $sortBy, 'sort_direction' => $sortDirection]) }}"
+                                                    class="btn btn-primary">
+                                                    <i class="ti ti-arrow-left me-2"></i>Tampilkan Semua Hobi
+                                                </a>
+                                            @else
+                                                <h5 class="text-muted mb-2">Belum ada hobi</h5>
+                                                <p class="text-muted mb-3">Mulai dengan menambahkan hobi pertama Anda</p>
+                                                <button class="btn btn-primary" data-bs-toggle="modal"
+                                                    data-bs-target="#tambahHobiModal">
+                                                    <i class="ti ti-plus me-2"></i>Tambah Hobi Sekarang
+                                                </button>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
                             @endforelse
                         </tbody>
                     </table>
                 </div>
+
+                @if ($hobis->hasPages())
+                    <div class="card-footer bg-transparent border-top">
+                        <div class="row align-items-center g-3">
+                            <div class="col-md-6 text-center text-md-start">
+                                <small class="text-muted">
+                                    <i class="ti ti-list-details me-1"></i>
+                                    Menampilkan <strong>{{ $hobis->firstItem() ?? 0 }}</strong> -
+                                    <strong>{{ $hobis->lastItem() ?? 0 }}</strong> dari
+                                    <strong>{{ $hobis->total() }}</strong> hobi
+                                </small>
+                            </div>
+                            <div class="col-md-6 d-flex justify-content-center justify-content-md-end">
+                                {{ $hobis->links() }}
+                            </div>
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
+
+        <link rel="stylesheet" href="{{ asset('admin/css/hobi-custom.css') }}">
     </div>
 
     <!-- Enhanced Modal -->

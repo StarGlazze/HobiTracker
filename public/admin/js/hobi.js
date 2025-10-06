@@ -25,80 +25,32 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Simple Search functionality
-    var searchInput = document.getElementById('searchHobi');
-    var clearSearchBtn = document.getElementById('clearSearchBtn');
-
+    // Auto-submit search on Enter key
+    const searchInput = document.getElementById('searchInput');
     if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            var searchTerm = this.value.toLowerCase().trim();
-            var tableBody = document.querySelector('.table tbody');
-            var rows = tableBody.querySelectorAll('tr');
-            var visibleRows = 0;
-
-            // Show/hide clear button
-            if (clearSearchBtn) {
-                clearSearchBtn.style.display = searchTerm ? 'block' : 'none';
-            }
-
-            // Filter rows
-            rows.forEach(function(row) {
-                // Skip no-results row
-                if (row.classList.contains('no-results-row')) {
-                    return;
-                }
-
-                var text = row.textContent.toLowerCase();
-                if (text.includes(searchTerm)) {
-                    row.style.display = '';
-                    visibleRows++;
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-
-            // Handle no results message
-            var noResultsRow = tableBody.querySelector('.no-results-row');
-            
-            if (visibleRows === 0 && searchTerm !== '') {
-                if (!noResultsRow) {
-                    noResultsRow = document.createElement('tr');
-                    noResultsRow.className = 'no-results-row';
-                    noResultsRow.innerHTML = `
-                        <td colspan="5" class="text-center py-4">
-                            <div class="text-muted">
-                                <i class="ti ti-search-off mb-2" style="font-size: 2rem;"></i>
-                                <p class="mb-0">Tidak ada hobi yang cocok dengan pencarian "${searchTerm}"</p>
-                            </div>
-                        </td>
-                    `;
-                    tableBody.appendChild(noResultsRow);
-                }
-                noResultsRow.style.display = '';
-            } else {
-                if (noResultsRow) {
-                    noResultsRow.style.display = 'none';
-                }
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('searchForm').submit();
             }
         });
     }
 
-    // Clear search functionality
-    if (clearSearchBtn) {
-        clearSearchBtn.addEventListener('click', function() {
-            if (searchInput) {
-                searchInput.value = '';
-                searchInput.dispatchEvent(new Event('input'));
-            }
-        });
-    }
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
 });
 
 // Global function to clear search
-function clearSearch() {
-    var searchInput = document.getElementById('searchHobi');
+function clearSearch(event) {
+    if (event) {
+        event.preventDefault();
+    }
+    const searchInput = document.getElementById('searchInput');
     if (searchInput) {
         searchInput.value = '';
-        searchInput.dispatchEvent(new Event('input'));
+        document.getElementById('searchForm').submit();
     }
 }
