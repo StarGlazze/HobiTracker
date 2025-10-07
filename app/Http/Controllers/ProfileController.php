@@ -23,7 +23,7 @@ class ProfileController extends Controller
 
         // Recent activities - with better error handling
         $recentActivities = LogAktivitas::where('user_id', $user->id)
-            ->with(['aktivitas', 'hobi'])
+            ->with(['aktivitas.target.hobi'])
             ->orderBy('created_at', 'desc')
             ->take(3)
             ->get();

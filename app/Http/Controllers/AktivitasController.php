@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Aktivitas;
-use App\Models\Hobi;
+use App\Models\TargetHobi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -20,26 +20,28 @@ class AktivitasController extends Controller
         $userId = Auth::id();
 
         // Mengambil semua aktivitas milik user yang sedang login
-        $aktivitas = Aktivitas::whereHas('hobi', function ($query) use ($userId) {
+        $aktivitas = Aktivitas::whereHas('target.hobi', function ($query) use ($userId) {
             $query->where('user_id', $userId);
-        })->with('hobi')->orderBy('created_at', 'desc')->get();
+        })->with('target.hobi')->orderBy('created_at', 'desc')->get();
 
         // Menghitung statistik untuk dashboard cards
         $totalAktivitas = $aktivitas->count();
         $totalDurasi = $aktivitas->sum('durasi_menit');
-        $hobiAktif = $aktivitas->pluck('hobi')->unique('id')->count();
+        $hobiAktif = $aktivitas->pluck('target.hobi')->unique('id')->count();
         $rataRataDurasi = $totalAktivitas > 0 ? round($totalDurasi / $totalAktivitas) : 0;
 
         // Format durasi untuk tampilan
         $totalDurasiFormatted = $totalDurasi . 'm';
         $rataRataDurasiFormatted = $rataRataDurasi . 'm';
 
-        // Mengambil hobi milik user untuk dropdown
-        $hobis = Hobi::where('user_id', $userId)->get();
+        // Mengambil target milik user untuk dropdown
+        $targets = TargetHobi::whereHas('hobi', function ($query) use ($userId) {
+            $query->where('user_id', $userId);
+        })->with('hobi')->get();
 
         return view('admin.aktivitas', [
             'aktivitas' => $aktivitas,
-            'hobis' => $hobis,
+            'targets' => $targets,
             'totalAktivitas' => $totalAktivitas,
             'totalDurasi' => $totalDurasiFormatted,
             'hobiAktif' => $hobiAktif,
@@ -65,7 +67,7 @@ class AktivitasController extends Controller
 
             // Validasi dasar terlebih dahulu
             $validator = Validator::make($request->all(), [
-                'hobi_id' => 'required|exists:hobis,id',
+                'target_id' => 'required|exists:target_hobis,id',
                 'nama_aktivitas' => 'required|string|max:255',
                 'durasi_menit' => 'required|integer|min:1',
                 'catatan' => 'nullable|string|max:1000',
@@ -87,10 +89,12 @@ class AktivitasController extends Controller
                     ->withInput();
             }
 
-            // Pastikan hobi milik user yang sedang login
-            $hobi = Hobi::where('id', $request->hobi_id)->where('user_id', $userId)->first();
-            if (!$hobi) {
-                return redirect()->back()->with('error', 'Hobi tidak ditemukan atau bukan milik Anda')->withInput();
+            // Pastikan target milik user yang sedang login
+            $target = TargetHobi::where('id', $request->target_id)->whereHas('hobi', function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            })->first();
+            if (!$target) {
+                return redirect()->back()->with('error', 'Target tidak ditemukan atau bukan milik Anda')->withInput();
             }
 
             $fileData = [];
@@ -109,7 +113,7 @@ class AktivitasController extends Controller
 
             // Buat aktivitas baru
             $aktivitas = Aktivitas::create([
-                'hobi_id' => $request->hobi_id,
+                'target_id' => $request->target_id,
                 'nama_aktivitas' => $request->nama_aktivitas,
                 'durasi_menit' => $request->durasi_menit,
                 'catatan' => $request->catatan,
@@ -137,11 +141,11 @@ class AktivitasController extends Controller
     {
         $userId = Auth::id();
 
-        // Load hobi relationship untuk cek kepemilikan
-        $aktivitas->load('hobi');
+        // Load target.hobi relationship untuk cek kepemilikan
+        $aktivitas->load('target.hobi');
 
         // Pastikan aktivitas milik user yang sedang login
-        if (!$aktivitas->hobi || $aktivitas->hobi->user_id !== $userId) {
+        if (!$aktivitas->target || !$aktivitas->target->hobi || $aktivitas->target->hobi->user_id !== $userId) {
             return redirect()->back()->with('error', 'Aktivitas tidak ditemukan atau bukan milik Anda');
         }
 
@@ -164,17 +168,17 @@ class AktivitasController extends Controller
         try {
             $userId = Auth::id();
 
-            // Load hobi relationship untuk cek kepemilikan
-            $aktivitas->load('hobi');
+            // Load target.hobi relationship untuk cek kepemilikan
+            $aktivitas->load('target.hobi');
 
             // Pastikan aktivitas milik user yang sedang login
-            if (!$aktivitas->hobi || $aktivitas->hobi->user_id !== $userId) {
+            if (!$aktivitas->target || !$aktivitas->target->hobi || $aktivitas->target->hobi->user_id !== $userId) {
                 return redirect()->back()->with('error', 'Aktivitas tidak ditemukan atau bukan milik Anda')->withInput();
             }
 
             // Validasi dasar terlebih dahulu
             $validator = Validator::make($request->all(), [
-                'hobi_id' => 'required|exists:hobis,id',
+                'target_id' => 'required|exists:target_hobis,id',
                 'nama_aktivitas' => 'required|string|max:255',
                 'durasi_menit' => 'required|integer|min:1',
                 'catatan' => 'nullable|string|max:1000',
@@ -198,10 +202,12 @@ class AktivitasController extends Controller
                     ->withInput();
             }
 
-            // Pastikan hobi milik user yang sedang login
-            $hobi = Hobi::where('id', $request->hobi_id)->where('user_id', $userId)->first();
-            if (!$hobi) {
-                return redirect()->back()->with('error', 'Hobi tidak ditemukan atau bukan milik Anda')->withInput();
+            // Pastikan target milik user yang sedang login
+            $target = TargetHobi::where('id', $request->target_id)->whereHas('hobi', function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            })->first();
+            if (!$target) {
+                return redirect()->back()->with('error', 'Target tidak ditemukan atau bukan milik Anda')->withInput();
             }
 
             // Parse existing file data with backward compatibility
@@ -242,7 +248,7 @@ class AktivitasController extends Controller
 
             // Update aktivitas
             $aktivitas->update([
-                'hobi_id' => $request->hobi_id,
+                'target_id' => $request->target_id,
                 'nama_aktivitas' => $request->nama_aktivitas,
                 'durasi_menit' => $request->durasi_menit,
                 'catatan' => $request->catatan,
@@ -269,11 +275,11 @@ class AktivitasController extends Controller
         try {
             $userId = Auth::id();
 
-            // Load hobi relationship untuk cek kepemilikan
-            $aktivitas->load('hobi');
+            // Load target.hobi relationship untuk cek kepemilikan
+            $aktivitas->load('target.hobi');
 
             // Pastikan aktivitas milik user yang sedang login
-            if (!$aktivitas->hobi || $aktivitas->hobi->user_id !== $userId) {
+            if (!$aktivitas->target || !$aktivitas->target->hobi || $aktivitas->target->hobi->user_id !== $userId) {
                 return redirect()->back()->with('error', 'Aktivitas tidak ditemukan atau bukan milik Anda');
             }
 

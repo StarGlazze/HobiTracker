@@ -17,7 +17,7 @@ class TargetHobiController extends Controller
         // Auto update expired targets before displaying
         $this->updateExpiredTargets();
         
-        $targets = TargetHobi::with('hobi.kategoriHobi', 'progresTarget')
+        $targets = TargetHobi::with('hobi.kategoriHobi', 'progresTarget', 'aktivitas')
                     ->where('user_id', Auth::id())
                     ->orderBy('target_deadline', 'asc')
                     ->get();
@@ -47,11 +47,15 @@ class TargetHobiController extends Controller
             'hobi_id' => 'required|exists:hobis,id',
             'nama_target' => 'required|string|max:255',
             'target_deadline' => 'required|date|after:yesterday',
+            'jumlah_aktivitas_dibutuhkan' => 'required|integer|min:1',
         ], [
             'target_deadline.after' => 'Batas waktu harus setelah hari kemarin.',
             'hobi_id.required' => 'Silakan pilih hobi.',
             'hobi_id.exists' => 'Hobi yang dipilih tidak valid.',
             'nama_target.required' => 'Nama target wajib diisi.',
+            'jumlah_aktivitas_dibutuhkan.required' => 'Jumlah aktivitas dibutuhkan wajib diisi.',
+            'jumlah_aktivitas_dibutuhkan.integer' => 'Jumlah aktivitas harus berupa angka.',
+            'jumlah_aktivitas_dibutuhkan.min' => 'Jumlah aktivitas minimal 1.',
         ]);
 
         // Verify hobi belongs to user
@@ -69,6 +73,7 @@ class TargetHobiController extends Controller
             'hobi_id' => $request->hobi_id,
             'nama_target' => $request->nama_target,
             'target_deadline' => $request->target_deadline,
+            'jumlah_aktivitas_dibutuhkan' => $request->jumlah_aktivitas_dibutuhkan,
         ]);
 
         return redirect()->route('admin.target.index')
@@ -112,11 +117,15 @@ class TargetHobiController extends Controller
             'hobi_id' => 'required|exists:hobis,id',
             'nama_target' => 'required|string|max:255',
             'target_deadline' => 'required|date|after:yesterday',
+            'jumlah_aktivitas_dibutuhkan' => 'required|integer|min:1',
         ], [
             'target_deadline.after' => 'Batas waktu harus setelah hari kemarin.',
             'hobi_id.required' => 'Silakan pilih hobi.',
             'hobi_id.exists' => 'Hobi yang dipilih tidak valid.',
             'nama_target.required' => 'Nama target wajib diisi.',
+            'jumlah_aktivitas_dibutuhkan.required' => 'Jumlah aktivitas dibutuhkan wajib diisi.',
+            'jumlah_aktivitas_dibutuhkan.integer' => 'Jumlah aktivitas harus berupa angka.',
+            'jumlah_aktivitas_dibutuhkan.min' => 'Jumlah aktivitas minimal 1.',
         ]);
 
         // Verify hobi belongs to user (except for admin)
@@ -131,7 +140,7 @@ class TargetHobiController extends Controller
             }
         }
 
-        $target->update($request->only(['hobi_id', 'nama_target', 'target_deadline']));
+        $target->update($request->only(['hobi_id', 'nama_target', 'target_deadline', 'jumlah_aktivitas_dibutuhkan']));
 
         // Update any failed progress back to on_progress if deadline is extended
         if ($request->target_deadline > now()->format('Y-m-d')) {

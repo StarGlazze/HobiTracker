@@ -98,8 +98,8 @@ class LogAktivitasController extends Controller
             $rataRataHarian = $failed;
 
         } else {
-            $query = LogAktivitas::with(['aktivitas.hobi']);
-            
+            $query = LogAktivitas::with(['aktivitas.target.hobi']);
+
             if (!$isAdmin) {
                 $query->where('user_id', Auth::id());
             }
@@ -141,10 +141,10 @@ class LogAktivitasController extends Controller
                 return response()->json(['error' => 'Unauthorized'], 403);
             }
 
-            $logAktivitas->load(['aktivitas.hobi']);
+            $logAktivitas->load(['aktivitas.target.hobi']);
 
             // Check if relations exist
-            if (!$logAktivitas->aktivitas || !$logAktivitas->aktivitas->hobi) {
+            if (!$logAktivitas->aktivitas || !$logAktivitas->aktivitas->target || !$logAktivitas->aktivitas->target->hobi) {
                 return response()->json(['error' => 'Data aktivitas tidak lengkap'], 404);
             }
 
@@ -163,7 +163,8 @@ class LogAktivitasController extends Controller
                 'tanggal' => $logAktivitas->created_at->format('d F Y'),
                 'waktu_upload' => $logAktivitas->created_at->format('H:i'),
                 'aktivitas' => $logAktivitas->aktivitas->nama_aktivitas,
-                'hobi' => $logAktivitas->aktivitas->hobi->nama_hobi,
+                'target' => $logAktivitas->aktivitas->target->nama_target,
+                'hobi' => $logAktivitas->aktivitas->target->hobi->nama_hobi,
                 'durasi' => $logAktivitas->aktivitas->durasi_menit . ' Menit',
                 'catatan' => $logAktivitas->catatan ?: 'tidak ada catatan',
                 'bukti' => $bukti
@@ -247,8 +248,8 @@ class LogAktivitasController extends Controller
             $logs = $query->orderBy('created_at', 'desc')->get();
 
         } else {
-            $query = LogAktivitas::with(['aktivitas.hobi']);
-            
+            $query = LogAktivitas::with(['aktivitas.target.hobi']);
+
             if (!$isAdmin) {
                 $query->where('user_id', Auth::id());
             }
