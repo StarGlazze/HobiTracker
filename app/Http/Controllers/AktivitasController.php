@@ -125,7 +125,6 @@ class AktivitasController extends Controller
             ]);
 
             return redirect()->back()->with('success', 'Aktivitas berhasil ditambahkan dan dicatat di log');
-
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan pada server: ' . $e->getMessage())->withInput();
         }
@@ -257,7 +256,6 @@ class AktivitasController extends Controller
             ]);
 
             return redirect()->back()->with('success', 'Aktivitas berhasil diperbarui');
-
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan pada server: ' . $e->getMessage())->withInput();
         }
@@ -305,7 +303,6 @@ class AktivitasController extends Controller
             $aktivitas->delete();
 
             return redirect()->back()->with('success', 'Aktivitas berhasil dihapus');
-
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan pada server: ' . $e->getMessage());
         }

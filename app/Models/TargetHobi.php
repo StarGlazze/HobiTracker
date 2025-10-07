@@ -14,6 +14,7 @@ class TargetHobi extends Model
         'hobi_id',
         'nama_target',
         'target_deadline',
+        'jumlah_aktivitas_dibutuhkan',
     ];
 
     protected $casts = [
@@ -29,5 +30,10 @@ class TargetHobi extends Model
     public function progresTarget()
     {
         return $this->hasMany(ProgresTarget::class, 'target_id');
+    }
+
+    public function aktivitas()
+    {
+        return $this->hasMany(Aktivitas::class, 'target_id');
     }
 }

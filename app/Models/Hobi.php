@@ -27,11 +27,6 @@ class Hobi extends Model
         return $this->belongsTo(KategoriHobi::class, 'kategori_id');
     }
 
-    public function aktivitas()
-    {
-        return $this->hasMany(Aktivitas::class);
-    }
-
     public function targetHobi()
     {
         return $this->hasMany(TargetHobi::class);

@@ -10,7 +10,7 @@ class Aktivitas extends Model
     use HasFactory;
 
     protected $fillable = [
-        'hobi_id',
+        'target_id',
         'nama_aktivitas',
         'durasi_menit',
         'catatan',
@@ -38,9 +38,9 @@ class Aktivitas extends Model
     }
 
     // Relationships
-    public function hobi()
+    public function target()
     {
-        return $this->belongsTo(Hobi::class);
+        return $this->belongsTo(TargetHobi::class, 'target_id');
     }
 
     public function logAktivitas()
