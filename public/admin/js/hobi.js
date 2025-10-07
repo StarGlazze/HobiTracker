@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     var editHobiModal = document.getElementById('editHobiModal');
-    
+
     // Edit modal functionality
     if (editHobiModal) {
         editHobiModal.addEventListener('show.bs.modal', function (event) {
@@ -24,6 +24,17 @@ document.addEventListener('DOMContentLoaded', function () {
             if (editDeskripsiHobi) editDeskripsiHobi.value = deskripsi || '';
         });
     }
+
+    // Konfirmasi hapus hobi
+    document.querySelectorAll('.hapus-hobi-form').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            var nama = form.querySelector('button[type="submit"]').getAttribute('data-nama');
+            var pesan = 'Yakin ingin menghapus hobi "' + nama + '"? Tindakan ini akan menghapus semua target dan aktivitas terkait secara permanen.';
+            if (!confirm(pesan)) {
+                e.preventDefault();
+            }
+        });
+    });
 
     // Auto-submit search on Enter key
     const searchInput = document.getElementById('searchInput');

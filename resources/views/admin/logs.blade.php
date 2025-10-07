@@ -18,25 +18,7 @@
             </div>
         </div>
 
-        <!-- Type Filter Tabs -->
-        <div class="row mb-3">
-            <div class="col-12">
-                <ul class="nav nav-pills">
-                    <li class="nav-item">
-                        <a class="nav-link {{ $type === 'aktivitas' ? 'active' : '' }}"
-                            href="{{ route('admin.logs', array_merge(request()->except(['type', 'page']), ['type' => 'aktivitas', 'page' => 1])) }}">
-                            <i class="ti ti-activity me-2"></i>Log Aktivitas
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {{ $type === 'target' ? 'active' : '' }}"
-                            href="{{ route('admin.logs', array_merge(request()->except(['type', 'page']), ['type' => 'target', 'page' => 1])) }}">
-                            <i class="ti ti-target me-2"></i>Log Target
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
+
 
         <!-- Stats Cards -->
         <div class="row mb-4">
@@ -45,8 +27,7 @@
                     <div class="card-body p-3">
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
-                                <h6 class="text-white-50 mb-1">Total {{ $type === 'target' ? 'Progress' : 'Aktivitas' }}
-                                </h6>
+                                <h6 class="text-white-50 mb-1">Total Aktivitas</h6>
                                 <h4 class="mb-0">{{ $totalAktivitas }}</h4>
                             </div>
                             <div class="ms-3">
@@ -76,11 +57,11 @@
                     <div class="card-body p-3">
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
-                                <h6 class="text-white-50 mb-1">{{ $type === 'target' ? 'Completed' : 'Total Durasi' }}</h6>
-                                <h4 class="mb-0">{{ $totalDurasi }}{{ $type === 'aktivitas' ? 'm' : '' }}</h4>
+                                <h6 class="text-white-50 mb-1">Total Durasi</h6>
+                                <h4 class="mb-0">{{ $totalDurasi }}m</h4>
                             </div>
                             <div class="ms-3">
-                                <i class="ti ti-{{ $type === 'target' ? 'check' : 'clock' }} fs-1 text-white-50"></i>
+                                <i class="ti ti-clock fs-1 text-white-50"></i>
                             </div>
                         </div>
                     </div>
@@ -91,12 +72,11 @@
                     <div class="card-body p-3">
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
-                                <h6 class="text-white-50 mb-1">{{ $type === 'target' ? 'Failed' : 'Rata-rata Harian' }}
-                                </h6>
-                                <h4 class="mb-0">{{ $rataRataHarian }}{{ $type === 'aktivitas' ? 'm' : '' }}</h4>
+                                <h6 class="text-white-50 mb-1">Rata-rata Harian</h6>
+                                <h4 class="mb-0">{{ $rataRataHarian }}m</h4>
                             </div>
                             <div class="ms-3">
-                                <i class="ti ti-{{ $type === 'target' ? 'x' : 'trending-up' }} fs-1 text-white-50"></i>
+                                <i class="ti ti-trending-up fs-1 text-white-50"></i>
                             </div>
                         </div>
                     </div>
@@ -109,14 +89,11 @@
             <div class="card-header bg-transparent border-bottom-0 pt-4">
                 <div class="row align-items-center">
                     <div class="col-md-5 mb-3 mb-md-0">
-                        <h5 class="mb-1">Riwayat {{ $type === 'target' ? 'Target' : 'Aktivitas' }}</h5>
-                        <p class="text-muted small mb-0">Daftar lengkap
-                            {{ $type === 'target' ? 'progress target' : 'aktivitas' }} hobi Anda</p>
+                        <h5 class="mb-1">Riwayat Aktivitas</h5>
+                        <p class="text-muted small mb-0">Daftar lengkap aktivitas hobi Anda</p>
                     </div>
                     <div class="col-md-7">
                         <form method="GET" action="{{ route('admin.logs') }}" class="row g-2 align-items-center">
-                            <input type="hidden" name="type" value="{{ $type }}">
-
                             <!-- Search -->
                             <div class="col-12 col-lg-4">
                                 <div class="input-group input-group-sm">
@@ -124,7 +101,7 @@
                                         <i class="ti ti-search text-muted"></i>
                                     </span>
                                     <input type="text" name="search" class="form-control border-start-0"
-                                        placeholder="Cari {{ $type }}..." value="{{ $search ?? '' }}">
+                                        placeholder="Cari aktivitas..." value="{{ $search ?? '' }}">
                                 </div>
                             </div>
 
@@ -146,7 +123,7 @@
                                         <i class="ti ti-filter"></i> Filter
                                     </button>
                                     @if ($search || $startDate || $endDate)
-                                        <a href="{{ route('admin.logs', ['type' => $type]) }}"
+                                        <a href="{{ route('admin.logs') }}"
                                             class="btn btn-outline-danger btn-sm">
                                             <i class="ti ti-x"></i>
                                         </a>
@@ -160,217 +137,111 @@
 
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    @if ($type === 'aktivitas')
-                        <!-- Table Aktivitas -->
-                        <table id="logs-table" class="table table-hover align-middle mb-0">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th scope="col" class="border-0 py-3 px-4" style="width: 120px;">
-                                        <div class="d-flex align-items-center">
-                                            <i class="ti ti-calendar-event me-2 text-muted"></i>
-                                            <a href="{{ request()->fullUrlWithQuery(['sort' => 'created_at', 'direction' => request('sort') === 'created_at' && request('direction') === 'asc' ? 'desc' : 'asc']) }}"
-                                                class="text-decoration-none text-dark">
-                                                Tanggal
-                                                @if (request('sort') === 'created_at')
-                                                    <i
-                                                        class="ti ti-chevron-{{ request('direction') === 'asc' ? 'up' : 'down' }} ms-1"></i>
-                                                @endif
-                                            </a>
-                                        </div>
-                                    </th>
-                                    <th scope="col" class="border-0 py-3">
-                                        <div class="d-flex align-items-center">
-                                            <i class="ti ti-activity me-2 text-muted"></i>
-                                            Aktivitas
-                                        </div>
-                                    </th>
-                                    <th scope="col" class="border-0 py-3">
-                                        <div class="d-flex align-items-center">
-                                            <i class="ti ti-heart me-2 text-muted"></i>
-                                            Hobi
-                                        </div>
-                                    </th>
-                                    <th scope="col" class="border-0 py-3">
-                                        <div class="d-flex align-items-center">
-                                            <i class="ti ti-clock me-2 text-muted"></i>
-                                            Durasi
-                                        </div>
-                                    </th>
-                                    <th scope="col" class="border-0 py-3">
-                                        <div class="d-flex align-items-center">
-                                            <i class="ti ti-notes me-2 text-muted"></i>
-                                            Catatan
-                                        </div>
-                                    </th>
-                                    <th scope="col" class="border-0 py-3 text-center">
-                                        <i class="ti ti-paperclip text-muted"></i>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($logs as $log)
-                                    <tr class="border-bottom">
-                                        <td class="px-4 py-3">
-                                            <div class="d-flex flex-column">
-                                                <span class="fw-semibold">{{ $log->created_at->format('d F Y') }}</span>
-                                            </div>
-                                        </td>
-                                        <td class="py-3">
-                                            <div class="d-flex align-items-center">
-                                                <div>
-                                                    <h6 class="mb-1">{{ $log->aktivitas->nama_aktivitas }}</h6>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="py-3">
-                                            <span
-                                                class="fw-semibold px-3 py-2">{{ $log->aktivitas->hobi->nama_hobi }}</span>
-                                        </td>
-                                        <td class="py-3">
-                                            <div class="d-flex align-items-center">
-                                                <span class="fw-semibold">{{ $log->aktivitas->durasi_menit }} Menit</span>
-                                            </div>
-                                        </td>
-                                        <td class="py-3">
-                                            <div class="text-truncate" style="max-width: 200px;">
-                                                {{ $log->catatan ?: 'tidak ada catatan' }}
-                                            </div>
-                                        </td>
-                                        <td class="py-3 text-center">
-                                            <button class="btn btn-sm btn-secondary" data-bs-toggle="modal"
-                                                data-bs-target="#detailModal" title="Lihat Detail"
-                                                onclick="loadDetail({{ $log->id }}, 'aktivitas')">
-                                                <i class="ti ti-eye"></i>
-                                            </button>
-                                            @if (Auth::user()->email === 'admin@example.com')
-                                                <form method="POST" action="{{ route('log-aktivitas.destroy', $log) }}"
-                                                    style="display: inline;"
-                                                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus log ini?')">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-danger ms-1"
-                                                        title="Hapus">
-                                                        <i class="ti ti-trash"></i>
-                                                    </button>
-                                                </form>
+                    <!-- Table Aktivitas -->
+                    <table id="logs-table" class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th scope="col" class="border-0 py-3 px-4" style="width: 120px;">
+                                    <div class="d-flex align-items-center">
+                                        <i class="ti ti-calendar-event me-2 text-muted"></i>
+                                        <a href="{{ request()->fullUrlWithQuery(['sort' => 'created_at', 'direction' => request('sort') === 'created_at' && request('direction') === 'asc' ? 'desc' : 'asc']) }}"
+                                            class="text-decoration-none text-dark">
+                                            Tanggal
+                                            @if (request('sort') === 'created_at')
+                                                <i
+                                                    class="ti ti-chevron-{{ request('direction') === 'asc' ? 'up' : 'down' }} ms-1"></i>
                                             @endif
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="6" class="text-center py-4">
-                                            <i class="ti ti-file-x text-muted fs-1"></i>
-                                            <p class="text-muted mt-2">Belum ada log aktivitas.</p>
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    @else
-                        <!-- Table Target -->
-                        <table id="logs-table" class="table table-hover align-middle mb-0">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th scope="col" class="border-0 py-3 px-4" style="width: 120px;">
-                                        <div class="d-flex align-items-center">
-                                            <i class="ti ti-calendar-event me-2 text-muted"></i>
-                                            <a href="{{ request()->fullUrlWithQuery(['sort' => 'created_at', 'direction' => request('sort') === 'created_at' && request('direction') === 'asc' ? 'desc' : 'asc']) }}"
-                                                class="text-decoration-none text-dark">
-                                                Tanggal
-                                                @if (request('sort') === 'created_at')
-                                                    <i
-                                                        class="ti ti-chevron-{{ request('direction') === 'asc' ? 'up' : 'down' }} ms-1"></i>
-                                                @endif
-                                            </a>
+                                        </a>
+                                    </div>
+                                </th>
+                                <th scope="col" class="border-0 py-3">
+                                    <div class="d-flex align-items-center">
+                                        <i class="ti ti-activity me-2 text-muted"></i>
+                                        Aktivitas
+                                    </div>
+                                </th>
+                                <th scope="col" class="border-0 py-3">
+                                    <div class="d-flex align-items-center">
+                                        <i class="ti ti-target me-2 text-muted"></i>
+                                        Target
+                                    </div>
+                                </th>
+                                <th scope="col" class="border-0 py-3">
+                                    <div class="d-flex align-items-center">
+                                        <i class="ti ti-clock me-2 text-muted"></i>
+                                        Durasi
+                                    </div>
+                                </th>
+                                <th scope="col" class="border-0 py-3">
+                                    <div class="d-flex align-items-center">
+                                        <i class="ti ti-notes me-2 text-muted"></i>
+                                        Catatan
+                                    </div>
+                                </th>
+                                <th scope="col" class="border-0 py-3 text-center">
+                                    <i class="ti ti-paperclip text-muted"></i>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($logs as $log)
+                                <tr class="border-bottom">
+                                    <td class="px-4 py-3">
+                                        <div class="d-flex flex-column">
+                                            <span class="fw-semibold">{{ $log->created_at->format('d F Y') }}</span>
                                         </div>
-                                    </th>
-                                    <th scope="col" class="border-0 py-3">
+                                    </td>
+                                    <td class="py-3">
                                         <div class="d-flex align-items-center">
-                                            <i class="ti ti-target me-2 text-muted"></i>
-                                            Target
+                                            <div>
+                                                <h6 class="mb-1">{{ $log->aktivitas->nama_aktivitas }}</h6>
+                                            </div>
                                         </div>
-                                    </th>
-                                    <th scope="col" class="border-0 py-3">
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="fw-semibold">{{ $log->aktivitas->target->nama_target }}</span>
+                                        <br><small class="text-muted">{{ $log->aktivitas->target->hobi->nama_hobi }}</small>
+                                    </td>
+                                    <td class="py-3">
                                         <div class="d-flex align-items-center">
-                                            <i class="ti ti-heart me-2 text-muted"></i>
-                                            Hobi
+                                            <span class="fw-semibold">{{ $log->aktivitas->durasi_menit }} Menit</span>
                                         </div>
-                                    </th>
-                                    <th scope="col" class="border-0 py-3">
-                                        <div class="d-flex align-items-center">
-                                            <i class="ti ti-flag me-2 text-muted"></i>
-                                            Status
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="text-truncate" style="max-width: 200px;">
+                                            {{ $log->catatan ?: 'tidak ada catatan' }}
                                         </div>
-                                    </th>
-                                    <th scope="col" class="border-0 py-3">
-                                        <div class="d-flex align-items-center">
-                                            <i class="ti ti-notes me-2 text-muted"></i>
-                                            Catatan
-                                        </div>
-                                    </th>
-                                    <th scope="col" class="border-0 py-3 text-center">
-                                        <i class="ti ti-paperclip text-muted"></i>
-                                    </th>
+                                    </td>
+                                    <td class="py-3 text-center">
+                                        <button class="btn btn-sm btn-secondary" data-bs-toggle="modal"
+                                            data-bs-target="#detailModal" title="Lihat Detail"
+                                            onclick="loadDetail({{ $log->id }}, 'aktivitas')">
+                                            <i class="ti ti-eye"></i>
+                                        </button>
+                                        @if (Auth::user()->email === 'admin@example.com')
+                                            <form method="POST" action="{{ route('log-aktivitas.destroy', $log) }}"
+                                                style="display: inline;"
+                                                onsubmit="return confirm('Apakah Anda yakin ingin menghapus log ini?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-danger ms-1"
+                                                    title="Hapus">
+                                                    <i class="ti ti-trash"></i>
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($logs as $log)
-                                    <tr class="border-bottom">
-                                        <td class="px-4 py-3">
-                                            <div class="d-flex flex-column">
-                                                <span class="fw-semibold">{{ $log->created_at->format('d F Y') }}</span>
-                                            </div>
-                                        </td>
-                                        <td class="py-3">
-                                            <div class="d-flex align-items-center">
-                                                <div>
-                                                    <h6 class="mb-1">{{ $log->targetHobi->nama_target }}</h6>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="py-3">
-                                            <span
-                                                class="fw-semibold px-3 py-2">{{ $log->targetHobi->hobi->nama_hobi }}</span>
-                                        </td>
-                                        <td class="py-3">
-                                            @if ($log->status === 'completed')
-                                                <span class="badge bg-success-subtle text-success px-3 py-2">
-                                                    <i class="ti ti-check-circle me-1"></i>Completed
-                                                </span>
-                                            @elseif($log->status === 'failed')
-                                                <span class="badge bg-danger-subtle text-danger px-3 py-2">
-                                                    <i class="ti ti-x-circle me-1"></i>Failed
-                                                </span>
-                                            @else
-                                                <span class="badge bg-warning-subtle text-warning px-3 py-2">
-                                                    <i class="ti ti-clock me-1"></i>On Progress
-                                                </span>
-                                            @endif
-                                        </td>
-                                        <td class="py-3">
-                                            <div class="text-truncate" style="max-width: 200px;">
-                                                {{ $log->catatan ?: 'tidak ada catatan' }}
-                                            </div>
-                                        </td>
-                                        <td class="py-3 text-center">
-                                            <button class="btn btn-sm btn-secondary" data-bs-toggle="modal"
-                                                data-bs-target="#detailModal" title="Lihat Detail"
-                                                onclick="loadDetail({{ $log->id }}, 'target')">
-                                                <i class="ti ti-eye"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="6" class="text-center py-4">
-                                            <i class="ti ti-target text-muted fs-1"></i>
-                                            <p class="text-muted mt-2">Belum ada log target.</p>
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    @endif
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="text-center py-4">
+                                        <i class="ti ti-file-x text-muted fs-1"></i>
+                                        <p class="text-muted mt-2">Belum ada log aktivitas.</p>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
@@ -381,7 +252,7 @@
                     <div class="col-12 col-md-4 text-center text-md-start">
                         <small class="text-muted">
                             Menampilkan {{ $logs->firstItem() ?? 0 }}-{{ $logs->lastItem() ?? 0 }} dari
-                            {{ $logs->total() }} {{ $type === 'target' ? 'progress' : 'aktivitas' }}
+                            {{ $logs->total() }} aktivitas
                         </small>
                     </div>
 
@@ -397,7 +268,7 @@
                                         </li>
                                     @else
                                         <li class="page-item">
-                                            <a class="page-link" href="{{ $logs->appends(array_merge(request()->query(), ['type' => $type]))->previousPageUrl() }}" rel="prev" aria-label="Previous">&laquo;</a>
+                                            <a class="page-link" href="{{ $logs->appends(request()->query())->previousPageUrl() }}" rel="prev" aria-label="Previous">&laquo;</a>
                                         </li>
                                     @endif
 
@@ -406,14 +277,14 @@
                                         @if ($page == $logs->currentPage())
                                             <li class="page-item active" aria-current="page"><span class="page-link">{{ $page }}</span></li>
                                         @else
-                                            <li class="page-item"><a class="page-link" href="{{ $url }}&type={{ $type }}">{{ $page }}</a></li>
+                                            <li class="page-item"><a class="page-link" href="{{ $url }}">{{ $page }}</a></li>
                                         @endif
                                     @endforeach
 
                                     {{-- Next Page Link --}}
                                     @if ($logs->hasMorePages())
                                         <li class="page-item">
-                                            <a class="page-link" href="{{ $logs->appends(array_merge(request()->query(), ['type' => $type]))->nextPageUrl() }}" rel="next" aria-label="Next">&raquo;</a>
+                                            <a class="page-link" href="{{ $logs->appends(request()->query())->nextPageUrl() }}" rel="next" aria-label="Next">&raquo;</a>
                                         </li>
                                     @else
                                         <li class="page-item disabled" aria-disabled="true" aria-label="Next">
@@ -486,7 +357,7 @@
             <div class="modal-content border-0 shadow">
                 <div class="modal-header bg-secondary text-white border-0">
                     <h5 class="modal-title" id="detailModalLabel">
-                        <i class="ti ti-eye me-2"></i>Detail Log {{ $type === 'target' ? 'Target' : 'Aktivitas' }}
+                        <i class="ti ti-eye me-2"></i>Detail Log Aktivitas
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                         aria-label="Close"></button>
@@ -501,7 +372,7 @@
                     <div id="detail-content">
                         <p class="text-muted mb-4">
                             <i class="ti ti-info-circle me-2"></i>
-                            Lihat keseluruhan data log {{ $type === 'target' ? 'target' : 'aktivitas' }} hobi Anda.
+                            Lihat keseluruhan data log aktivitas hobi Anda.
                         </p>
 
                         <dl class="row">
@@ -511,17 +382,23 @@
                             <dt class="col-sm-3">Waktu Upload</dt>
                             <dd class="col-sm-9" id="detail-waktu-upload">-</dd>
 
-                            <dt class="col-sm-3">{{ $type === 'target' ? 'Target' : 'Aktivitas' }}</dt>
+                            <dt class="col-sm-3">Aktivitas</dt>
                             <dd class="col-sm-9" id="detail-aktivitas">-</dd>
+
+                            <dt class="col-sm-3">Target</dt>
+                            <dd class="col-sm-9" id="detail-target">-</dd>
 
                             <dt class="col-sm-3">Hobi</dt>
                             <dd class="col-sm-9" id="detail-hobi">-</dd>
 
-                            <dt class="col-sm-3">{{ $type === 'target' ? 'Status' : 'Durasi' }}</dt>
+                            <dt class="col-sm-3">Durasi</dt>
                             <dd class="col-sm-9" id="detail-durasi">-</dd>
 
                             <dt class="col-sm-3">Catatan</dt>
                             <dd class="col-sm-9" id="detail-catatan">-</dd>
+
+                            <dt class="col-sm-3">Bukti</dt>
+                            <dd class="col-sm-9" id="detail-bukti">-</dd>
                         </dl>
 
                         <div class="row mt-4">

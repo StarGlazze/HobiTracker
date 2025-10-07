@@ -33,79 +33,7 @@ $(document).ready(function() {
         }
     });
 
-    // Validate progress form on submit - check for both add and edit progress forms
-    $('form[action*="progres.store"], form[action*="progres.update"]').on('submit', function(e) {
-        var fileInput = $(this).find('input[name="file_bukti"]');
-        var linkInput = $(this).find('input[name="link_gdrive"]');
-        var fileVal = fileInput.val();
-        var linkVal = linkInput.val().trim();
-        
-        // For edit forms, check if there's existing evidence
-        var isEditForm = $(this).find('input[name="_method"][value="PUT"]').length > 0;
-        var hasExistingFile = $(this).find('small:contains("File saat ini")').length > 0;
-        var hasExistingLink = isEditForm && linkInput.attr('value') && linkInput.attr('value').trim() !== '';
 
-        // Check if at least one evidence exists (new file, new link, or existing evidence)
-        if (!fileVal && !linkVal && !hasExistingFile && !hasExistingLink) {
-            alert('Harus upload file bukti atau isi link Google Drive.');
-            e.preventDefault();
-            return false;
-        }
-
-        // Check file size if new file is selected
-        if (fileInput[0] && fileInput[0].files.length > 0) {
-            var fileSize = fileInput[0].files[0].size / 1024 / 1024; // MB
-            if (fileSize > 5) {
-                alert('Ukuran file maksimal 5MB.');
-                e.preventDefault();
-                return false;
-            }
-        }
-    });
-
-    // Auto-update status based on evidence submission
-    $('select[name="status"]').on('change', function() {
-        var form = $(this).closest('form');
-        var fileInput = form.find('input[name="file_bukti"]');
-        var linkInput = form.find('input[name="link_gdrive"]');
-        var statusSelect = $(this);
-        
-        // If user selects completed, ensure they have evidence
-        if (statusSelect.val() === 'completed') {
-            var fileVal = fileInput.val();
-            var linkVal = linkInput.val().trim();
-            var hasExistingFile = form.find('small:contains("File saat ini")').length > 0;
-            var hasExistingLink = linkInput.attr('value') && linkInput.attr('value').trim() !== '';
-            
-            if (!fileVal && !linkVal && !hasExistingFile && !hasExistingLink) {
-                alert('Status "Completed" memerlukan file bukti atau link Google Drive.');
-                statusSelect.val('on_progress');
-            }
-        }
-    });
-
-    // When file is uploaded or link is added, auto-update status to completed
-    $('input[name="file_bukti"], input[name="link_gdrive"]').on('change input', function() {
-        var form = $(this).closest('form');
-        var fileInput = form.find('input[name="file_bukti"]');
-        var linkInput = form.find('input[name="link_gdrive"]');
-        var statusSelect = form.find('select[name="status"]');
-        
-        var hasFile = fileInput[0] && fileInput[0].files.length > 0;
-        var hasLink = linkInput.val().trim() !== '';
-        var hasExistingFile = form.find('small:contains("File saat ini")').length > 0;
-        var hasExistingLink = linkInput.attr('value') && linkInput.attr('value').trim() !== '';
-        
-        // Auto-set to completed if evidence is provided and current status is on_progress
-        if ((hasFile || hasLink || hasExistingFile || hasExistingLink) && statusSelect.val() === 'on_progress') {
-            statusSelect.val('completed');
-        }
-        
-        // Reset to on_progress if no evidence and status was completed
-        if (!hasFile && !hasLink && !hasExistingFile && !hasExistingLink && statusSelect.val() === 'completed') {
-            statusSelect.val('on_progress');
-        }
-    });
 
     // Auto-hide alerts after 5 seconds
     setTimeout(function() {
@@ -167,15 +95,10 @@ $(document).ready(function() {
     $('.modal').on('shown.bs.modal', function() {
         var modal = $(this);
         var form = modal.find('form');
-        
+
         // Reset form validation states
         form.find('.is-invalid').removeClass('is-invalid');
         form.find('.invalid-feedback').remove();
-        
-        // Set default status for new progress
-        if (modal.attr('id').includes('progressModal') && !modal.attr('id').includes('edit')) {
-            form.find('select[name="status"]').val('on_progress');
-        }
     });
 
     // Simple Search functionality
@@ -228,114 +151,9 @@ $(document).ready(function() {
 
     // Functions for onclick
     window.confirmDelete = function(button) {
-        if (confirm('Yakin ingin menghapus target ini? Semua progres terkait juga akan terhapus.')) {
+        if (confirm('Yakin ingin menghapus target ini?')) {
             button.closest('form').submit();
         }
-    };
-
-    window.confirmDeleteProgress = function(button) {
-        if (confirm('Yakin ingin menghapus progres ini?')) {
-            button.closest('form').submit();
-        }
-    };
-
-    window.viewFile = function(fileUrl, fileName) {
-        var fileContent = $('#fileContent');
-        fileContent.empty(); // Clear previous content
-
-        var fileExtension = fileName.split('.').pop().toLowerCase();
-
-        if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(fileExtension)) {
-            // Display image
-            var img = $('<img>', {
-                src: fileUrl,
-                class: 'img-fluid rounded',
-                alt: 'Bukti File'
-            });
-            fileContent.append(img);
-        } else if (fileExtension === 'pdf') {
-            // Display PDF
-            var iframe = $('<iframe>', {
-                src: fileUrl,
-                width: '100%',
-                height: '500px',
-                style: 'border: none;'
-            });
-            fileContent.append(iframe);
-        } else {
-            // For other files, show download link
-            var link = $('<a>', {
-                href: fileUrl,
-                target: '_blank',
-                class: 'btn btn-primary',
-                text: 'Download File'
-            });
-            fileContent.append('<p>File tidak dapat ditampilkan di browser. </p>').append(link);
-        }
-
-        // Update modal title for file view
-        $('#fileViewModalLabel').html('<i class="ti ti-eye me-2"></i>Lihat Bukti File');
-
-        $('#fileViewModal').modal('show');
-    };
-
-    window.viewGDrive = function(gdriveUrl) {
-        var fileContent = $('#fileContent');
-        fileContent.empty(); // Clear previous content
-
-        // Simple container matching the image design
-        var container = $('<div>', {
-            class: 'text-center p-4'
-        });
-
-        // Header with Google Drive title
-        var header = $('<div>', {
-            class: 'mb-4'
-        }).append(
-            $('<h5>', {
-                class: 'text-primary mb-2',
-                text: 'File dari Google Drive'
-            })
-        );
-
-        // Google Drive logo/icon
-        var logo = $('<div>', {
-            class: 'mb-3'
-        }).append(
-            $('<i>', {
-                class: 'ti ti-brand-google-drive',
-                style: 'font-size: 3rem; color: #4285f4;'
-            })
-        );
-
-        container.append(header, logo);
-
-        // Instruction text
-        var instruction = $('<p>', {
-            class: 'text-muted mb-4',
-            text: 'Klik File di atas untuk membuka file Google Drive'
-        });
-
-        container.append(instruction);
-
-        // Simple button to open in Google Drive
-        var openButton = $('<a>', {
-            href: gdriveUrl,
-            target: '_blank',
-            class: 'btn btn-primary px-4 py-2'
-        }).append(
-            $('<i>', { class: 'ti ti-external-link me-2' }),
-            'Buka di Google Drive'
-        );
-
-        container.append(openButton);
-
-        fileContent.append(container);
-
-        // Update modal title for GDrive
-        $('#fileViewModalLabel').html('<i class="ti ti-brand-google-drive me-2 text-info"></i>File dari Google Drive');
-
-        $('#fileViewModal').modal('show');
     };
 
     // Auto-reload jika ada session success
@@ -345,45 +163,7 @@ $(document).ready(function() {
         }, 1500);
     }
 
-    // Real-time validation for evidence requirement
-    $(document).on('change', 'input[name="file_bukti"], input[name="link_gdrive"]', function() {
-        var form = $(this).closest('form');
-        var fileInput = form.find('input[name="file_bukti"]');
-        var linkInput = form.find('input[name="link_gdrive"]');
-        var submitBtn = form.find('button[type="submit"]');
-        var statusSelect = form.find('select[name="status"]');
 
-        var hasFile = fileInput[0] && fileInput[0].files.length > 0;
-        var hasLink = linkInput.val().trim() !== '';
-        var hasExistingEvidence = form.find('small:contains("File saat ini")').length > 0;
-
-        // Enable/disable submit button
-        if (hasFile || hasLink || hasExistingEvidence) {
-            submitBtn.prop('disabled', false);
-            // Auto-set status to completed if evidence provided
-            if (statusSelect.val() === 'on_progress') {
-                statusSelect.val('completed');
-            }
-        } else {
-            submitBtn.prop('disabled', true);
-            statusSelect.val('on_progress');
-        }
-
-        // Show/hide validation message
-        var validationMsg = form.find('.evidence-validation');
-        if (validationMsg.length === 0) {
-            validationMsg = $('<div class="evidence-validation alert alert-warning mt-2"></div>');
-            linkInput.parent().after(validationMsg);
-        }
-
-        if (!hasFile && !hasLink && !hasExistingEvidence) {
-            validationMsg.html(
-                    '<i class="ti ti-alert-circle me-1"></i>Harus upload file bukti atau isi link Google Drive')
-                .show();
-        } else {
-            validationMsg.hide();
-        }
-    });
 
     // Auto-update expired targets - SKIP COMPLETED TARGETS
     setInterval(function() {
@@ -414,4 +194,119 @@ $(document).ready(function() {
             }
         });
     }, 60000); // Check every minute
+
+    // File modal functionality
+    window.openFileModal = function(fileUrl, fileType, title) {
+        let modalContent = '';
+        let modalTitle = '';
+
+        let modalHtml = '';
+
+        if (fileType === 'image') {
+            modalTitle = `<i class="ti ti-photo me-2"></i>${title}`;
+            modalContent = `<img src="${fileUrl}" class="img-fluid" alt="Bukti Aktivitas" style="max-height: 70vh;">`;
+            modalHtml = `
+                <div class="modal fade" id="fileModal" tabindex="-1" aria-labelledby="fileModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content border-0 shadow">
+                            <div class="modal-header bg-dark text-white border-0">
+                                <h5 class="modal-title text-white" id="fileModalLabel">${modalTitle}</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body p-0 text-center bg-dark">
+                                ${modalContent}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else if (fileType === 'video') {
+            modalTitle = `<i class="ti ti-video me-2"></i>${title}`;
+            const extension = fileUrl.split('.').pop().toLowerCase();
+            const mimeType = extension === 'mov' ? 'video/quicktime' : (extension === 'avi' ? 'video/avi' : 'video/mp4');
+            modalContent = `<video controls class="w-100" style="max-height: 70vh;"><source src="${fileUrl}" type="${mimeType}">Browser Anda tidak mendukung pemutaran video.</video>`;
+            modalHtml = `
+                <div class="modal fade" id="fileModal" tabindex="-1" aria-labelledby="fileModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content border-0 shadow">
+                            <div class="modal-header bg-dark text-white border-0">
+                                <h5 class="modal-title text-white" id="fileModalLabel">${modalTitle}</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body p-0 text-center bg-dark">
+                                ${modalContent}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else if (fileType === 'gdrive') {
+            modalTitle = `<i class="ti ti-brand-google-drive me-2"></i>${title}`;
+            modalContent = `
+                <div class="text-center py-5">
+                    <i class="ti ti-brand-google-drive text-info mb-3" style="font-size: 4rem;"></i>
+                    <h5>File tersimpan di Google Drive</h5>
+                    <p class="text-muted mb-4">Klik tombol di bawah untuk membuka file di Google Drive</p>
+                    <a href="${fileUrl}" target="_blank" class="btn btn-primary">
+                        <i class="ti ti-external-link me-2"></i>Buka di Google Drive
+                    </a>
+                </div>
+            `;
+            modalHtml = `
+                <div class="modal fade" id="fileModal" tabindex="-1" aria-labelledby="fileModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content border-0 shadow">
+                            <div class="modal-header bg-light text-dark border-0">
+                                <h5 class="modal-title" id="fileModalLabel">${modalTitle}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body p-0 text-center bg-light">
+                                ${modalContent}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            modalTitle = `<i class="ti ti-file-text me-2"></i>${title}`;
+            modalContent = `
+                <div class="text-center py-5">
+                    <i class="ti ti-file-text fs-1 text-muted mb-3"></i>
+                    <h5>File tidak dapat dipreview</h5>
+                    <p class="text-muted mb-4">File ini tidak dapat ditampilkan di browser</p>
+                    <a href="${fileUrl}" target="_blank" class="btn btn-primary">
+                        <i class="ti ti-download me-2"></i>Download File
+                    </a>
+                </div>
+            `;
+            modalHtml = `
+                <div class="modal fade" id="fileModal" tabindex="-1" aria-labelledby="fileModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content border-0 shadow">
+                            <div class="modal-header bg-dark text-white border-0">
+                                <h5 class="modal-title text-white" id="fileModalLabel">${modalTitle}</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body p-0 text-center bg-dark">
+                                ${modalContent}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Remove existing modal if present
+        const existingModal = document.getElementById('fileModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+
+        // Append modal to body
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('fileModal'));
+        modal.show();
+    };
 });

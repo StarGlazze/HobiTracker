@@ -237,7 +237,7 @@ function loadAktivitasData(aktivitasId, editButton) {
     try {
         // Get data from button attributes (fallback method)
         const nama = editButton.getAttribute('data-nama') || '';
-        const hobi = editButton.getAttribute('data-hobi') || '';
+        const target = editButton.getAttribute('data-target') || '';
         const durasi = editButton.getAttribute('data-durasi') || '';
         const catatan = editButton.getAttribute('data-catatan') || '';
         const fileBukti = editButton.getAttribute('data-file-bukti') || '';
@@ -247,10 +247,10 @@ function loadAktivitasData(aktivitasId, editButton) {
         document.getElementById('editDurasiMenit').value = durasi;
         document.getElementById('editCatatanAktivitas').value = catatan === 'Tidak ada catatan' ? '' : catatan;
 
-        // Set hobi selection
-        const hobiSelect = document.getElementById('editPilihHobi');
-        for (let option of hobiSelect.options) {
-            if (option.text.trim() === hobi.trim()) {
+        // Set target selection
+        const targetSelect = document.getElementById('editPilihTarget');
+        for (let option of targetSelect.options) {
+            if (option.text.trim().includes(target.trim())) {
                 option.selected = true;
                 break;
             }

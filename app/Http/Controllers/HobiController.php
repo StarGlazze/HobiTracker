@@ -14,11 +14,11 @@ class HobiController extends Controller
         $userId = Auth::id();
 
         // Query untuk semua hobi (untuk statistik)
-        $allHobisQuery = Hobi::where('user_id', $userId)->with('kategoriHobi');
+        $allHobisQuery = Hobi::where('user_id', $userId)->with('kategoriHobi', 'targetHobi.aktivitas');
         $allHobis = $allHobisQuery->get();
 
         // Query untuk hobi yang akan ditampilkan (dengan sorting, search, pagination)
-        $query = Hobi::where('user_id', $userId)->with('kategoriHobi');
+        $query = Hobi::where('user_id', $userId)->with('kategoriHobi', 'targetHobi.aktivitas');
 
         // Handle search
         $search = $request->input('search');
@@ -71,7 +71,9 @@ class HobiController extends Controller
         $hobiTerpopuler = null;
         $maxAktivitas = 0;
         foreach ($allHobis as $hobi) {
-            $aktivitasCount = $hobi->aktivitas()->count();
+            $aktivitasCount = $hobi->targetHobi->sum(function($target) {
+                return $target->aktivitas ? $target->aktivitas->count() : 0;
+            });
             if ($aktivitasCount > $maxAktivitas) {
                 $maxAktivitas = $aktivitasCount;
                 $hobiTerpopuler = $hobi;

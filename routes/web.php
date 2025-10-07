@@ -8,7 +8,6 @@ use App\Http\Controllers\HobiController;
 use App\Http\Controllers\AktivitasController;
 use App\Http\Controllers\WebSettingController;
 use App\Http\Controllers\TargetHobiController;
-use App\Http\Controllers\ProgresTargetController;
 use App\Http\Controllers\LogAktivitasController;
 use App\Http\Controllers\ProfileController;
 
@@ -23,7 +22,6 @@ Route::get('/dashboard', function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/logs', [LogAktivitasController::class, 'index'])->name('admin.logs');
     Route::get('/logs/export', [LogAktivitasController::class, 'export'])->name('logs.export');
-    Route::get('/logs/target/{id}', [LogAktivitasController::class, 'showTarget'])->name('log.target.show');
     Route::resource('log-aktivitas', LogAktivitasController::class)->parameters([
         'log-aktivitas' => 'logAktivitas'
     ]);
@@ -63,12 +61,5 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
         // Target routes
         Route::resource('target', TargetHobiController::class);
-        Route::get('target-progres', [TargetHobiController::class, 'indexProgres'])->name('target.progres');
-        
-        // Progress routes
-        Route::resource('progres', ProgresTargetController::class)->except(['store', 'update', 'destroy']);
-        Route::post('progres/store', [ProgresTargetController::class, 'store'])->name('progres.store');
-        Route::put('progres/{progresTarget}', [ProgresTargetController::class, 'update'])->name('progres.update');
-        Route::delete('progres/{progresTarget}', [ProgresTargetController::class, 'destroy'])->name('progres.destroy');
     });
 });

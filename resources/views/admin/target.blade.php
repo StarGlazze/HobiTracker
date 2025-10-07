@@ -55,6 +55,7 @@
                                 <th scope="col" class="border-0 py-3" style="width: 25%;">Hobi</th>
                                 <th scope="col" class="border-0 py-3" style="width: 20%;">Kategori</th>
                                 <th scope="col" class="border-0 py-3" style="width: 20%;">Batas Waktu</th>
+                                <th scope="col" class="border-0 py-3" style="width: 15%;">Progress</th>
                                 <th scope="col" class="border-0 py-3" style="width: 15%;">Status</th>
                                 <th scope="col" class="border-0 py-3 text-center" style="width: 5%;">Aksi</th>
                             </tr>
@@ -63,8 +64,9 @@
                             @forelse($targets as $index => $target)
                                 <tr class="border-bottom">
                                     @php
-                                        $latestProgress = $target->progresTarget->sortByDesc('created_at')->first();
-                                        $isCompleted = $latestProgress && $latestProgress->status === 'completed';
+                                        $aktivitasCount = $target->aktivitas->count();
+                                        $progress = $target->jumlah_aktivitas_dibutuhkan > 0 ? ($aktivitasCount / $target->jumlah_aktivitas_dibutuhkan) * 100 : 0;
+                                        $isCompleted = $progress >= 100;
                                         $isExpired = $target->target_deadline < now()->startOfDay() && !$isCompleted;
                                     @endphp
                                     <td class="px-4 py-3">{{ $loop->iteration }}</td>
@@ -80,31 +82,51 @@
                                     <td class="py-3">
                                         {{ \Carbon\Carbon::parse($target->target_deadline)->format('d F Y') }}
                                     </td>
+                                    <td class="py-3">
+                                        <div class="progress position-relative" style="height: 24px; border-radius: 12px; background: linear-gradient(90deg, #f8f9fa 0%, #e9ecef 100%); box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);">
+                                            <div class="progress-bar position-relative overflow-hidden {{ $progress >= 100 ? 'bg-success' : ($progress >= 50 ? 'bg-warning' : 'bg-primary') }}"
+                                                 role="progressbar"
+                                                 style="width: {{ min($progress, 100) }}%;
+                                                        border-radius: 12px;
+                                                        background: {{ $progress >= 100 ? 'linear-gradient(90deg, #28a745 0%, #20c997 100%)' : ($progress >= 50 ? 'linear-gradient(90deg, #ffc107 0%, #fd7e14 100%)' : 'linear-gradient(90deg, #007bff 0%, #6610f2 100%)') }};
+                                                        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                                                        transition: width 0.6s ease-in-out;"
+                                                 aria-valuenow="{{ min($progress, 100) }}"
+                                                 aria-valuemin="0"
+                                                 aria-valuemax="100">
+                                                <span class="position-absolute top-50 start-50 translate-middle fw-bold text-white text-shadow" style="font-size: 12px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">
+                                                    {{ number_format($progress, 1) }}%
+                                                </span>
+                                                @if($progress >= 100)
+                                                    <i class="ti ti-check position-absolute top-50 end-0 translate-middle-y me-2 text-white" style="font-size: 14px;"></i>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <small class="text-muted d-flex align-items-center mt-1">
+                                            <i class="ti ti-activity me-1"></i>
+                                            {{ $aktivitasCount }} / {{ $target->jumlah_aktivitas_dibutuhkan }} aktivitas
+                                            @if($aktivitasCount > 0)
+                                                <span class="badge bg-light text-dark ms-2" style="font-size: 10px;">{{ $aktivitasCount }} tercapai</span>
+                                            @endif
+                                        </small>
+                                    </td>
                                     <td class="py-3 text-center">
-                                        @if ($latestProgress)
-                                            @if ($latestProgress->status === 'completed')
-                                                <span class="badge bg-success-subtle text-success px-3 py-2">
-                                                    <i class="ti ti-check-circle me-1"></i>Completed
-                                                </span>
-                                            @elseif($latestProgress->status === 'failed' || $isExpired)
-                                                <span class="badge bg-danger-subtle text-danger px-3 py-2">
-                                                    <i class="ti ti-x-circle me-1"></i>Failed
-                                                </span>
-                                            @else
-                                                <span class="badge bg-warning-subtle text-warning px-3 py-2">
-                                                    <i class="ti ti-clock me-1"></i>On Progress
-                                                </span>
-                                            @endif
+                                        @if ($isCompleted)
+                                            <span class="badge bg-success-subtle text-success px-3 py-2">
+                                                <i class="ti ti-check-circle me-1"></i>Completed
+                                            </span>
+                                        @elseif($isExpired)
+                                            <span class="badge bg-danger-subtle text-danger px-3 py-2">
+                                                <i class="ti ti-x-circle me-1"></i>Failed
+                                            </span>
+                                        @elseif($aktivitasCount > 0)
+                                            <span class="badge bg-warning-subtle text-warning px-3 py-2">
+                                                <i class="ti ti-clock me-1"></i>On Progress
+                                            </span>
                                         @else
-                                            @if ($isExpired)
-                                                <span class="badge bg-danger-subtle text-danger px-3 py-2">
-                                                    <i class="ti ti-x-circle me-1"></i>Expired
-                                                </span>
-                                            @else
-                                                <span class="badge bg-info-subtle text-info px-3 py-2">
-                                                    <i class="ti ti-plus me-1"></i>No Progress
-                                                </span>
-                                            @endif
+                                            <span class="badge bg-info-subtle text-info px-3 py-2">
+                                                <i class="ti ti-plus me-1"></i>No Progress
+                                            </span>
                                         @endif
                                     </td>
                                     <td class="py-3 text-center">
@@ -122,11 +144,7 @@
                                                     <i class="ti ti-trash"></i>
                                                 </button>
                                             </form>
-                                            <button class="btn btn-info btn-sm" data-bs-toggle="modal"
-                                                data-bs-target="#progressModal{{ $target->id }}" title="Lihat Progress"
-                                                {{ $isExpired && !$isCompleted ? 'disabled' : '' }}>
-                                                <i class="ti ti-chart-bar"></i>
-                                            </button>
+
                                             <button class="btn btn-secondary btn-sm" data-bs-toggle="modal"
                                                 data-bs-target="#detailModal{{ $target->id }}" title="Lihat Detail">
                                                 <i class="ti ti-eye"></i>
@@ -200,6 +218,17 @@
                                 <input type="date" class="form-control" id="target_deadline" name="target_deadline"
                                     min="{{ date('Y-m-d', strtotime('today')) }}" required>
                                 @error('target_deadline')
+                                    <div class="text-danger small">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="jumlah_aktivitas_dibutuhkan" class="form-label fw-semibold">
+                                    <i class="ti ti-number text-info me-2"></i>Jumlah Aktivitas Dibutuhkan
+                                </label>
+                                <input type="number" class="form-control" id="jumlah_aktivitas_dibutuhkan" name="jumlah_aktivitas_dibutuhkan"
+                                    min="1" value="1" required>
+                                @error('jumlah_aktivitas_dibutuhkan')
                                     <div class="text-danger small">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -281,6 +310,18 @@
                                         <div class="text-danger small">{{ $message }}</div>
                                     @enderror
                                 </div>
+
+                                <div class="mb-3">
+                                    <label for="jumlah_aktivitas_dibutuhkan{{ $target->id }}" class="form-label fw-semibold">
+                                        <i class="ti ti-number text-info me-2"></i>Jumlah Aktivitas Dibutuhkan
+                                    </label>
+                                    <input type="number" class="form-control" id="jumlah_aktivitas_dibutuhkan{{ $target->id }}"
+                                        name="jumlah_aktivitas_dibutuhkan" value="{{ $target->jumlah_aktivitas_dibutuhkan }}"
+                                        min="1" required>
+                                    @error('jumlah_aktivitas_dibutuhkan')
+                                        <div class="text-danger small">{{ $message }}</div>
+                                    @enderror
+                                </div>
                                 @if ($errors->any())
                                     <div class="alert alert-danger">
                                         <ul class="mb-0">
@@ -297,99 +338,6 @@
                                 </button>
                                 <button type="submit" class="btn btn-warning">
                                     <i class="ti ti-device-floppy me-2"></i>Simpan Perubahan
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        @endforeach
-
-        <!-- Progress Modals -->
-        @foreach ($targets as $target)
-            <div class="modal fade" id="progressModal{{ $target->id }}" tabindex="-1"
-                aria-labelledby="progressModalLabel{{ $target->id }}" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered modal-lg">
-                    <div class="modal-content border-0 shadow">
-                        <form action="{{ route('admin.progres.store') }}" method="POST" enctype="multipart/form-data">
-                            @csrf
-                            <input type="hidden" name="target_id" value="{{ $target->id }}">
-                            <div class="modal-header bg-info text-white border-0">
-                                <h5 class="modal-title" id="progressModalLabel{{ $target->id }}">
-                                    <i class="ti ti-chart-bar me-2"></i>Progress: {{ $target->nama_target }}
-                                </h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                                    aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body p-4">
-                                <p class="text-muted mb-4">
-                                    <i class="ti ti-info-circle me-2"></i>
-                                    Tambah progres untuk target "{{ $target->nama_target }}".
-                                </p>
-
-                                <div class="mb-3">
-                                    <label for="status{{ $target->id }}" class="form-label fw-semibold">
-                                        <i class="ti ti-check-circle text-success me-2"></i>Status
-                                    </label>
-                                    <select class="form-select" id="status{{ $target->id }}" name="status" required>
-                                        <option value="on_progress" selected>On Progress</option>
-                                        <option value="completed">Completed</option>
-                                        <option value="failed">Failed</option>
-                                    </select>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label for="file_bukti{{ $target->id }}" class="form-label fw-semibold">
-                                        <i class="ti ti-paperclip text-primary me-2"></i>Bukti File
-                                    </label>
-                                    <input class="form-control" type="file" id="file_bukti{{ $target->id }}"
-                                        name="file_bukti" accept="image/*,.pdf">
-                                    <div class="form-text">
-                                        <i class="ti ti-info-circle me-1"></i>
-                                        Format yang didukung: Gambar (max 5MB) atau PDF. Wajib jika tidak ada link Google
-                                        Drive.
-                                    </div>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label for="link_gdrive{{ $target->id }}" class="form-label fw-semibold">
-                                        <i class="ti ti-link text-info me-2"></i>Link Google Drive
-                                    </label>
-                                    <input type="url" class="form-control" id="link_gdrive{{ $target->id }}"
-                                        name="link_gdrive" placeholder="https://drive.google.com/...">
-                                    <div class="form-text">
-                                        <i class="ti ti-info-circle me-1"></i>
-                                        Wajib jika tidak ada file bukti. Gunakan jika file terlalu besar.
-                                    </div>
-                                </div>
-                                @if ($errors->has('bukti') || $errors->has('file_bukti') || $errors->has('link_gdrive'))
-                                    <div class="alert alert-danger">
-                                        @if ($errors->has('bukti'))
-                                            {{ $errors->first('bukti') }}
-                                        @endif
-                                        @if ($errors->has('file_bukti'))
-                                            {{ $errors->first('file_bukti') }}
-                                        @endif
-                                        @if ($errors->has('link_gdrive'))
-                                            {{ $errors->first('link_gdrive') }}
-                                        @endif
-                                    </div>
-                                @endif
-
-                                <div class="mb-3">
-                                    <label for="catatan{{ $target->id }}" class="form-label fw-semibold">
-                                        <i class="ti ti-notes text-warning me-2"></i>Catatan
-                                    </label>
-                                    <textarea class="form-control" id="catatan{{ $target->id }}" name="catatan" rows="3"
-                                        placeholder="Tambahkan catatan tentang perkembangan progress..."></textarea>
-                                </div>
-                            </div>
-                            <div class="modal-footer border-0 pt-0">
-                                <button type="button" class="btn btn-light" data-bs-dismiss="modal">
-                                    <i class="ti ti-x me-2"></i>Batal
-                                </button>
-                                <button type="submit" class="btn btn-info">
-                                    <i class="ti ti-device-floppy me-2"></i>Simpan Progress
                                 </button>
                             </div>
                         </form>
@@ -439,55 +387,159 @@
 
                                 <dt class="col-sm-3">Tanggal Dibuat</dt>
                                 <dd class="col-sm-9">{{ $target->created_at->format('d F Y') }}</dd>
+
+                                <dt class="col-sm-3">Jumlah Aktivitas Dibutuhkan</dt>
+                                <dd class="col-sm-9">{{ $target->jumlah_aktivitas_dibutuhkan }}</dd>
                             </dl>
 
-                            <h6 class="mt-4">Daftar Progres:</h6>
-                            @forelse($target->progresTarget as $progres)
-                                <div class="border rounded p-3 mb-2">
-                                    <div class="d-flex justify-content-between">
-                                        <span>Status: <strong>{{ ucfirst($progres->status) }}</strong></span>
-                                        <div>
-                                            <button class="btn btn-sm btn-warning" data-bs-toggle="modal"
-                                                data-bs-target="#editProgresModal{{ $progres->id }}"
-                                                title="Edit Progres">
-                                                <i class="ti ti-pencil"></i>
-                                            </button>
-                                            <form
-                                                action="{{ route('admin.progres.destroy', ['progresTarget' => $progres->id]) }}"
-                                                method="POST" style="display:inline;">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="button" class="btn btn-sm btn-danger"
-                                                    title="Hapus Progres" onclick="confirmDeleteProgress(this)">
-                                                    <i class="ti ti-trash"></i>
-                                                </button>
-                                            </form>
-                                            <small>{{ $progres->created_at->format('d F Y H:i') }}</small>
+                            <!-- Aktivitas dan Bukti Section -->
+                            @if($target->aktivitas->count() > 0)
+                                <hr class="my-4">
+                                <h6 class="fw-bold mb-3 text-primary">
+                                    <i class="ti ti-activity me-2"></i>Aktivitas dan Bukti ({{ $target->aktivitas->count() }})
+                                </h6>
+                                <div class="row">
+                                    @foreach($target->aktivitas as $aktivitas)
+                                        <div class="col-12 mb-4">
+                                            <div class="card border-0 shadow-sm h-100">
+                                                <div class="card-header bg-light border-0 py-3">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <h6 class="mb-0 fw-semibold text-dark">
+                                                            <i class="ti ti-circle-check text-success me-2"></i>{{ $aktivitas->nama_aktivitas }}
+                                                        </h6>
+                                                    </div>
+                                                </div>
+                                                <div class="card-body">
+                                                    @if($aktivitas->catatan)
+                                                        <p class="mb-3 text-muted">
+                                                            <i class="ti ti-message me-2"></i>{{ $aktivitas->catatan }}
+                                                        </p>
+                                                    @endif
+
+                                                    @php
+                                                        $rawFileBukti = $aktivitas->file_bukti;
+
+                                                        // Handle backward compatibility: could be array, JSON string, or plain string
+                                                        if (is_array($rawFileBukti)) {
+                                                            $fileData = $rawFileBukti;
+                                                        } elseif (is_string($rawFileBukti) && !empty($rawFileBukti)) {
+                                                            // Try to decode as JSON first
+                                                            $decoded = json_decode($rawFileBukti, true);
+                                                            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                                                                $fileData = $decoded;
+                                                            } else {
+                                                                // Old format: plain string, check if it's GDrive URL
+                                                                $fileData = str_contains($rawFileBukti, 'drive.google.com')
+                                                                    ? ['gdrive' => $rawFileBukti]
+                                                                    : ['file' => $rawFileBukti];
+                                                            }
+                                                        } else {
+                                                            $fileData = [];
+                                                        }
+
+                                                        $hasFile = isset($fileData['file']) && !empty($fileData['file']);
+                                                        $hasGdrive = isset($fileData['gdrive']) && !empty($fileData['gdrive']);
+                                                    @endphp
+
+                                                    @if($hasFile || $hasGdrive)
+                                                        <div class="bukti-files">
+                                                            <h6 class="text-secondary mb-3">
+                                                                <i class="ti ti-paperclip me-2"></i>Bukti Aktivitas
+                                                            </h6>
+                                                            <div class="row g-3">
+                                                                @if($hasFile)
+                                                                    @php
+                                                                        $extension = strtolower(pathinfo($fileData['file'], PATHINFO_EXTENSION));
+                                                                        $imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+                                                                        $videoExts = ['mp4', 'mov', 'avi', 'webm'];
+
+                                                                        if (in_array($extension, $imageExts)) {
+                                                                            $fileType = 'image';
+                                                                            $icon = 'ti-photo';
+                                                                            $title = 'Lihat gambar bukti';
+                                                                        } elseif (in_array($extension, $videoExts)) {
+                                                                            $fileType = 'video';
+                                                                            $icon = 'ti-video';
+                                                                            $title = 'Lihat video bukti';
+                                                                        } else {
+                                                                            $fileType = 'file';
+                                                                            $icon = 'ti-file-text';
+                                                                            $title = 'Lihat file bukti';
+                                                                        }
+                                                                    @endphp
+
+                                                                    <div class="col-md-6 col-lg-4">
+                                                                        <div class="position-relative">
+                                                                            @if($fileType === 'image')
+                                                                                <img src="{{ asset('storage/' . $fileData['file']) }}"
+                                                                                     class="img-fluid rounded shadow-sm w-100"
+                                                                                     style="height: 150px; object-fit: cover; cursor: pointer;"
+                                                                                     alt="Bukti Aktivitas"
+                                                                                     onclick="openFileModal('{{ asset('storage/' . $fileData['file']) }}', '{{ $fileType }}', '{{ $aktivitas->nama_aktivitas }}')">
+                                                                            @elseif($fileType === 'video')
+                                                                                <video class="img-fluid rounded shadow-sm w-100"
+                                                                                       style="height: 150px; object-fit: cover; cursor: pointer;"
+                                                                                       onclick="openFileModal('{{ asset('storage/' . $fileData['file']) }}', '{{ $fileType }}', '{{ $aktivitas->nama_aktivitas }}')">
+                                                                                    <source src="{{ asset('storage/' . $fileData['file']) }}" type="video/{{ $extension === 'mov' ? 'quicktime' : ($extension === 'avi' ? 'avi' : 'mp4') }}">
+                                                                                </video>
+                                                                            @else
+                                                                                <div class="d-flex align-items-center justify-content-center bg-light rounded shadow-sm"
+                                                                                     style="height: 150px; cursor: pointer;"
+                                                                                     onclick="openFileModal('{{ asset('storage/' . $fileData['file']) }}', '{{ $fileType }}', '{{ $aktivitas->nama_aktivitas }}')">
+                                                                                    <i class="ti {{ $icon }} fs-1 text-muted"></i>
+                                                                                </div>
+                                                                            @endif
+                                                                            <div class="position-absolute top-0 end-0 m-2">
+                                                                                <span class="badge bg-primary">
+                                                                                    <i class="ti {{ $icon }}"></i>
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                @endif
+
+                                                                @if($hasGdrive)
+                                                                    <div class="col-md-6 col-lg-4">
+                                                                        <div class="position-relative">
+                                                                            <div class="d-flex align-items-center justify-content-center bg-light rounded shadow-sm"
+                                                                                 style="height: 150px; cursor: pointer;"
+                                                                                 onclick="openFileModal('{{ $fileData['gdrive'] }}', 'gdrive', '{{ $aktivitas->nama_aktivitas }}')">
+                                                                                <i class="ti ti-brand-google-drive text-info" style="font-size: 3rem;"></i>
+                                                                            </div>
+                                                                            <div class="position-absolute top-0 end-0 m-2">
+                                                                                <span class="badge bg-info">
+                                                                                    <i class="ti ti-external-link"></i>
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                    @else
+                                                        <div class="text-center py-4">
+                                                            <i class="ti ti-photo-off text-muted" style="font-size: 2rem;"></i>
+                                                            <p class="text-muted mt-2 mb-0">Tidak ada file bukti</p>
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                                <div class="card-footer bg-transparent border-0 py-2">
+                                                    <small class="text-muted">
+                                                        <i class="ti ti-calendar me-1"></i>Dilakukan pada {{ $aktivitas->created_at->format('d F Y H:i') }}
+                                                    </small>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                    @if ($progres->file_bukti)
-                                        <div class="mt-2">
-                                            <button type="button" class="btn btn-sm btn-outline-primary"
-                                                onclick="viewFile('{{ asset('storage/' . $progres->file_bukti) }}', '{{ $progres->file_bukti }}')">
-                                                <i class="ti ti-eye"></i> Lihat Bukti File
-                                            </button>
-                                        </div>
-                                    @endif
-                                    @if ($progres->link_gdrive)
-                                        <div class="mt-2">
-                                            <button type="button" class="btn btn-sm btn-outline-info"
-                                                onclick="viewGDrive('{{ $progres->link_gdrive }}')">
-                                                <i class="ti ti-external-link"></i> Lihat di Google Drive
-                                            </button>
-                                        </div>
-                                    @endif
-                                    @if ($progres->catatan)
-                                        <p class="mt-2 mb-0"><em>{{ $progres->catatan }}</em></p>
-                                    @endif
+                                    @endforeach
                                 </div>
-                            @empty
-                                <p class="text-muted">Belum ada progres.</p>
-                            @endforelse
+                            @else
+                                <hr class="my-4">
+                                <div class="text-center py-5">
+                                    <i class="ti ti-activity text-muted" style="font-size: 3rem;"></i>
+                                    <h6 class="text-muted mt-3">Belum ada Aktivitas</h6>
+                                    <p class="text-muted mb-0">Aktivitas akan muncul di sini setelah Anda menambahkannya.</p>
+                                </div>
+                            @endif
                         </div>
                         <div class="modal-footer border-0 pt-0">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
@@ -499,134 +551,7 @@
             </div>
         @endforeach
 
-        <!-- Edit Progres Modals -->
-        @foreach ($targets as $target)
-            @foreach ($target->progresTarget as $progres)
-                <div class="modal fade" id="editProgresModal{{ $progres->id }}" tabindex="-1"
-                    aria-labelledby="editProgresModalLabel{{ $progres->id }}" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered modal-lg">
-                        <div class="modal-content border-0 shadow">
-                            <form action="{{ route('admin.progres.update', $progres) }}" method="POST"
-                                enctype="multipart/form-data">
-                                @csrf @method('PUT')
-                                <div class="modal-header bg-warning text-white border-0">
-                                    <h5 class="modal-title" id="editProgresModalLabel{{ $progres->id }}">
-                                        <i class="ti ti-edit me-2"></i>Edit Progres: {{ $target->nama_target }}
-                                    </h5>
-                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                                        aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body p-4">
-                                    <p class="text-muted mb-4">
-                                        <i class="ti ti-info-circle me-2"></i>
-                                        Edit detail progres untuk target "{{ $target->nama_target }}".
-                                    </p>
 
-                                    <div class="mb-3">
-                                        <label for="status_edit{{ $progres->id }}" class="form-label fw-semibold">
-                                            <i class="ti ti-check-circle text-success me-2"></i>Status
-                                        </label>
-                                        <select class="form-select" id="status_edit{{ $progres->id }}" name="status"
-                                            required>
-                                            <option value="on_progress"
-                                                {{ $progres->status == 'on_progress' ? 'selected' : '' }}>On Progress
-                                            </option>
-                                            <option value="completed"
-                                                {{ $progres->status == 'completed' ? 'selected' : '' }}>Completed</option>
-                                            <option value="failed" {{ $progres->status == 'failed' ? 'selected' : '' }}>
-                                                Failed</option>
-                                        </select>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label for="file_bukti_edit{{ $progres->id }}" class="form-label fw-semibold">
-                                            <i class="ti ti-paperclip text-primary me-2"></i>Bukti File
-                                        </label>
-                                        <input class="form-control" type="file"
-                                            id="file_bukti_edit{{ $progres->id }}" name="file_bukti"
-                                            accept="image/*,.pdf">
-                                        <div class="form-text">
-                                            <i class="ti ti-info-circle me-1"></i>
-                                            Biarkan kosong jika tidak ingin ganti. Format: Gambar atau PDF (max 5MB).
-                                        </div>
-                                        @if ($progres->file_bukti)
-                                            <small class="text-muted">File saat ini:
-                                                {{ basename($progres->file_bukti) }}</small>
-                                        @endif
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label for="link_gdrive_edit{{ $progres->id }}" class="form-label fw-semibold">
-                                            <i class="ti ti-link text-info me-2"></i>Link Google Drive
-                                        </label>
-                                        <input type="url" class="form-control"
-                                            id="link_gdrive_edit{{ $progres->id }}" name="link_gdrive"
-                                            value="{{ $progres->link_gdrive }}"
-                                            placeholder="https://drive.google.com/...">
-                                        <div class="form-text">
-                                            <i class="ti ti-info-circle me-1"></i>
-                                            Wajib jika tidak ada file bukti. Gunakan jika file terlalu besar.
-                                        </div>
-                                    </div>
-                                    @if ($errors->has('bukti') || $errors->has('file_bukti') || $errors->has('link_gdrive'))
-                                        <div class="alert alert-danger">
-                                            @if ($errors->has('bukti'))
-                                                {{ $errors->first('bukti') }}
-                                            @endif
-                                            @if ($errors->has('file_bukti'))
-                                                {{ $errors->first('file_bukti') }}
-                                            @endif
-                                            @if ($errors->has('link_gdrive'))
-                                                {{ $errors->first('link_gdrive') }}
-                                            @endif
-                                        </div>
-                                    @endif
-
-                                    <div class="mb-3">
-                                        <label for="catatan_edit{{ $progres->id }}" class="form-label fw-semibold">
-                                            <i class="ti ti-notes text-warning me-2"></i>Catatan
-                                        </label>
-                                        <textarea class="form-control" id="catatan_edit{{ $progres->id }}" name="catatan" rows="3">{{ $progres->catatan }}</textarea>
-                                    </div>
-                                </div>
-                                <div class="modal-footer border-0 pt-0">
-                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">
-                                        <i class="ti ti-x me-2"></i>Batal
-                                    </button>
-                                    <button type="submit" class="btn btn-warning">
-                                        <i class="ti ti-device-floppy me-2"></i>Simpan Perubahan
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
-        @endforeach
-
-        <!-- File View Modal -->
-        <div class="modal fade" id="fileViewModal" tabindex="-1" aria-labelledby="fileViewModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-lg">
-                <div class="modal-content border-0 shadow">
-                    <div class="modal-header bg-primary text-white border-0">
-                        <h5 class="modal-title" id="fileViewModalLabel">
-                            <i class="ti ti-eye me-2"></i>Lihat Bukti File
-                        </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                            aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body p-4 text-center">
-                        <div id="fileContent"></div>
-                    </div>
-                    <div class="modal-footer border-0 pt-0">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <i class="ti ti-x me-2"></i>Tutup
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 @endsection
 

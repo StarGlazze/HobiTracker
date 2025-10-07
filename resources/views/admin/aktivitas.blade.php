@@ -143,7 +143,7 @@
                         <tr>
                             <th scope="col" class="border-0 py-3 px-4" style="width: 5%;">#</th>
                             <th scope="col" class="border-0 py-3" style="width: 30%;">Aktivitas</th>
-                            <th scope="col" class="border-0 py-3" style="width: 20%;">Hobi</th>
+                            <th scope="col" class="border-0 py-3" style="width: 20%;">Target</th>
                             <th scope="col" class="border-0 py-3" style="width: 15%;">Durasi</th>
                             <th scope="col" class="border-0 py-3">Catatan</th>
                             <th scope="col" class="border-0 py-3 text-center" style="width: 8%;">File</th>
@@ -158,7 +158,8 @@
                                     <h6 class="mb-1 fw-semibold">{{ $aktivitasItem->nama_aktivitas }}</h6>
                                 </td>
                                 <td class="py-3">
-                                    <span class="fw-semibold">{{ $aktivitasItem->hobi->nama_hobi ?? 'N/A' }}</span>
+                                    <span class="fw-semibold">{{ $aktivitasItem->target->nama_target ?? 'N/A' }}</span>
+                                    <br><small class="text-muted">{{ $aktivitasItem->target->hobi->nama_hobi ?? 'N/A' }}</small>
                                 </td>
                                 <td class="py-3">
                                     <span class="fw-semibold">{{ $aktivitasItem->durasi_menit }} Menit</span>
@@ -248,7 +249,7 @@
                                             data-bs-target="#editAktivitasModal" data-bs-toggle="tooltip"
                                             title="Edit Aktivitas" data-id="{{ $aktivitasItem->id }}"
                                             data-nama="{{ $aktivitasItem->nama_aktivitas }}"
-                                            data-hobi="{{ $aktivitasItem->hobi->nama_hobi ?? '' }}"
+                                            data-target="{{ $aktivitasItem->target->nama_target ?? '' }}"
                                             data-durasi="{{ $aktivitasItem->durasi_menit }}"
                                             data-catatan="{{ $aktivitasItem->catatan ?? '' }}"
                                             data-file-bukti="{{ json_encode($aktivitasItem->file_bukti) }}">
@@ -307,18 +308,18 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="pilihHobi" class="form-label fw-semibold">
-                                        <i class="ti ti-heart text-danger me-2"></i>Pilih Hobi
+                                    <label for="pilihTarget" class="form-label fw-semibold">
+                                        <i class="ti ti-target text-danger me-2"></i>Pilih Target
                                     </label>
-                                    <select class="form-select @error('hobi_id') is-invalid @enderror" id="pilihHobi" name="hobi_id" required>
-                                        <option value="" selected disabled>Pilih Hobi Terkait...</option>
-                                        @foreach ($hobis ?? [] as $hobi)
-                                            <option value="{{ $hobi->id }}" {{ old('hobi_id') == $hobi->id ? 'selected' : '' }}>
-                                                {{ $hobi->nama_hobi }}
+                                    <select class="form-select @error('target_id') is-invalid @enderror" id="pilihTarget" name="target_id" required>
+                                        <option value="" selected disabled>Pilih Target Terkait...</option>
+                                        @foreach ($targets ?? [] as $target)
+                                            <option value="{{ $target->id }}" {{ old('target_id') == $target->id ? 'selected' : '' }}>
+                                                {{ $target->nama_target }} ({{ $target->hobi->nama_hobi }})
                                             </option>
                                         @endforeach
                                     </select>
-                                    @error('hobi_id')
+                                    @error('target_id')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
@@ -443,13 +444,13 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="editPilihHobi" class="form-label fw-semibold">
-                                        <i class="ti ti-heart text-danger me-2"></i>Pilih Hobi
+                                    <label for="editPilihTarget" class="form-label fw-semibold">
+                                        <i class="ti ti-target text-danger me-2"></i>Pilih Target
                                     </label>
-                                    <select class="form-select" id="editPilihHobi" name="hobi_id" required>
-                                        <option value="" selected disabled>Pilih Hobi Terkait...</option>
-                                        @foreach ($hobis ?? [] as $hobi)
-                                            <option value="{{ $hobi->id }}">{{ $hobi->nama_hobi }}</option>
+                                    <select class="form-select" id="editPilihTarget" name="target_id" required>
+                                        <option value="" selected disabled>Pilih Target Terkait...</option>
+                                        @foreach ($targets ?? [] as $target)
+                                            <option value="{{ $target->id }}">{{ $target->nama_target }} ({{ $target->hobi->nama_hobi }})</option>
                                         @endforeach
                                     </select>
                                 </div>

@@ -27,10 +27,7 @@ class TargetHobi extends Model
         return $this->belongsTo(Hobi::class);
     }
 
-    public function progresTarget()
-    {
-        return $this->hasMany(ProgresTarget::class, 'target_id');
-    }
+
 
     public function aktivitas()
     {

@@ -42,6 +42,16 @@
                         </a>
                     </li>
                     <li class="sidebar-item">
+                        <a class="sidebar-link justify-content-between" href="/admin/target" aria-expanded="false">
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="d-flex">
+                                    <i class="ti ti-target"></i>
+                                </span>
+                                <span class="hide-menu">Target Hobi</span>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
                         <a class="sidebar-link justify-content-between" href="/aktivitas" aria-expanded="false">
                             <div class="d-flex align-items-center gap-3">
                                 <span class="d-flex">
@@ -50,16 +60,6 @@
                                 <span class="hide-menu">Activities</span>
                             </div>
 
-                        </a>
-                    </li>
-                    <li class="sidebar-item">
-                        <a class="sidebar-link justify-content-between" href="/admin/target" aria-expanded="false">
-                            <div class="d-flex align-items-center gap-3">
-                                <span class="d-flex">
-                                    <i class="ti ti-target"></i>
-                                </span>
-                                <span class="hide-menu">Target Hobi</span>
-                            </div>
                         </a>
                     </li>
                     <li class="sidebar-item">

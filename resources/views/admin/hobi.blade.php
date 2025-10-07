@@ -99,7 +99,9 @@
                                                 ($maxAktivitas /
                                                     max(
                                                         $hobis->sum(function ($h) {
-                                                            return $h->aktivitas->count();
+                                                            return $h->targetHobi->sum(function ($target) {
+                                                                return $target->aktivitas->count();
+                                                            });
                                                         }),
                                                         1,
                                                     )) *
@@ -321,12 +323,11 @@
                                                 <i class="ti ti-pencil"></i>
                                             </button>
                                             <form action="{{ route('hobi.destroy', $hobi->id) }}" method="POST"
-                                                onsubmit="return confirm('Yakin ingin menghapus hobi \"{{ $hobi->nama_hobi }}\"?');"
-                                                class="d-inline">
+                                                class="d-inline hapus-hobi-form">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-danger"
-                                                    data-bs-toggle="tooltip" title="Hapus Hobi">
+                                                <button type="submit" class="btn btn-sm btn-danger" title="Hapus Hobi"
+                                                    data-nama="{{ $hobi->nama_hobi }}">
                                                     <i class="ti ti-trash"></i>
                                                 </button>
                                             </form>
@@ -553,6 +554,8 @@
             </div>
         </div>
     </div>
+
+
 
 @endsection
 

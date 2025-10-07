@@ -260,8 +260,8 @@
                                 <li class="list-group-item">
                                     <i class="ti ti-check text-success me-2"></i>
                                     {{ $activity->catatan ?? 'Melakukan aktivitas hobi' }}
-                                    @if($activity->hobi)
-                                        - <b>{{ $activity->hobi->nama_hobi }}</b>
+                                    @if($activity->target)
+                                        - <b>{{ $activity->target->nama_target }}</b> ({{ $activity->target->hobi->nama_hobi }})
                                     @endif
                                     <span class="text-muted small float-end">
                                         {{ $activity->created_at->diffForHumans() }}

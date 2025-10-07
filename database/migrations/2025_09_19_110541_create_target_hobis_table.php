@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('hobi_id')->constrained('hobis')->onDelete('cascade');
             $table->string('nama_target');
             $table->date('target_deadline');
+            $table->integer('jumlah_aktivitas_dibutuhkan')->default(1);
             $table->timestamps();
         });
     }

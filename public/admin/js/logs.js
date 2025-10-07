@@ -22,8 +22,8 @@ function loadDetail(id, type = 'aktivitas') {
     document.getElementById('detail-loading').classList.remove('d-none');
     document.getElementById('detail-content').classList.add('d-none');
 
-    const url = type === 'target' ? `/logs/target/${id}` : `/log-aktivitas/${id}`;
-    
+    const url = `/log-aktivitas/${id}`;
+
     fetch(url)
         .then(response => {
             if (!response.ok) {
@@ -32,45 +32,14 @@ function loadDetail(id, type = 'aktivitas') {
             return response.json();
         })
         .then(data => {
-            // Update modal fields based on type
+            // Update modal fields for aktivitas
             document.getElementById('detail-tanggal').textContent = data.tanggal;
             document.getElementById('detail-waktu-upload').textContent = data.waktu_upload;
-            
-            if (type === 'target') {
-                // Update for target
-                document.getElementById('detail-aktivitas').parentElement.querySelector('dt').textContent = 'Target';
-                document.getElementById('detail-aktivitas').textContent = data.target;
-                document.getElementById('detail-hobi').textContent = data.hobi;
-                
-                // Change durasi to status for target
-                document.getElementById('detail-durasi').parentElement.querySelector('dt').textContent = 'Status';
-                document.getElementById('detail-durasi').innerHTML = getStatusBadge(data.status);
-                
-                // Add deadline field if not exists
-                let deadlineRow = document.getElementById('detail-deadline-row');
-                if (!deadlineRow) {
-                    const durasiRow = document.getElementById('detail-durasi').parentElement;
-                    deadlineRow = document.createElement('div');
-                    deadlineRow.className = 'row';
-                    deadlineRow.id = 'detail-deadline-row';
-                    deadlineRow.innerHTML = '<dt class="col-sm-3">Deadline</dt><dd class="col-sm-9" id="detail-deadline">-</dd>';
-                    durasiRow.parentElement.insertBefore(deadlineRow, durasiRow.nextSibling);
-                }
-                document.getElementById('detail-deadline').textContent = data.deadline;
-            } else {
-                // Update for aktivitas
-                document.getElementById('detail-aktivitas').parentElement.querySelector('dt').textContent = 'Aktivitas';
-                document.getElementById('detail-aktivitas').textContent = data.aktivitas;
-                document.getElementById('detail-hobi').textContent = data.hobi;
-                document.getElementById('detail-durasi').parentElement.querySelector('dt').textContent = 'Durasi';
-                document.getElementById('detail-durasi').textContent = data.durasi;
-                
-                // Remove deadline row if exists
-                const deadlineRow = document.getElementById('detail-deadline-row');
-                if (deadlineRow) {
-                    deadlineRow.remove();
-                }
-            }
+
+            document.getElementById('detail-aktivitas').textContent = data.aktivitas;
+            document.getElementById('detail-target').textContent = data.target;
+            document.getElementById('detail-hobi').textContent = data.hobi;
+            document.getElementById('detail-durasi').textContent = data.durasi;
 
             document.getElementById('detail-catatan').textContent = data.catatan || 'tidak ada catatan';
 
@@ -159,13 +128,4 @@ function loadDetail(id, type = 'aktivitas') {
         });
 }
 
-function getStatusBadge(status) {
-    const statusLower = status.toLowerCase();
-    if (statusLower === 'completed') {
-        return '<span class="badge bg-success-subtle text-success px-3 py-2"><i class="ti ti-check-circle me-1"></i>Completed</span>';
-    } else if (statusLower === 'failed') {
-        return '<span class="badge bg-danger-subtle text-danger px-3 py-2"><i class="ti ti-x-circle me-1"></i>Failed</span>';
-    } else {
-        return '<span class="badge bg-warning-subtle text-warning px-3 py-2"><i class="ti ti-clock me-1"></i>On Progress</span>';
-    }
-}
+

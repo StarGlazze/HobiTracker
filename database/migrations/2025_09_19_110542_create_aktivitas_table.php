@@ -11,14 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('progres_targets', function (Blueprint $table) {
+        Schema::create('aktivitas', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('target_id')->constrained('target_hobis')->onDelete('cascade');
-            $table->enum('status', ['on_progress', 'completed', 'failed'])->default('on_progress');
-            $table->string('file_bukti')->nullable();
-            $table->string('link_gdrive')->nullable();
+            $table->string('nama_aktivitas');
+            $table->integer('durasi_menit');
             $table->text('catatan')->nullable();
+            $table->string('file_bukti');
             $table->timestamps();
         });
     }
@@ -28,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('progres_targets');
+        Schema::dropIfExists('aktivitas');
     }
 };

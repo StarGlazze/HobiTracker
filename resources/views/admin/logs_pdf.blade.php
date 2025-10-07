@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Laporan Log {{ $type === 'target' ? 'Target' : 'Aktivitas' }}</title>
+    <title>Laporan Log Aktivitas</title>
     <style>
         body {
             font-family: 'DejaVu Sans', sans-serif;
@@ -84,8 +84,8 @@
 </head>
 <body>
     <div class="header">
-        <h1>Laporan Log {{ $type === 'target' ? 'Target' : 'Aktivitas' }}</h1>
-        <p>Riwayat {{ $type === 'target' ? 'Progress Target' : 'Aktivitas' }} Hobi</p>
+        <h1>Laporan Log Aktivitas</h1>
+        <p>Riwayat Aktivitas Hobi</p>
     </div>
 
     <div class="info-box">
@@ -93,135 +93,70 @@
         @if($startDate && $endDate)
             <p><strong>Period:</strong> {{ \Carbon\Carbon::parse($startDate)->format('d F Y') }} - {{ \Carbon\Carbon::parse($endDate)->format('d F Y') }}</p>
         @endif
-        <p><strong>Total Data:</strong> {{ $logs->count() }} {{ $type === 'target' ? 'progress' : 'aktivitas' }}</p>
+        <p><strong>Total Data:</strong> {{ $logs->count() }} aktivitas</p>
     </div>
 
-    @if($type === 'target')
-        <!-- Tabel Target -->
-        @forelse($logs as $index => $log)
-            <div style="margin-bottom: 20px; page-break-inside: avoid;">
-                <table style="margin-bottom: 10px;">
-                    <tr>
-                        <td style="width: 100px; font-weight: bold; background: #f8f9fc;">Tanggal</td>
-                        <td>{{ $log->created_at->format('d F Y') }}</td>
-                    </tr>
-                    <tr>
-                        <td style="font-weight: bold; background: #f8f9fc;">Target</td>
-                        <td>{{ $log->targetHobi->nama_target }}</td>
-                    </tr>
-                    <tr>
-                        <td style="font-weight: bold; background: #f8f9fc;">Hobi</td>
-                        <td>{{ $log->targetHobi->hobi->nama_hobi }}</td>
-                    </tr>
-                    <tr>
-                        <td style="font-weight: bold; background: #f8f9fc;">Status</td>
-                        <td>
-                            @if($log->status === 'completed')
-                                <span class="badge badge-success">Completed</span>
-                            @elseif($log->status === 'failed')
-                                <span class="badge badge-danger">Failed</span>
-                            @else
-                                <span class="badge badge-warning">Progress</span>
-                            @endif
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="font-weight: bold; background: #f8f9fc;">Catatan</td>
-                        <td>{{ $log->catatan ?: '-' }}</td>
-                    </tr>
-                </table>
+    <!-- Tabel Aktivitas -->
+    @forelse($logs as $index => $log)
+        <div style="margin-bottom: 20px; page-break-inside: avoid;">
+            <table style="margin-bottom: 10px;">
+                <tr>
+                    <td style="width: 100px; font-weight: bold; background: #f8f9fc;">Tanggal</td>
+                    <td>{{ $log->created_at->format('d F Y') }}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold; background: #f8f9fc;">Aktivitas</td>
+                    <td>{{ $log->aktivitas->nama_aktivitas }}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold; background: #f8f9fc;">Hobi</td>
+                    <td>{{ $log->aktivitas->hobi->nama_hobi }}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold; background: #f8f9fc;">Durasi</td>
+                    <td>{{ $log->aktivitas->durasi_menit }} Menit</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold; background: #f8f9fc;">Catatan</td>
+                    <td>{{ $log->catatan ?: '-' }}</td>
+                </tr>
+            </table>
 
-                @if($log->file_bukti || $log->link_gdrive)
+            @if($log->file_bukti)
+                @php
+                    $decoded = json_decode($log->file_bukti, true) ?: [];
+                    $fileData = isset($decoded['file']) ? $decoded['file'] : null;
+                    $gdriveData = isset($decoded['gdrive']) ? $decoded['gdrive'] : null;
+                @endphp
+                @if($fileData || $gdriveData)
                     <div style="margin-top: 10px;">
                         <strong>Bukti:</strong>
-                        @if($log->file_bukti)
+                        @if($fileData)
                             @php
-                                $filePath = storage_path('app/public/' . $log->file_bukti);
-                                $fileExt = pathinfo($log->file_bukti, PATHINFO_EXTENSION);
+                                $filePath = storage_path('app/public/' . $fileData);
+                                $fileExt = pathinfo($fileData, PATHINFO_EXTENSION);
                             @endphp
                             @if(in_array($fileExt, ['jpg', 'jpeg', 'png', 'gif']) && file_exists($filePath))
                                 <div style="margin-top: 5px;">
                                     <img src="{{ $filePath }}" style="max-width: 300px; max-height: 200px; border: 1px solid #ddd; padding: 5px;">
                                 </div>
                             @else
-                                <p style="margin: 5px 0; font-size: 11px;">File: {{ basename($log->file_bukti) }}</p>
+                                <p style="margin: 5px 0; font-size: 11px;">File: {{ basename($fileData) }}</p>
                             @endif
                         @endif
-                        @if($log->link_gdrive)
-                            <p style="margin: 5px 0; font-size: 11px; color: #4e73df;">Link: {{ $log->link_gdrive }}</p>
+                        @if($gdriveData)
+                            <p style="margin: 5px 0; font-size: 11px; color: #4e73df;">Link: {{ $gdriveData }}</p>
                         @endif
                     </div>
                 @endif
-            </div>
-            @if(!$loop->last)
-                <hr style="border: 1px dashed #ddd; margin: 20px 0;">
             @endif
-        @empty
-            <p style="text-align: center; padding: 20px;">Tidak ada data</p>
-        @endforelse
-    @else
-        <!-- Tabel Aktivitas -->
-        @forelse($logs as $index => $log)
-            <div style="margin-bottom: 20px; page-break-inside: avoid;">
-                <table style="margin-bottom: 10px;">
-                    <tr>
-                        <td style="width: 100px; font-weight: bold; background: #f8f9fc;">Tanggal</td>
-                        <td>{{ $log->created_at->format('d F Y') }}</td>
-                    </tr>
-                    <tr>
-                        <td style="font-weight: bold; background: #f8f9fc;">Aktivitas</td>
-                        <td>{{ $log->aktivitas->nama_aktivitas }}</td>
-                    </tr>
-                    <tr>
-                        <td style="font-weight: bold; background: #f8f9fc;">Hobi</td>
-                        <td>{{ $log->aktivitas->hobi->nama_hobi }}</td>
-                    </tr>
-                    <tr>
-                        <td style="font-weight: bold; background: #f8f9fc;">Durasi</td>
-                        <td>{{ $log->aktivitas->durasi_menit }} Menit</td>
-                    </tr>
-                    <tr>
-                        <td style="font-weight: bold; background: #f8f9fc;">Catatan</td>
-                        <td>{{ $log->catatan ?: '-' }}</td>
-                    </tr>
-                </table>
-
-                @if($log->file_bukti)
-                    @php
-                        $decoded = json_decode($log->file_bukti, true) ?: [];
-                        $fileData = isset($decoded['file']) ? $decoded['file'] : null;
-                        $gdriveData = isset($decoded['gdrive']) ? $decoded['gdrive'] : null;
-                    @endphp
-                    @if($fileData || $gdriveData)
-                        <div style="margin-top: 10px;">
-                            <strong>Bukti:</strong>
-                            @if($fileData)
-                                @php
-                                    $filePath = storage_path('app/public/' . $fileData);
-                                    $fileExt = pathinfo($fileData, PATHINFO_EXTENSION);
-                                @endphp
-                                @if(in_array($fileExt, ['jpg', 'jpeg', 'png', 'gif']) && file_exists($filePath))
-                                    <div style="margin-top: 5px;">
-                                        <img src="{{ $filePath }}" style="max-width: 300px; max-height: 200px; border: 1px solid #ddd; padding: 5px;">
-                                    </div>
-                                @else
-                                    <p style="margin: 5px 0; font-size: 11px;">File: {{ basename($fileData) }}</p>
-                                @endif
-                            @endif
-                            @if($gdriveData)
-                                <p style="margin: 5px 0; font-size: 11px; color: #4e73df;">Link: {{ $gdriveData }}</p>
-                            @endif
-                        </div>
-                    @endif
-                @endif
-            </div>
-            @if(!$loop->last)
-                <hr style="border: 1px dashed #ddd; margin: 20px 0;">
-            @endif
-        @empty
-            <p style="text-align: center; padding: 20px;">Tidak ada data</p>
-        @endforelse
-    @endif
+        </div>
+        @if(!$loop->last)
+            <hr style="border: 1px dashed #ddd; margin: 20px 0;">
+        @endif
+    @empty
+        <p style="text-align: center; padding: 20px;">Tidak ada data</p>
+    @endforelse
 
     <div class="footer">
         <p>Dokumen ini digenerate secara otomatis oleh sistem | Halaman {PAGE_NUM} dari {PAGE_COUNT}</p>
