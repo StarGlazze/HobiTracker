@@ -12,7 +12,7 @@ class Aktivitas extends Model
     protected $fillable = [
         'target_id',
         'nama_aktivitas',
-        'durasi_menit',
+        'energy_mood_level',
         'catatan',
         'file_bukti',
     ];

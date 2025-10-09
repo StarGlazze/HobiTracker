@@ -283,25 +283,25 @@
                             <div class="list-group-item px-0 d-flex align-items-center">
                                 <div class="flex-grow-1">
                                     <h6 class="fw-semibold mb-0">Membaca Novel "Dune"</h6>
-                                    <small class="text-muted">2 jam lalu • 2 jam durasi</small>
+                                    <small class="text-muted">2 jam lalu • Mood: 😊</small>
                                 </div>
                             </div>
                             <div class="list-group-item px-0 d-flex align-items-center">
                                 <div class="flex-grow-1">
                                     <h6 class="fw-semibold mb-0">Bersepeda pagi</h6>
-                                    <small class="text-muted">5 jam lalu • 1 jam durasi</small>
+                                    <small class="text-muted">5 jam lalu • Energi: 8/10</small>
                                 </div>
                             </div>
                             <div class="list-group-item px-0 d-flex align-items-center">
                                 <div class="flex-grow-1">
                                     <h6 class="fw-semibold mb-0">Latihan Piano</h6>
-                                    <small class="text-muted">1 hari lalu • 30 menit durasi</small>
+                                    <small class="text-muted">1 hari lalu • Mood: 🎵</small>
                                 </div>
                             </div>
                             <div class="list-group-item px-0 d-flex align-items-center">
                                 <div class="flex-grow-1">
                                     <h6 class="fw-semibold mb-0">Bermain Clash Royale</h6>
-                                    <small class="text-muted">2 hari lalu • 50 menit durasi</small>
+                                    <small class="text-muted">2 hari lalu • Energi: Tinggi</small>
                                 </div>
                             </div>
                         </div>

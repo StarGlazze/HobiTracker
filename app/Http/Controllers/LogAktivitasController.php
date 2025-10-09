@@ -51,58 +51,127 @@ class LogAktivitasController extends Controller
 
         $totalAktivitas = DB::select("SELECT COUNT(*) as count FROM log_aktivitas l WHERE 1=1 $whereUser $whereDate")[0]->count;
         $bulanIni = DB::select("SELECT COUNT(*) as count FROM log_aktivitas l WHERE MONTH(created_at) = ? $whereUser $whereDate", [now()->month])[0]->count;
-        $totalDurasi = DB::select("SELECT SUM(a.durasi_menit) as sum FROM log_aktivitas l JOIN aktivitas a ON l.aktivitas_id = a.id WHERE 1=1 $whereUser $whereDate")[0]->sum ?? 0;
-        $distinctDays = DB::select("SELECT COUNT(DISTINCT DATE(created_at)) as count FROM log_aktivitas l WHERE 1=1 $whereUser $whereDate")[0]->count;
-        $rataRataHarian = $distinctDays > 0 ? round($totalDurasi / $distinctDays, 1) : 0;
 
-        return view('admin.logs', compact('logs', 'totalAktivitas', 'bulanIni', 'totalDurasi', 'rataRataHarian', 'search', 'startDate', 'endDate'));
+        return view('admin.logs', compact('logs', 'totalAktivitas', 'bulanIni', 'search', 'startDate', 'endDate'));
     }
 
     /**
      * Display the specified resource.
+     * Route: GET /log-aktivitas/{id}
      */
-    public function show(LogAktivitas $logAktivitas)
-    {
-        try {
-            if (Auth::user()->email !== 'admin@example.com' && $logAktivitas->user_id !== Auth::id()) {
-                return response()->json(['error' => 'Unauthorized'], 403);
-            }
-
-            $logAktivitas->load(['aktivitas.target.hobi']);
-
-            // Check if relations exist
-            if (!$logAktivitas->aktivitas || !$logAktivitas->aktivitas->target || !$logAktivitas->aktivitas->target->hobi) {
-                return response()->json(['error' => 'Data aktivitas tidak lengkap'], 404);
-            }
-
-            $bukti = [];
-            if ($fileBukti = $logAktivitas->file_bukti) {
-                $decoded = json_decode($fileBukti, true) ?: [];
-                if (isset($decoded['file'])) {
-                    $bukti[] = Storage::url($decoded['file']);
-                }
-                if (isset($decoded['gdrive'])) {
-                    $bukti[] = $decoded['gdrive'];
-                }
-            }
-
+public function show($id)
+{
+    // Log request info
+    Log::info("=== LOG DETAIL REQUEST ===");
+    Log::info("ID: {$id}");
+    Log::info("User ID: " . Auth::id());
+    Log::info("User Email: " . Auth::user()->email);
+    Log::info("Request Headers: ", request()->headers->all());
+    
+    try {
+        // Cari log berdasarkan ID
+        $logAktivitas = LogAktivitas::find($id);
+        
+        if (!$logAktivitas) {
+            Log::error("Log not found: {$id}");
             return response()->json([
-                'tanggal' => $logAktivitas->created_at->format('d F Y'),
-                'waktu_upload' => $logAktivitas->created_at->format('H:i'),
-                'aktivitas' => $logAktivitas->aktivitas->nama_aktivitas,
-                'target' => $logAktivitas->aktivitas->target->nama_target,
-                'hobi' => $logAktivitas->aktivitas->target->hobi->nama_hobi,
-                'durasi' => $logAktivitas->aktivitas->durasi_menit . ' Menit',
-                'catatan' => $logAktivitas->catatan ?: 'tidak ada catatan',
-                'bukti' => $bukti
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Error loading aktivitas detail: ' . $e->getMessage());
-            return response()->json(['error' => 'Gagal memuat detail: ' . $e->getMessage()], 500);
+                'error' => 'Log tidak ditemukan',
+                'id' => $id
+            ], 404);
         }
+        
+        Log::info("Log found: {$id}");
+        
+        // Check authorization
+        if (Auth::user()->email !== 'admin@example.com' && $logAktivitas->user_id !== Auth::id()) {
+            Log::warning("Unauthorized access attempt to log {$id} by user " . Auth::id());
+            return response()->json([
+                'error' => 'Anda tidak memiliki akses ke data ini',
+                'log_user_id' => $logAktivitas->user_id,
+                'current_user_id' => Auth::id()
+            ], 403);
+        }
+
+        Log::info("Authorization passed");
+
+        // Load relasi
+        try {
+            $logAktivitas->load(['aktivitas.target.hobi']);
+            Log::info("Relations loaded successfully");
+        } catch (\Exception $e) {
+            Log::error("Error loading relations: " . $e->getMessage());
+            // Continue anyway, we'll handle missing relations below
+        }
+
+        // Process bukti files
+        $bukti = [];
+        if ($fileBukti = $logAktivitas->file_bukti) {
+            Log::info("File bukti raw: " . $fileBukti);
+            
+            // Coba decode sebagai JSON
+            $decoded = json_decode($fileBukti, true);
+            
+            if (is_array($decoded)) {
+                Log::info("File bukti is JSON array");
+                if (isset($decoded['file']) && !empty($decoded['file'])) {
+                    $url = Storage::url($decoded['file']);
+                    $bukti[] = $url;
+                    Log::info("Added file: " . $url);
+                }
+                if (isset($decoded['gdrive']) && !empty($decoded['gdrive'])) {
+                    $bukti[] = $decoded['gdrive'];
+                    Log::info("Added gdrive: " . $decoded['gdrive']);
+                }
+            } elseif (is_string($fileBukti) && !empty($fileBukti)) {
+                Log::info("File bukti is string");
+                if (filter_var($fileBukti, FILTER_VALIDATE_URL)) {
+                    $bukti[] = $fileBukti;
+                    Log::info("Added URL: " . $fileBukti);
+                } else {
+                    $url = Storage::url($fileBukti);
+                    $bukti[] = $url;
+                    Log::info("Added storage path: " . $url);
+                }
+            } else {
+                Log::info("File bukti format unknown: " . gettype($fileBukti));
+            }
+        } else {
+            Log::info("No file bukti");
+        }
+
+        Log::info("Total bukti: " . count($bukti));
+
+        $responseData = [
+            'tanggal' => $logAktivitas->created_at->format('d F Y'),
+            'waktu_upload' => $logAktivitas->created_at->format('H:i'),
+            'aktivitas' => optional($logAktivitas->aktivitas)->nama_aktivitas ?? 'tidak ada',
+            'target' => optional(optional($logAktivitas->aktivitas)->target)->nama_target ?? 'tidak ada',
+            'hobi' => optional(optional(optional($logAktivitas->aktivitas)->target)->hobi)->nama_hobi ?? 'tidak ada',
+            'energy_mood_level' => optional($logAktivitas->aktivitas)->energy_mood_level ?? '-',
+            'catatan' => $logAktivitas->catatan ?: 'tidak ada catatan',
+            'bukti' => $bukti
+        ];
+
+        Log::info("Response data prepared", $responseData);
+        Log::info("=== LOG DETAIL SUCCESS ===");
+
+        return response()->json($responseData, 200, [], JSON_UNESCAPED_SLASHES);
+
+    } catch (\Exception $e) {
+        Log::error("=== LOG DETAIL ERROR ===");
+        Log::error("Error: " . $e->getMessage());
+        Log::error("File: " . $e->getFile());
+        Log::error("Line: " . $e->getLine());
+        Log::error("Trace: " . $e->getTraceAsString());
+        
+        return response()->json([
+            'error' => 'Gagal memuat detail log',
+            'message' => config('app.debug') ? $e->getMessage() : 'Terjadi kesalahan server',
+            'file' => config('app.debug') ? $e->getFile() : null,
+            'line' => config('app.debug') ? $e->getLine() : null
+        ], 500);
     }
-
-
+}
 
     /**
      * Export logs to PDF.
@@ -158,6 +227,4 @@ class LogAktivitasController extends Controller
         $logAktivitas->delete();
         return redirect()->route('admin.logs')->with('success', 'Log berhasil dihapus');
     }
-
-
 }

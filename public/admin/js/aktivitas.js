@@ -135,21 +135,35 @@ function clearFileEvidenceError(form) {
  * Initialize Edit Form
  */
 function initEditForm() {
-    // Handle edit button clicks using event delegation
-    document.addEventListener('click', function(e) {
-        const editButton = e.target.closest('button[data-bs-target="#editAktivitasModal"]');
+    // Handle edit modal show event
+    const editModal = document.getElementById('editAktivitasModal');
+    if (editModal) {
+        editModal.addEventListener('show.bs.modal', function(e) {
+            const editButton = e.relatedTarget; // the button that triggered the modal
 
-        if (editButton) {
-            e.preventDefault();
-            const aktivitasId = editButton.getAttribute('data-id');
+            // Get data from button JSON attribute
+            const dataAttr = editButton.getAttribute('data-aktivitas');
+            if (!dataAttr) {
+                alert('Data aktivitas tidak ditemukan');
+                return;
+            }
 
+            let data;
+            try {
+                data = JSON.parse(dataAttr);
+            } catch (error) {
+                alert('Gagal memuat data aktivitas: Format data tidak valid');
+                return;
+            }
+
+            const aktivitasId = data.id;
             if (aktivitasId) {
-                loadAktivitasData(aktivitasId, editButton);
+                loadAktivitasData(aktivitasId, data);
             } else {
                 alert('ID aktivitas tidak ditemukan');
             }
-        }
-    });
+        });
+    }
 }
 
 /**
@@ -233,51 +247,65 @@ function initSearch() {
 /**
  * Load Activity Data for Edit Form
  */
-function loadAktivitasData(aktivitasId, editButton) {
+/**
+ * Load Activity Data for Edit Form
+ */
+function loadAktivitasData(aktivitasId, data) {
     try {
-        // Get data from button attributes (fallback method)
-        const nama = editButton.getAttribute('data-nama') || '';
-        const target = editButton.getAttribute('data-target') || '';
-        const durasi = editButton.getAttribute('data-durasi') || '';
-        const catatan = editButton.getAttribute('data-catatan') || '';
-        const fileBukti = editButton.getAttribute('data-file-bukti') || '';
+        // Extract values from data
+        const nama = data.nama || '';
+        const targetId = data.target_id || '';
+        const energyMood = data.energy_mood || '';
+        const catatan = data.catatan || '';
+        const fileBukti = data.file_bukti || '';
 
         // Fill form fields
         document.getElementById('editNamaAktivitas').value = nama;
-        document.getElementById('editDurasiMenit').value = durasi;
+        document.getElementById('editEnergyMoodLevel').value = energyMood;
         document.getElementById('editCatatanAktivitas').value = catatan === 'Tidak ada catatan' ? '' : catatan;
 
         // Set target selection
         const targetSelect = document.getElementById('editPilihTarget');
-        for (let option of targetSelect.options) {
-            if (option.text.trim().includes(target.trim())) {
-                option.selected = true;
-                break;
-            }
+        if (targetSelect) {
+            targetSelect.value = targetId;
         }
 
         // Clear file inputs first
         document.getElementById('editFileBukti').value = '';
         document.getElementById('editGdriveLink').value = '';
 
-        // Handle file data (now stored as JSON)
+        // Handle file data (now stored as JSON, with backward compatibility)
+        let fileData = {};
         try {
-            const fileData = fileBukti ? JSON.parse(fileBukti) : {};
-
-            // If there's a GDrive link, populate it
-            if (fileData.gdrive) {
-                document.getElementById('editGdriveLink').value = fileData.gdrive;
+            if (fileBukti) {
+                fileData = JSON.parse(fileBukti);
             }
-            // Note: We don't populate the file input as browsers don't allow setting file input values for security reasons
-            // The user will need to re-upload if they want to change the file
         } catch (e) {
-            console.warn('Failed to parse file_bukti data:', e);
+            // Backward compatibility: handle plain string
+            console.warn('Failed to parse file_bukti data, treating as plain string:', e);
+            if (fileBukti && typeof fileBukti === 'string') {
+                if (fileBukti.includes('drive.google.com')) {
+                    fileData = { gdrive: fileBukti };
+                } else {
+                    fileData = { file: fileBukti };
+                }
+            }
         }
 
-        // Set form action
+        // If there's a GDrive link, populate it
+        if (fileData.gdrive) {
+            document.getElementById('editGdriveLink').value = fileData.gdrive;
+        }
+
+        // ===== PERBAIKAN UTAMA DI SINI =====
+        // Set form action dengan URL lengkap
         const editForm = document.getElementById('editAktivitasForm');
-        const baseUrl = editForm.getAttribute('data-base-url') || '/aktivitas';
-        editForm.action = `${baseUrl}/${aktivitasId}`;
+
+        // Set action dengan format yang benar - menggunakan path absolut
+        editForm.action = '/aktivitas/' + aktivitasId;
+
+        console.log('Form action set to:', editForm.action); // Untuk debugging
+        // ===================================
 
         // Store ID for reference
         document.getElementById('editAktivitasModal').setAttribute('data-aktivitas-id', aktivitasId);
@@ -287,7 +315,7 @@ function loadAktivitasData(aktivitasId, editButton) {
 
     } catch (error) {
         console.error('Error loading aktivitas data:', error);
-        alert('Gagal memuat data aktivitas');
+        alert('Gagal memuat data aktivitas: ' + error.message);
     }
 }
 

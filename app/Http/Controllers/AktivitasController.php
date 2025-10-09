@@ -26,13 +26,9 @@ class AktivitasController extends Controller
 
         // Menghitung statistik untuk dashboard cards
         $totalAktivitas = $aktivitas->count();
-        $totalDurasi = $aktivitas->sum('durasi_menit');
+        $bulanIni = $aktivitas->where('created_at', '>=', now()->startOfMonth())->count();
         $hobiAktif = $aktivitas->pluck('target.hobi')->unique('id')->count();
-        $rataRataDurasi = $totalAktivitas > 0 ? round($totalDurasi / $totalAktivitas) : 0;
-
-        // Format durasi untuk tampilan
-        $totalDurasiFormatted = $totalDurasi . 'm';
-        $rataRataDurasiFormatted = $rataRataDurasi . 'm';
+        $denganMood = $aktivitas->whereNotNull('energy_mood_level')->where('energy_mood_level', '!=', '')->count();
 
         // Mengambil target milik user untuk dropdown
         $targets = TargetHobi::whereHas('hobi', function ($query) use ($userId) {
@@ -43,9 +39,9 @@ class AktivitasController extends Controller
             'aktivitas' => $aktivitas,
             'targets' => $targets,
             'totalAktivitas' => $totalAktivitas,
-            'totalDurasi' => $totalDurasiFormatted,
+            'bulanIni' => $bulanIni,
             'hobiAktif' => $hobiAktif,
-            'rataRataDurasi' => $rataRataDurasiFormatted,
+            'denganMood' => $denganMood,
         ]);
     }
 
@@ -69,7 +65,7 @@ class AktivitasController extends Controller
             $validator = Validator::make($request->all(), [
                 'target_id' => 'required|exists:target_hobis,id',
                 'nama_aktivitas' => 'required|string|max:255',
-                'durasi_menit' => 'required|integer|min:1',
+                'energy_mood_level' => 'nullable|string|max:50',
                 'catatan' => 'nullable|string|max:1000',
                 'file_bukti' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:51200', // Max 50MB
                 'gdrive_link' => 'nullable|url|max:500',
@@ -115,7 +111,7 @@ class AktivitasController extends Controller
             $aktivitas = Aktivitas::create([
                 'target_id' => $request->target_id,
                 'nama_aktivitas' => $request->nama_aktivitas,
-                'durasi_menit' => $request->durasi_menit,
+                'energy_mood_level' => $request->energy_mood_level,
                 'catatan' => $request->catatan,
                 'file_bukti' => json_encode($fileData),
             ]);
@@ -180,7 +176,7 @@ class AktivitasController extends Controller
             $validator = Validator::make($request->all(), [
                 'target_id' => 'required|exists:target_hobis,id',
                 'nama_aktivitas' => 'required|string|max:255',
-                'durasi_menit' => 'required|integer|min:1',
+                'energy_mood_level' => 'nullable|string|max:50',
                 'catatan' => 'nullable|string|max:1000',
                 'file_bukti' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:51200', // Max 50MB
                 'gdrive_link' => 'nullable|url|max:500',
@@ -250,7 +246,7 @@ class AktivitasController extends Controller
             $aktivitas->update([
                 'target_id' => $request->target_id,
                 'nama_aktivitas' => $request->nama_aktivitas,
-                'durasi_menit' => $request->durasi_menit,
+                'energy_mood_level' => $request->energy_mood_level,
                 'catatan' => $request->catatan,
                 'file_bukti' => json_encode($fileData),
             ]);

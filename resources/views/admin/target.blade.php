@@ -131,10 +131,16 @@
                                     </td>
                                     <td class="py-3 text-center">
                                         <div class="btn-group" role="group">
-                                            <button class="btn btn-warning btn-sm" data-bs-toggle="modal"
-                                                data-bs-target="#editTargetModal{{ $target->id }}" title="Edit Target">
-                                                <i class="ti ti-pencil"></i>
-                                            </button>
+                                            @if($isExpired)
+                                                <button class="btn btn-secondary btn-sm" disabled title="Target Expired - Cannot Edit">
+                                                    <i class="ti ti-pencil-off"></i>
+                                                </button>
+                                            @else
+                                                <button class="btn btn-warning btn-sm" data-bs-toggle="modal"
+                                                    data-bs-target="#editTargetModal{{ $target->id }}" title="Edit Target">
+                                                    <i class="ti ti-pencil"></i>
+                                                </button>
+                                            @endif
                                             <form action="{{ route('admin.target.destroy', ['target' => $target->id]) }}"
                                                 method="POST" style="display:inline;">
                                                 @csrf

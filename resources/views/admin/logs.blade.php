@@ -18,8 +18,6 @@
             </div>
         </div>
 
-
-
         <!-- Stats Cards -->
         <div class="row mb-4">
             <div class="col-md-3">
@@ -57,11 +55,11 @@
                     <div class="card-body p-3">
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
-                                <h6 class="text-white-50 mb-1">Total Durasi</h6>
-                                <h4 class="mb-0">{{ $totalDurasi }}m</h4>
+                                <h6 class="text-white-50 mb-1">Total Logs</h6>
+                                <h4 class="mb-0">{{ $totalAktivitas }}</h4>
                             </div>
                             <div class="ms-3">
-                                <i class="ti ti-clock fs-1 text-white-50"></i>
+                                <i class="ti ti-file-text fs-1 text-white-50"></i>
                             </div>
                         </div>
                     </div>
@@ -72,11 +70,11 @@
                     <div class="card-body p-3">
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
-                                <h6 class="text-white-50 mb-1">Rata-rata Harian</h6>
-                                <h4 class="mb-0">{{ $rataRataHarian }}m</h4>
+                                <h6 class="text-white-50 mb-1">Bulan Ini</h6>
+                                <h4 class="mb-0">{{ $bulanIni }}</h4>
                             </div>
                             <div class="ms-3">
-                                <i class="ti ti-trending-up fs-1 text-white-50"></i>
+                                <i class="ti ti-calendar fs-1 text-white-50"></i>
                             </div>
                         </div>
                     </div>
@@ -168,8 +166,8 @@
                                 </th>
                                 <th scope="col" class="border-0 py-3">
                                     <div class="d-flex align-items-center">
-                                        <i class="ti ti-clock me-2 text-muted"></i>
-                                        Durasi
+                                        <i class="ti ti-mood-happy me-2 text-muted"></i>
+                                        Mood
                                     </div>
                                 </th>
                                 <th scope="col" class="border-0 py-3">
@@ -204,7 +202,7 @@
                                     </td>
                                     <td class="py-3">
                                         <div class="d-flex align-items-center">
-                                            <span class="fw-semibold">{{ $log->aktivitas->durasi_menit }} Menit</span>
+                                            <span class="fw-semibold">{{ $log->aktivitas->energy_mood_level ?? '-' }}</span>
                                         </div>
                                     </td>
                                     <td class="py-3">
@@ -245,7 +243,7 @@
                 </div>
             </div>
 
-            <!-- Pagination - FIXED -->
+            <!-- Pagination -->
             <div class="card-footer bg-transparent border-top">
                 <div class="row align-items-center g-3">
                     <!-- Info Text -->
@@ -273,7 +271,7 @@
                                     @endif
 
                                     {{-- Pagination Elements --}}
-                                    @foreach ($logs->getUrlRange(max($logs->currentPage() - 2, 1), min($logs->currentPage() + 2, $logs->lastPage())) as $page => $url)
+                                    @foreach ($logs->getUrlRange(max($logs->currentPage() -2, 1), min($logs->currentPage() + 2, $logs->lastPage())) as $page => $url)
                                         @if ($page == $logs->currentPage())
                                             <li class="page-item active" aria-current="page"><span class="page-link">{{ $page }}</span></li>
                                         @else
@@ -391,14 +389,11 @@
                             <dt class="col-sm-3">Hobi</dt>
                             <dd class="col-sm-9" id="detail-hobi">-</dd>
 
-                            <dt class="col-sm-3">Durasi</dt>
-                            <dd class="col-sm-9" id="detail-durasi">-</dd>
+                            <dt class="col-sm-3">Mood</dt>
+                            <dd class="col-sm-9" id="detail-energy-mood">-</dd>
 
                             <dt class="col-sm-3">Catatan</dt>
                             <dd class="col-sm-9" id="detail-catatan">-</dd>
-
-                            <dt class="col-sm-3">Bukti</dt>
-                            <dd class="col-sm-9" id="detail-bukti">-</dd>
                         </dl>
 
                         <div class="row mt-4">
@@ -423,5 +418,7 @@
 @endsection
 
 @section('scripts')
+    <!-- CSRF Token untuk AJAX -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="{{ asset('./admin/js/logs.js') }}"></script>
 @endsection

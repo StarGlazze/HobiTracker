@@ -25,14 +25,14 @@
         </div>
 
         <!-- Success/Error Messages -->
-        @if(session('success'))
+        @if (session('success'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <i class="ti ti-check-circle me-2"></i>{{ session('success') }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         @endif
 
-        @if(session('error'))
+        @if (session('error'))
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <i class="ti ti-alert-circle me-2"></i>{{ session('error') }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -40,12 +40,12 @@
         @endif
 
         {{-- Display validation errors --}}
-        @if($errors->any())
+        @if ($errors->any())
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <i class="ti ti-alert-triangle me-2"></i>
                 <strong>Terjadi kesalahan:</strong>
                 <ul class="mb-0 mt-2">
-                    @foreach($errors->all() as $error)
+                    @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
                     @endforeach
                 </ul>
@@ -90,11 +90,11 @@
                     <div class="card-body p-3">
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
-                                <h6 class="text-white-50 mb-1">Total Durasi</h6>
-                                <h4 class="mb-0">{{ $totalDurasi ?? '0m' }}</h4>
+                                <h6 class="text-white-50 mb-1">Bulan Ini</h6>
+                                <h4 class="mb-0">{{ $bulanIni ?? 0 }}</h4>
                             </div>
                             <div class="ms-3">
-                                <i class="ti ti-clock fs-1 text-white-50"></i>
+                                <i class="ti ti-calendar fs-1 text-white-50"></i>
                             </div>
                         </div>
                     </div>
@@ -105,11 +105,11 @@
                     <div class="card-body p-3">
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
-                                <h6 class="text-white-50 mb-1">Rata-rata</h6>
-                                <h4 class="mb-0">{{ $rataRataDurasi ?? '0m' }}</h4>
+                                <h6 class="text-white-50 mb-1">Dengan Mood</h6>
+                                <h4 class="mb-0">{{ $denganMood ?? 0 }}</h4>
                             </div>
                             <div class="ms-3">
-                                <i class="ti ti-trending-up fs-1 text-white-50"></i>
+                                <i class="ti ti-mood-happy fs-1 text-white-50"></i>
                             </div>
                         </div>
                     </div>
@@ -144,7 +144,7 @@
                             <th scope="col" class="border-0 py-3 px-4" style="width: 5%;">#</th>
                             <th scope="col" class="border-0 py-3" style="width: 30%;">Aktivitas</th>
                             <th scope="col" class="border-0 py-3" style="width: 20%;">Target</th>
-                            <th scope="col" class="border-0 py-3" style="width: 15%;">Durasi</th>
+                            <th scope="col" class="border-0 py-3" style="width: 15%;">Mood</th>
                             <th scope="col" class="border-0 py-3">Catatan</th>
                             <th scope="col" class="border-0 py-3 text-center" style="width: 8%;">File</th>
                             <th scope="col" class="border-0 py-3 text-center" style="width: 12%;">Aksi</th>
@@ -159,10 +159,11 @@
                                 </td>
                                 <td class="py-3">
                                     <span class="fw-semibold">{{ $aktivitasItem->target->nama_target ?? 'N/A' }}</span>
-                                    <br><small class="text-muted">{{ $aktivitasItem->target->hobi->nama_hobi ?? 'N/A' }}</small>
+                                    <br><small
+                                        class="text-muted">{{ $aktivitasItem->target->hobi->nama_hobi ?? 'N/A' }}</small>
                                 </td>
                                 <td class="py-3">
-                                    <span class="fw-semibold">{{ $aktivitasItem->durasi_menit }} Menit</span>
+                                    <span class="fw-semibold">{{ $aktivitasItem->energy_mood_level ?? '-' }}</span>
                                 </td>
                                 <td class="py-3">
                                     <div class="text-truncate" style="max-width: 180px;" data-bs-toggle="tooltip"
@@ -184,16 +185,16 @@
                                                 $fileData = $decoded;
                                             } else {
                                                 // Old format: plain string, check if it's GDrive URL
-                                                $fileData = str_contains($rawFileBukti, 'drive.google.com')
-                                                    ? ['gdrive' => $rawFileBukti]
-                                                    : ['file' => $rawFileBukti];
-                                            }
-                                        } else {
-                                            $fileData = [];
-                                        }
+        $fileData = str_contains($rawFileBukti, 'drive.google.com')
+            ? ['gdrive' => $rawFileBukti]
+            : ['file' => $rawFileBukti];
+    }
+} else {
+    $fileData = [];
+}
 
-                                        $hasFile = isset($fileData['file']) && !empty($fileData['file']);
-                                        $hasGdrive = isset($fileData['gdrive']) && !empty($fileData['gdrive']);
+$hasFile = isset($fileData['file']) && !empty($fileData['file']);
+$hasGdrive = isset($fileData['gdrive']) && !empty($fileData['gdrive']);
                                     @endphp
 
                                     @if ($hasFile || $hasGdrive)
@@ -201,7 +202,9 @@
                                             @if ($hasFile)
                                                 {{-- Local file - detect type --}}
                                                 @php
-                                                    $extension = strtolower(pathinfo($fileData['file'], PATHINFO_EXTENSION));
+                                                    $extension = strtolower(
+                                                        pathinfo($fileData['file'], PATHINFO_EXTENSION),
+                                                    );
                                                     $imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
                                                     $videoExts = ['mp4', 'mov', 'avi', 'webm'];
 
@@ -246,13 +249,15 @@
                                 <td class="py-3 text-center">
                                     <div class="btn-group" role="group">
                                         <button class="btn btn-warning btn-sm" data-bs-toggle="modal"
-                                            data-bs-target="#editAktivitasModal" data-bs-toggle="tooltip"
-                                            title="Edit Aktivitas" data-id="{{ $aktivitasItem->id }}"
-                                            data-nama="{{ $aktivitasItem->nama_aktivitas }}"
-                                            data-target="{{ $aktivitasItem->target->nama_target ?? '' }}"
-                                            data-durasi="{{ $aktivitasItem->durasi_menit }}"
-                                            data-catatan="{{ $aktivitasItem->catatan ?? '' }}"
-                                            data-file-bukti="{{ json_encode($aktivitasItem->file_bukti) }}">
+                                            data-bs-target="#editAktivitasModal" title="Edit Aktivitas"
+                                            data-aktivitas="{{ json_encode([
+                                                'id' => $aktivitasItem->id,
+                                                'nama' => $aktivitasItem->nama_aktivitas,
+                                                'target_id' => $aktivitasItem->target_id,
+                                                'energy_mood' => $aktivitasItem->energy_mood_level ?? '',
+                                                'catatan' => $aktivitasItem->catatan ?? '',
+                                                'file_bukti' => $aktivitasItem->file_bukti
+                                            ]) }}">
                                             <i class="ti ti-pencil"></i>
                                         </button>
                                         <form action="{{ route('aktivitas.destroy', $aktivitasItem->id) }}"
@@ -311,10 +316,12 @@
                                     <label for="pilihTarget" class="form-label fw-semibold">
                                         <i class="ti ti-target text-danger me-2"></i>Pilih Target
                                     </label>
-                                    <select class="form-select @error('target_id') is-invalid @enderror" id="pilihTarget" name="target_id" required>
+                                    <select class="form-select @error('target_id') is-invalid @enderror" id="pilihTarget"
+                                        name="target_id" required>
                                         <option value="" selected disabled>Pilih Target Terkait...</option>
                                         @foreach ($targets ?? [] as $target)
-                                            <option value="{{ $target->id }}" {{ old('target_id') == $target->id ? 'selected' : '' }}>
+                                            <option value="{{ $target->id }}"
+                                                {{ old('target_id') == $target->id ? 'selected' : '' }}>
                                                 {{ $target->nama_target }} ({{ $target->hobi->nama_hobi }})
                                             </option>
                                         @endforeach
@@ -326,15 +333,19 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="durasiMenit" class="form-label fw-semibold">
-                                        <i class="ti ti-clock text-info me-2"></i>Durasi (menit)
+                                    <label for="energyMoodLevel" class="form-label fw-semibold">
+                                        <i class="ti ti-mood-happy text-info me-2"></i>Mood(opsional)
                                     </label>
-                                    <input type="number" class="form-control @error('durasi_menit') is-invalid @enderror" 
-                                           id="durasiMenit" name="durasi_menit" value="{{ old('durasi_menit') }}"
-                                           placeholder="Contoh: 30, 120" min="1" required>
-                                    @error('durasi_menit')
+                                    <input type="text"
+                                        class="form-control @error('energy_mood_level') is-invalid @enderror"
+                                        id="energyMoodLevel" name="energy_mood_level"
+                                        value="{{ old('energy_mood_level') }}" placeholder="Contoh: 5, 😊, Enerjik"
+                                        maxlength="50">
+                                    @error('energy_mood_level')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
+                                    <small class="text-muted">Masukkan skala 1-5, emoji mood, atau deskripsi
+                                        singkat</small>
                                 </div>
                             </div>
                         </div>
@@ -343,9 +354,9 @@
                             <label for="namaAktivitas" class="form-label fw-semibold">
                                 <i class="ti ti-activity text-primary me-2"></i>Nama Aktivitas
                             </label>
-                            <input type="text" class="form-control @error('nama_aktivitas') is-invalid @enderror" 
-                                   id="namaAktivitas" name="nama_aktivitas" value="{{ old('nama_aktivitas') }}"
-                                   placeholder="Contoh: Baca novel Dune chapter 1-3, Lari keliling taman 5km" required>
+                            <input type="text" class="form-control @error('nama_aktivitas') is-invalid @enderror"
+                                id="namaAktivitas" name="nama_aktivitas" value="{{ old('nama_aktivitas') }}"
+                                placeholder="Contoh: Baca novel Dune chapter 1-3, Lari keliling taman 5km" required>
                             @error('nama_aktivitas')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -355,8 +366,8 @@
                             <label for="catatanAktivitas" class="form-label fw-semibold">
                                 <i class="ti ti-notes text-warning me-2"></i>Catatan
                             </label>
-                            <textarea class="form-control @error('catatan') is-invalid @enderror" id="catatanAktivitas" name="catatan" rows="3"
-                                placeholder="Deskripsi tambahan, target yang ingin dicapai, atau catatan lainnya...">{{ old('catatan') }}</textarea>
+                            <textarea class="form-control @error('catatan') is-invalid @enderror" id="catatanAktivitas" name="catatan"
+                                rows="3" placeholder="Deskripsi tambahan, target yang ingin dicapai, atau catatan lainnya...">{{ old('catatan') }}</textarea>
                             @error('catatan')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -368,7 +379,8 @@
                                 <h6 class="alert-heading mb-2">
                                     <i class="ti ti-info-circle me-2"></i>Bukti Aktivitas (WAJIB)
                                 </h6>
-                                <p class="mb-2">Pilih salah satu atau kedua opsi di bawah ini untuk memberikan bukti aktivitas:</p>
+                                <p class="mb-2">Pilih salah satu atau kedua opsi di bawah ini untuk memberikan bukti
+                                    aktivitas:</p>
                                 <small class="text-muted">
                                     <i class="ti ti-check me-1"></i>Upload file langsung (maks 50MB)<br>
                                     <i class="ti ti-check me-1"></i>Atau berikan link Google Drive
@@ -380,8 +392,8 @@
                             <label for="fileBukti" class="form-label fw-semibold">
                                 <i class="ti ti-paperclip text-success me-2"></i>Opsi 1: Upload File Bukti
                             </label>
-                            <input class="form-control @error('file_bukti') is-invalid @enderror" type="file" id="fileBukti" name="file_bukti"
-                                accept="image/*,video/*">
+                            <input class="form-control @error('file_bukti') is-invalid @enderror" type="file"
+                                id="fileBukti" name="file_bukti" accept="image/*,video/*">
                             <div class="form-text">
                                 <i class="ti ti-info-circle me-1"></i>
                                 Format yang didukung: Gambar (jpg, png, gif) dan Video (mp4, mov, avi) - maksimal 50MB
@@ -395,8 +407,8 @@
                             <label for="gdriveLink" class="form-label fw-semibold">
                                 <i class="ti ti-link text-info me-2"></i>Opsi 2: Link Google Drive
                             </label>
-                            <input type="url" class="form-control @error('gdrive_link') is-invalid @enderror" id="gdriveLink" name="gdrive_link"
-                                value="{{ old('gdrive_link') }}"
+                            <input type="url" class="form-control @error('gdrive_link') is-invalid @enderror"
+                                id="gdriveLink" name="gdrive_link" value="{{ old('gdrive_link') }}"
                                 placeholder="https://drive.google.com/file/...">
                             <div class="form-text">
                                 <i class="ti ti-info-circle me-1"></i>
@@ -425,7 +437,7 @@
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow">
-                <form method="POST" action="" id="editAktivitasForm" enctype="multipart/form-data" data-base-url="{{ url('aktivitas') }}">
+                <form method="POST" action="" id="editAktivitasForm" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
                     <div class="modal-header bg-warning text-white border-0">
@@ -450,18 +462,19 @@
                                     <select class="form-select" id="editPilihTarget" name="target_id" required>
                                         <option value="" selected disabled>Pilih Target Terkait...</option>
                                         @foreach ($targets ?? [] as $target)
-                                            <option value="{{ $target->id }}">{{ $target->nama_target }} ({{ $target->hobi->nama_hobi }})</option>
+                                            <option value="{{ $target->id }}">{{ $target->nama_target }}
+                                                ({{ $target->hobi->nama_hobi }})</option>
                                         @endforeach
                                     </select>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="editDurasiMenit" class="form-label fw-semibold">
-                                        <i class="ti ti-clock text-info me-2"></i>Durasi (menit)
+                                    <label for="editEnergyMoodLevel" class="form-label fw-semibold">
+                                        <i class="ti ti-mood-happy text-info me-2"></i>Mood (opsional)
                                     </label>
-                                    <input type="number" class="form-control" id="editDurasiMenit" name="durasi_menit"
-                                        placeholder="Contoh: 30, 120" min="1" required>
+                                    <input type="text" class="form-control" id="editEnergyMoodLevel"
+                                        name="energy_mood_level" placeholder="Contoh: 5, 😊, Enerjik" maxlength="50">
                                 </div>
                             </div>
                         </div>
@@ -490,7 +503,8 @@
                                 </h6>
                                 <p class="mb-2">Aktivitas ini sudah memiliki bukti yang tersimpan. Anda bisa:</p>
                                 <small class="text-muted">
-                                    <i class="ti ti-check me-1"></i>Tetap menggunakan bukti yang ada (kosongkan kedua field)<br>
+                                    <i class="ti ti-check me-1"></i>Tetap menggunakan bukti yang ada (kosongkan kedua
+                                    field)<br>
                                     <i class="ti ti-check me-1"></i>Mengganti dengan file baru<br>
                                     <i class="ti ti-check me-1"></i>Mengganti dengan link Google Drive baru
                                 </small>

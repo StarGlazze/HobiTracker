@@ -113,8 +113,8 @@
                     <td>{{ $log->aktivitas->hobi->nama_hobi }}</td>
                 </tr>
                 <tr>
-                    <td style="font-weight: bold; background: #f8f9fc;">Durasi</td>
-                    <td>{{ $log->aktivitas->durasi_menit }} Menit</td>
+                    <td style="font-weight: bold; background: #f8f9fc;">Level Energi / Mood</td>
+                    <td>{{ $log->aktivitas->energy_mood_level ?? '-' }}</td>
                 </tr>
                 <tr>
                     <td style="font-weight: bold; background: #f8f9fc;">Catatan</td>
