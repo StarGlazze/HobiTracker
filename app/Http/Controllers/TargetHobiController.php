@@ -11,18 +11,80 @@ class TargetHobiController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $targets = TargetHobi::with('hobi.kategoriHobi', 'aktivitas')
-                    ->where('user_id', Auth::id())
-                    ->orderBy('target_deadline', 'asc')
-                    ->get();
+        $userId = Auth::id();
+
+        // Query untuk targets yang akan ditampilkan (dengan sorting, search, pagination)
+        $query = TargetHobi::query()->where('target_hobis.user_id', $userId);
+
+        // Handle search
+        $search = $request->input('search');
+        if (!empty($search)) {
+            $query->where(function($q) use ($search) {
+                $q->where('target_hobis.nama_target', 'like', '%' . $search . '%')
+                  ->orWhereHas('hobi', function($q2) use ($search) {
+                      $q2->where('nama_hobi', 'like', '%' . $search . '%')
+                         ->orWhereHas('kategoriHobi', function($q3) use ($search) {
+                             $q3->where('nama_kategori', 'like', '%' . $search . '%');
+                         });
+                  });
+            });
+        }
+
+        // Handle sorting
+        $sortBy = $request->input('sort_by', 'target_deadline');
+        $sortDirection = $request->input('sort_direction', 'asc');
+
+        // Validasi sort direction
+        if (!in_array(strtolower($sortDirection), ['asc', 'desc'])) {
+            $sortDirection = 'asc';
+        }
+
+        // Validasi sort by dan terapkan sorting
+        switch ($sortBy) {
+            case 'nama_target':
+                $query->orderBy('target_hobis.nama_target', $sortDirection);
+                break;
+            case 'hobi':
+                $query->leftJoin('hobis', 'target_hobis.hobi_id', '=', 'hobis.id')
+                      ->orderBy('hobis.nama_hobi', $sortDirection)
+                      ->select('target_hobis.*');
+                break;
+            case 'kategori':
+                $query->leftJoin('hobis as hobis_for_sort', 'target_hobis.hobi_id', '=', 'hobis_for_sort.id')
+                      ->leftJoin('kategori_hobis', 'hobis_for_sort.kategori_id', '=', 'kategori_hobis.id')
+                      ->orderBy('kategori_hobis.nama_kategori', $sortDirection)
+                      ->select('target_hobis.*');
+                break;
+            case 'target_deadline':
+                $query->orderBy('target_hobis.target_deadline', $sortDirection);
+                break;
+            case 'created_at':
+                $query->orderBy('target_hobis.created_at', $sortDirection);
+                break;
+            default:
+                $query->orderBy('target_hobis.target_deadline', 'asc');
+                break;
+        }
+
+        // Pagination dengan append query parameters
+        $targets = $query->paginate(5)->withQueryString();
+
+        // Load relations setelah pagination
+        $targets->load('hobi.kategoriHobi', 'aktivitas');
 
         $hobis = \App\Models\Hobi::with('kategoriHobi')
-                    ->where('user_id', Auth::id())
+                    ->where('user_id', $userId)
                     ->get();
 
-        return view('admin.target', compact('targets', 'hobis'));
+        return view('admin.target', [
+            'targets' => $targets,
+            'hobis' => $hobis,
+            'sortBy' => $sortBy,
+            'sortDirection' => $sortDirection,
+            'search' => $search,
+        ]);
     }
 
     /**
@@ -156,8 +218,6 @@ class TargetHobiController extends Controller
         return redirect()->route('admin.target.index')
                         ->with('success', 'Target berhasil dihapus.');
     }
-
-
 
     /**
      * Get targets summary for dashboard

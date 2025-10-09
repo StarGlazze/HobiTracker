@@ -43,7 +43,7 @@ class LogAktivitasController extends Controller
             $query->whereBetween('created_at', [$startDate, $endDate]);
         }
 
-        $logs = $query->orderBy($sortBy, $direction)->paginate(10);
+        $logs = $query->orderBy($sortBy, $direction)->paginate(5);
 
         $userId = !$isAdmin ? Auth::id() : null;
         $whereUser = $userId ? "AND l.user_id = $userId" : "";

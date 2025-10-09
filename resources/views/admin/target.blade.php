@@ -25,155 +25,306 @@
         </div>
 
         <!-- Targets Table -->
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-transparent border-bottom-0 pt-4">
-                <div class="row align-items-center">
-                    <div class="col">
-                        <h5 class="mb-1">
-                            <i class="ti ti-list text-primary me-2"></i>Daftar Target Hobi Anda
-                        </h5>
-                        <p class="text-muted small mb-0">Kelola dan pantau semua target hobi Anda</p>
-                    </div>
-                    <div class="col-auto">
-                        <div class="input-group input-group-sm" style="width: 280px;">
-                            <span class="input-group-text bg-light border-end-0">
-                                <i class="ti ti-search text-muted"></i>
-                            </span>
-                            <input type="text" class="form-control border-start-0" placeholder="Cari target...">
-                        </div>
-                    </div>
-                </div>
+<!-- Targets Table with Enhanced Search, Sort & Pagination -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-transparent border-bottom-0 pt-4 pb-3">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h5 class="mb-1">
+                    <i class="ti ti-list text-primary me-2"></i>Daftar Target Hobi Anda
+                </h5>
+                <p class="text-muted small mb-0">Kelola dan pantau semua target hobi Anda</p>
             </div>
-
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="bg-light">
-                            <tr>
-                                <th scope="col" class="border-0 py-3 px-4" style="width: 5%;">#</th>
-                                <th scope="col" class="border-0 py-3" style="width: 25%;">Nama Target</th>
-                                <th scope="col" class="border-0 py-3" style="width: 25%;">Hobi</th>
-                                <th scope="col" class="border-0 py-3" style="width: 20%;">Kategori</th>
-                                <th scope="col" class="border-0 py-3" style="width: 20%;">Batas Waktu</th>
-                                <th scope="col" class="border-0 py-3" style="width: 15%;">Progress</th>
-                                <th scope="col" class="border-0 py-3" style="width: 15%;">Status</th>
-                                <th scope="col" class="border-0 py-3 text-center" style="width: 5%;">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($targets as $index => $target)
-                                <tr class="border-bottom">
-                                    @php
-                                        $aktivitasCount = $target->aktivitas->count();
-                                        $progress = $target->jumlah_aktivitas_dibutuhkan > 0 ? ($aktivitasCount / $target->jumlah_aktivitas_dibutuhkan) * 100 : 0;
-                                        $isCompleted = $progress >= 100;
-                                        $isExpired = $target->target_deadline < now()->startOfDay() && !$isCompleted;
-                                    @endphp
-                                    <td class="px-4 py-3">{{ $loop->iteration }}</td>
-                                    <td class="py-3">{{ $target->nama_target }}</td>
-                                    <td class="py-3">{{ $target->hobi->nama_hobi ?? 'N/A' }}</td>
-                                    <td class="py-3">
-                                        <span
-                                            class="badge {{ $target->hobi->kategoriHobi->background_color ?? 'bg-info-subtle' }} {{ $target->hobi->kategoriHobi->background_color ? 'text-white' : 'text-info' }} px-3 py-2">
-                                            <i
-                                                class="ti {{ $target->hobi->kategoriHobi->icon ?? 'ti-tag' }} me-1"></i>{{ $target->hobi->kategoriHobi->nama_kategori ?? 'N/A' }}
-                                        </span>
-                                    </td>
-                                    <td class="py-3">
-                                        {{ \Carbon\Carbon::parse($target->target_deadline)->format('d F Y') }}
-                                    </td>
-                                    <td class="py-3">
-                                        <div class="progress position-relative" style="height: 24px; border-radius: 12px; background: linear-gradient(90deg, #f8f9fa 0%, #e9ecef 100%); box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);">
-                                            <div class="progress-bar position-relative overflow-hidden {{ $progress >= 100 ? 'bg-success' : ($progress >= 50 ? 'bg-warning' : 'bg-primary') }}"
-                                                 role="progressbar"
-                                                 style="width: {{ min($progress, 100) }}%;
-                                                        border-radius: 12px;
-                                                        background: {{ $progress >= 100 ? 'linear-gradient(90deg, #28a745 0%, #20c997 100%)' : ($progress >= 50 ? 'linear-gradient(90deg, #ffc107 0%, #fd7e14 100%)' : 'linear-gradient(90deg, #007bff 0%, #6610f2 100%)') }};
-                                                        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-                                                        transition: width 0.6s ease-in-out;"
-                                                 aria-valuenow="{{ min($progress, 100) }}"
-                                                 aria-valuemin="0"
-                                                 aria-valuemax="100">
-                                                <span class="position-absolute top-50 start-50 translate-middle fw-bold text-white text-shadow" style="font-size: 12px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">
-                                                    {{ number_format($progress, 1) }}%
-                                                </span>
-                                                @if($progress >= 100)
-                                                    <i class="ti ti-check position-absolute top-50 end-0 translate-middle-y me-2 text-white" style="font-size: 14px;"></i>
-                                                @endif
-                                            </div>
-                                        </div>
-                                        <small class="text-muted d-flex align-items-center mt-1">
-                                            <i class="ti ti-activity me-1"></i>
-                                            {{ $aktivitasCount }} / {{ $target->jumlah_aktivitas_dibutuhkan }} aktivitas
-                                            @if($aktivitasCount > 0)
-                                                <span class="badge bg-light text-dark ms-2" style="font-size: 10px;">{{ $aktivitasCount }} tercapai</span>
-                                            @endif
-                                        </small>
-                                    </td>
-                                    <td class="py-3 text-center">
-                                        @if ($isCompleted)
-                                            <span class="badge bg-success-subtle text-success px-3 py-2">
-                                                <i class="ti ti-check-circle me-1"></i>Completed
-                                            </span>
-                                        @elseif($isExpired)
-                                            <span class="badge bg-danger-subtle text-danger px-3 py-2">
-                                                <i class="ti ti-x-circle me-1"></i>Failed
-                                            </span>
-                                        @elseif($aktivitasCount > 0)
-                                            <span class="badge bg-warning-subtle text-warning px-3 py-2">
-                                                <i class="ti ti-clock me-1"></i>On Progress
-                                            </span>
-                                        @else
-                                            <span class="badge bg-info-subtle text-info px-3 py-2">
-                                                <i class="ti ti-plus me-1"></i>No Progress
-                                            </span>
-                                        @endif
-                                    </td>
-                                    <td class="py-3 text-center">
-                                        <div class="btn-group" role="group">
-                                            @if($isExpired)
-                                                <button class="btn btn-secondary btn-sm" disabled title="Target Expired - Cannot Edit">
-                                                    <i class="ti ti-pencil-off"></i>
-                                                </button>
-                                            @else
-                                                <button class="btn btn-warning btn-sm" data-bs-toggle="modal"
-                                                    data-bs-target="#editTargetModal{{ $target->id }}" title="Edit Target">
-                                                    <i class="ti ti-pencil"></i>
-                                                </button>
-                                            @endif
-                                            <form action="{{ route('admin.target.destroy', ['target' => $target->id]) }}"
-                                                method="POST" style="display:inline;">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="button" class="btn btn-danger btn-sm" title="Hapus Target"
-                                                    onclick="confirmDelete(this)">
-                                                    <i class="ti ti-trash"></i>
-                                                </button>
-                                            </form>
-
-                                            <button class="btn btn-secondary btn-sm" data-bs-toggle="modal"
-                                                data-bs-target="#detailModal{{ $target->id }}" title="Lihat Detail">
-                                                <i class="ti ti-eye"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="7" class="text-center py-5">
-                                        <div class="mb-4">
-                                            <i class="ti ti-target text-muted" style="font-size: 4rem;"></i>
-                                        </div>
-                                        <h5 class="text-muted">Belum ada Target Hobi</h5>
-                                        <p class="text-muted mb-4">Mulai dengan menambahkan target hobi pertama Anda</p>
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+            <div class="col-md-6">
+                <form method="GET" action="{{ route('admin.target.index') }}" id="searchForm">
+                    <!-- Preserve sorting parameters -->
+                    <input type="hidden" name="sort_by" value="{{ $sortBy ?? 'target_deadline' }}">
+                    <input type="hidden" name="sort_direction" value="{{ $sortDirection ?? 'asc' }}">
+                    
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white">
+                            <i class="ti ti-search text-muted"></i>
+                        </span>
+                        <input type="text" 
+                               class="form-control border-start-0" 
+                               placeholder="Cari target, hobi, atau kategori..." 
+                               name="search" 
+                               id="searchInput"
+                               value="{{ $search ?? '' }}"
+                               autocomplete="off">
+                        @if(!empty($search))
+                            <button class="btn btn-outline-secondary" type="button" onclick="clearSearch()" title="Hapus pencarian">
+                                <i class="ti ti-x"></i>
+                            </button>
+                        @endif
+                        <button class="btn btn-outline-primary" type="submit">
+                            <i class="ti ti-search"></i>
+                        </button>
+                    </div>
+                    
+                    @if(!empty($search))
+                        <div class="mt-1">
+                            <small class="text-muted">
+                                Hasil untuk: <strong>"{{ $search }}"</strong>
+                                <a href="{{ route('admin.target.index', ['sort_by' => $sortBy, 'sort_direction' => $sortDirection]) }}" class="text-primary ms-2">
+                                    <i class="ti ti-x" style="font-size: 0.7rem;"></i> Hapus
+                                </a>
+                            </small>
+                        </div>
+                    @endif
+                </form>
             </div>
         </div>
+    </div>
+
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th scope="col" class="border-0 py-3 px-4" style="width: 3%;">
+                            <span class="text-muted">#</span>
+                        </th>
+                        <th scope="col" class="border-0 py-3" style="width: 20%;">
+                            <a href="{{ route('admin.target.index', array_merge(request()->except(['sort_by', 'sort_direction']), ['sort_by' => 'nama_target', 'sort_direction' => ($sortBy == 'nama_target' && $sortDirection == 'asc') ? 'desc' : 'asc'])) }}" 
+                               class="text-decoration-none text-dark d-flex align-items-center sortable-header {{ $sortBy == 'nama_target' ? 'active' : '' }}">
+                                <i class="ti ti-target me-2 text-primary"></i>
+                                <span class="fw-semibold">Nama Target</span>
+                                @if($sortBy == 'nama_target')
+                                    <i class="ti ti-arrow-{{ $sortDirection == 'asc' ? 'up' : 'down' }} ms-2 text-primary"></i>
+                                @else
+                                    <i class="ti ti-selector ms-2 text-muted" style="opacity: 0.3;"></i>
+                                @endif
+                            </a>
+                        </th>
+                        <th scope="col" class="border-0 py-3" style="width: 15%;">
+                            <a href="{{ route('admin.target.index', array_merge(request()->except(['sort_by', 'sort_direction']), ['sort_by' => 'hobi', 'sort_direction' => ($sortBy == 'hobi' && $sortDirection == 'asc') ? 'desc' : 'asc'])) }}" 
+                               class="text-decoration-none text-dark d-flex align-items-center sortable-header {{ $sortBy == 'hobi' ? 'active' : '' }}">
+                                <i class="ti ti-heart me-2 text-danger"></i>
+                                <span class="fw-semibold">Hobi</span>
+                                @if($sortBy == 'hobi')
+                                    <i class="ti ti-arrow-{{ $sortDirection == 'asc' ? 'up' : 'down' }} ms-2 text-primary"></i>
+                                @else
+                                    <i class="ti ti-selector ms-2 text-muted" style="opacity: 0.3;"></i>
+                                @endif
+                            </a>
+                        </th>
+                        <th scope="col" class="border-0 py-3" style="width: 12%;">
+                            <a href="{{ route('admin.target.index', array_merge(request()->except(['sort_by', 'sort_direction']), ['sort_by' => 'kategori', 'sort_direction' => ($sortBy == 'kategori' && $sortDirection == 'asc') ? 'desc' : 'asc'])) }}" 
+                               class="text-decoration-none text-dark d-flex align-items-center sortable-header {{ $sortBy == 'kategori' ? 'active' : '' }}">
+                                <i class="ti ti-category me-2 text-success"></i>
+                                <span class="fw-semibold">Kategori</span>
+                                @if($sortBy == 'kategori')
+                                    <i class="ti ti-arrow-{{ $sortDirection == 'asc' ? 'up' : 'down' }} ms-2 text-primary"></i>
+                                @else
+                                    <i class="ti ti-selector ms-2 text-muted" style="opacity: 0.3;"></i>
+                                @endif
+                            </a>
+                        </th>
+                        <th scope="col" class="border-0 py-3" style="width: 12%;">
+                            <a href="{{ route('admin.target.index', array_merge(request()->except(['sort_by', 'sort_direction']), ['sort_by' => 'target_deadline', 'sort_direction' => ($sortBy == 'target_deadline' && $sortDirection == 'asc') ? 'desc' : 'asc'])) }}" 
+                               class="text-decoration-none text-dark d-flex align-items-center sortable-header {{ $sortBy == 'target_deadline' ? 'active' : '' }}">
+                                <i class="ti ti-calendar me-2 text-warning"></i>
+                                <span class="fw-semibold">Deadline</span>
+                                @if($sortBy == 'target_deadline')
+                                    <i class="ti ti-arrow-{{ $sortDirection == 'asc' ? 'up' : 'down' }} ms-2 text-primary"></i>
+                                @else
+                                    <i class="ti ti-selector ms-2 text-muted" style="opacity: 0.3;"></i>
+                                @endif
+                            </a>
+                        </th>
+                        <th scope="col" class="border-0 py-3" style="width: 18%;">
+                            <span class="text-muted fw-semibold">
+                                <i class="ti ti-chart-bar me-2"></i>Progress
+                            </span>
+                        </th>
+                        <th scope="col" class="border-0 py-3" style="width: 12%;">
+                            <span class="text-muted fw-semibold">
+                                <i class="ti ti-flag me-2"></i>Status
+                            </span>
+                        </th>
+                        <th scope="col" class="border-0 py-3 text-center" style="width: 8%;">
+                            <span class="text-muted fw-semibold">Aksi</span>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($targets as $target)
+                        <tr class="border-bottom hover-row">
+                            @php
+                                $aktivitasCount = $target->aktivitas->count();
+                                $progress = $target->jumlah_aktivitas_dibutuhkan > 0 ? ($aktivitasCount / $target->jumlah_aktivitas_dibutuhkan) * 100 : 0;
+                                $isCompleted = $progress >= 100;
+                                $isExpired = $target->target_deadline < now()->startOfDay() && !$isCompleted;
+                            @endphp
+                            <td class="px-4 py-3">
+                                <span class="text-muted">{{ ($targets->currentPage() - 1) * $targets->perPage() + $loop->iteration }}</span>
+                            </td>
+                            <td class="py-3">
+                                <h6 class="mb-0 fw-semibold">{{ $target->nama_target }}</h6>
+                            </td>
+                            <td class="py-3">{{ $target->hobi->nama_hobi ?? 'N/A' }}</td>
+                            <td class="py-3">
+                                <span class="badge bg-{{ $target->hobi->kategoriHobi->background_color ?? 'primary' }}-subtle text-dark px-3 py-2">
+                                    <i class="ti {{ $target->hobi->kategoriHobi->icon ?? 'ti-category' }} me-1"></i>
+                                    {{ $target->hobi->kategoriHobi->nama_kategori ?? 'N/A' }}
+                                </span>
+                            </td>
+                            <td class="py-3">
+                                <small class="text-muted">
+                                    <i class="ti ti-calendar-event" style="font-size: 0.75rem;"></i>
+                                    {{ \Carbon\Carbon::parse($target->target_deadline)->format('d M Y') }}
+                                </small>
+                            </td>
+                            <td class="py-3">
+                                <div class="progress position-relative" style="height: 24px; border-radius: 12px; background: linear-gradient(90deg, #f8f9fa 0%, #e9ecef 100%); box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);">
+                                    <div class="progress-bar position-relative overflow-hidden {{ $progress >= 100 ? 'bg-success' : ($progress >= 50 ? 'bg-warning' : 'bg-primary') }}"
+                                         role="progressbar"
+                                         style="width: {{ min($progress, 100) }}%;
+                                                border-radius: 12px;
+                                                background: {{ $progress >= 100 ? 'linear-gradient(90deg, #28a745 0%, #20c997 100%)' : ($progress >= 50 ? 'linear-gradient(90deg, #ffc107 0%, #fd7e14 100%)' : 'linear-gradient(90deg, #007bff 0%, #6610f2 100%)') }};
+                                                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                                                transition: width 0.6s ease-in-out;"
+                                         aria-valuenow="{{ min($progress, 100) }}"
+                                         aria-valuemin="0"
+                                         aria-valuemax="100">
+                                        <span class="position-absolute top-50 start-50 translate-middle fw-bold text-white text-shadow" style="font-size: 12px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">
+                                            {{ number_format($progress, 1) }}%
+                                        </span>
+                                    </div>
+                                </div>
+                                <small class="text-muted d-flex align-items-center mt-1">
+                                    <i class="ti ti-activity me-1"></i>
+                                    {{ $aktivitasCount }} / {{ $target->jumlah_aktivitas_dibutuhkan }} aktivitas
+                                </small>
+                            </td>
+                            <td class="py-3 text-center">
+                                @if ($isCompleted)
+                                    <span class="badge bg-success-subtle text-success px-3 py-2">
+                                        <i class="ti ti-check-circle me-1"></i>Completed
+                                    </span>
+                                @elseif($isExpired)
+                                    <span class="badge bg-danger-subtle text-danger px-3 py-2">
+                                        <i class="ti ti-x-circle me-1"></i>Failed
+                                    </span>
+                                @elseif($aktivitasCount > 0)
+                                    <span class="badge bg-warning-subtle text-warning px-3 py-2">
+                                        <i class="ti ti-clock me-1"></i>On Progress
+                                    </span>
+                                @else
+                                    <span class="badge bg-info-subtle text-info px-3 py-2">
+                                        <i class="ti ti-plus me-1"></i>No Progress
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="py-3 text-center">
+                                <div class="btn-group" role="group">
+                                    @if($isExpired)
+                                        <button class="btn btn-secondary btn-sm" disabled title="Target Expired - Cannot Edit">
+                                            <i class="ti ti-pencil-off"></i>
+                                        </button>
+                                    @else
+                                        <button class="btn btn-warning btn-sm" data-bs-toggle="modal"
+                                            data-bs-target="#editTargetModal{{ $target->id }}" title="Edit Target">
+                                            <i class="ti ti-pencil"></i>
+                                        </button>
+                                    @endif
+                                    <form action="{{ route('admin.target.destroy', ['target' => $target->id]) }}"
+                                        method="POST" style="display:inline;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="button" class="btn btn-danger btn-sm" title="Hapus Target"
+                                            onclick="confirmDelete(this)">
+                                            <i class="ti ti-trash"></i>
+                                        </button>
+                                    </form>
+                                    <button class="btn btn-secondary btn-sm" data-bs-toggle="modal"
+                                        data-bs-target="#detailModal{{ $target->id }}" title="Lihat Detail">
+                                        <i class="ti ti-eye"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="8" class="text-center py-5">
+                                <div class="py-4">
+                                    <i class="ti ti-mood-sad text-muted mb-3" style="font-size: 4rem;"></i>
+                                    @if(!empty($search))
+                                        <h5 class="text-muted mb-2">Tidak ada hasil untuk "{{ $search }}"</h5>
+                                        <p class="text-muted mb-3">Coba gunakan kata kunci yang berbeda</p>
+                                        <a href="{{ route('admin.target.index', ['sort_by' => $sortBy, 'sort_direction' => $sortDirection]) }}" class="btn btn-primary">
+                                            <i class="ti ti-arrow-left me-2"></i>Tampilkan Semua Target
+                                        </a>
+                                    @else
+                                        <h5 class="text-muted mb-2">Belum ada Target Hobi</h5>
+                                        <p class="text-muted mb-3">Mulai dengan menambahkan target hobi pertama Anda</p>
+                                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tambahTargetModal">
+                                            <i class="ti ti-plus me-2"></i>Tambah Target Sekarang
+                                        </button>
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        @if($targets->hasPages())
+            <div class="card-footer bg-transparent border-top">
+                <div class="row align-items-center g-3">
+                    <div class="col-md-6 text-center text-md-start">
+                        <small class="text-muted">
+                            <i class="ti ti-list-details me-1"></i>
+                            Menampilkan <strong>{{ $targets->firstItem() ?? 0 }}</strong> - <strong>{{ $targets->lastItem() ?? 0 }}</strong> dari <strong>{{ $targets->total() }}</strong> target
+                        </small>
+                    </div>
+                    <div class="col-md-6 d-flex justify-content-center justify-content-md-end">
+                        <nav aria-label="Page navigation">
+                            @if ($targets->lastPage() > 1)
+                                <ul class="pagination pagination-sm mb-0">
+                                    {{-- Previous Page Link --}}
+                                    @if ($targets->onFirstPage())
+                                        <li class="page-item disabled" aria-disabled="true" aria-label="Previous">
+                                            <span class="page-link" aria-hidden="true">&laquo;</span>
+                                        </li>
+                                    @else
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ $targets->appends(request()->query())->previousPageUrl() }}" rel="prev" aria-label="Previous">&laquo;</a>
+                                        </li>
+                                    @endif
+
+                                    {{-- Pagination Elements --}}
+                                    @foreach ($targets->getUrlRange(max($targets->currentPage() -2, 1), min($targets->currentPage() + 2, $targets->lastPage())) as $page => $url)
+                                        @if ($page == $targets->currentPage())
+                                            <li class="page-item active" aria-current="page"><span class="page-link">{{ $page }}</span></li>
+                                        @else
+                                            <li class="page-item"><a class="page-link" href="{{ $url }}">{{ $page }}</a></li>
+                                        @endif
+                                    @endforeach
+
+                                    {{-- Next Page Link --}}
+                                    @if ($targets->hasMorePages())
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ $targets->appends(request()->query())->nextPageUrl() }}" rel="next" aria-label="Next">&raquo;</a>
+                                        </li>
+                                    @else
+                                        <li class="page-item disabled" aria-disabled="true" aria-label="Next">
+                                            <span class="page-link" aria-hidden="true">&raquo;</span>
+                                        </li>
+                                    @endif
+                                </ul>
+                            @endif
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        @endif
+    </div>
+</div>
+
+<link rel="stylesheet" href="{{ asset('admin/css/target.css') }}">
 
         <!-- Add Target Modal -->
         <div class="modal fade" id="tambahTargetModal" tabindex="-1" aria-labelledby="tambahTargetModalLabel"
@@ -556,8 +707,6 @@
                 </div>
             </div>
         @endforeach
-
-
     </div>
 @endsection
 

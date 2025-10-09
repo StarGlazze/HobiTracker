@@ -33,8 +33,6 @@ $(document).ready(function() {
         }
     });
 
-
-
     // Auto-hide alerts after 5 seconds
     setTimeout(function() {
         $('.alert').fadeOut('slow');
@@ -49,44 +47,55 @@ $(document).ready(function() {
         
         $('table tbody tr').each(function() {
             var row = $(this);
-            var deadlineText = row.find('td:nth-child(5)').text().trim();
-            var statusBadge = row.find('td:nth-child(6) .badge');
+            var statusBadge = row.find('.badge');
             
             // SKIP if status is completed
             if (statusBadge.text().includes('Completed')) {
                 return; // continue to next row
             }
             
+            var deadlineText = row.find('td').eq(4).text().trim();
+            
             if (deadlineText && deadlineText !== 'N/A') {
-                // Parse Indonesian date format "dd Month yyyy"
-                var deadlineDate = parseIndonesianDate(deadlineText);
+                // Parse date format "dd Mon yyyy"
+                var deadlineDate = parseDeadlineDate(deadlineText);
                 
                 if (deadlineDate && deadlineDate < today) {
                     // Mark row as expired only if not completed
                     row.addClass('table-warning');
-                    row.find('td:nth-child(5)').append(' <small class="text-danger fw-bold">(EXPIRED)</small>');
                 }
             }
         });
     }
     
-    function parseIndonesianDate(dateStr) {
+    function parseDeadlineDate(dateStr) {
         var months = {
+            'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
+            'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11,
             'January': 0, 'February': 1, 'March': 2, 'April': 3, 'May': 4, 'June': 5,
             'July': 6, 'August': 7, 'September': 8, 'October': 9, 'November': 10, 'December': 11,
             'Januari': 0, 'Februari': 1, 'Maret': 2, 'April': 3, 'Mei': 4, 'Juni': 5,
             'Juli': 6, 'Agustus': 7, 'September': 8, 'Oktober': 9, 'November': 10, 'Desember': 11
         };
         
-        var parts = dateStr.split(' ');
-        if (parts.length === 3) {
-            var day = parseInt(parts[0]);
-            var month = months[parts[1]];
-            var year = parseInt(parts[2]);
-            
-            if (!isNaN(day) && month !== undefined && !isNaN(year)) {
-                return new Date(year, month, day);
+        // Extract date parts using icon tag
+        var parts = dateStr.replace(/\s+/g, ' ').trim().split(' ');
+        
+        // Find numeric parts and month name
+        var day, month, year;
+        for (var i = 0; i < parts.length; i++) {
+            var part = parts[i];
+            if (!isNaN(part) && part.length <= 2) {
+                day = parseInt(part);
+            } else if (months[part] !== undefined) {
+                month = months[part];
+            } else if (!isNaN(part) && part.length === 4) {
+                year = parseInt(part);
             }
+        }
+        
+        if (day && month !== undefined && year) {
+            return new Date(year, month, day);
         }
         return null;
     }
@@ -99,54 +108,6 @@ $(document).ready(function() {
         // Reset form validation states
         form.find('.is-invalid').removeClass('is-invalid');
         form.find('.invalid-feedback').remove();
-    });
-
-    // Simple Search functionality
-    $('input[placeholder*="Cari target"]').on('input', function() {
-        var searchTerm = $(this).val().toLowerCase().trim();
-        var tableBody = $(this).closest('.card').find('table tbody');
-        var rows = tableBody.find('tr');
-        var visibleRows = 0;
-
-        // Filter rows
-        rows.each(function() {
-            var row = $(this);
-            
-            // Skip no-results row
-            if (row.hasClass('no-results-row')) {
-                return;
-            }
-
-            var text = row.text().toLowerCase();
-            if (text.includes(searchTerm)) {
-                row.show();
-                visibleRows++;
-            } else {
-                row.hide();
-            }
-        });
-
-        // Handle no results message
-        var noResultsRow = tableBody.find('.no-results-row');
-        
-        if (visibleRows === 0 && searchTerm !== '') {
-            if (noResultsRow.length === 0) {
-                noResultsRow = $('<tr class="no-results-row">' +
-                    '<td colspan="7" class="text-center py-4">' +
-                        '<div class="text-muted">' +
-                            '<i class="ti ti-search-off mb-2" style="font-size: 2rem;"></i>' +
-                            '<p class="mb-0">Tidak ada target yang cocok dengan pencarian "' + searchTerm + '"</p>' +
-                        '</div>' +
-                    '</td>' +
-                '</tr>');
-                tableBody.append(noResultsRow);
-            }
-            noResultsRow.show();
-        } else {
-            if (noResultsRow.length > 0) {
-                noResultsRow.hide();
-            }
-        }
     });
 
     // Functions for onclick
@@ -163,8 +124,6 @@ $(document).ready(function() {
         }, 1500);
     }
 
-
-
     // Auto-update expired targets - SKIP COMPLETED TARGETS
     setInterval(function() {
         var currentDate = new Date();
@@ -172,16 +131,17 @@ $(document).ready(function() {
 
         $('table tbody tr').each(function() {
             var row = $(this);
-            var deadlineText = row.find('td:nth-child(5)').text().trim();
-            var statusBadge = row.find('td:nth-child(6) .badge');
+            var statusBadge = row.find('.badge');
 
             // SKIP if status is completed
             if (statusBadge.text().includes('Completed')) {
                 return; // continue to next row
             }
 
+            var deadlineText = row.find('td').eq(4).text().trim();
+
             if (deadlineText && !deadlineText.includes('EXPIRED')) {
-                var deadline = parseIndonesianDate(deadlineText);
+                var deadline = parseDeadlineDate(deadlineText);
                 if (deadline && deadline < currentDate) {
                     // Mark as expired only if not completed
                     row.addClass('table-danger');
@@ -199,7 +159,6 @@ $(document).ready(function() {
     window.openFileModal = function(fileUrl, fileType, title) {
         let modalContent = '';
         let modalTitle = '';
-
         let modalHtml = '';
 
         if (fileType === 'image') {
