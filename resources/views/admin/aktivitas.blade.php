@@ -247,7 +247,7 @@ $hasGdrive = isset($fileData['gdrive']) && !empty($fileData['gdrive']);
                                     @endif
                                 </td>
                                 <td class="py-3 text-center">
-                                    <div class="btn-group" role="group">
+                                    <div class="d-flex justify-content-center gap-1">
                                         <button class="btn btn-warning btn-sm" data-bs-toggle="modal"
                                             data-bs-target="#editAktivitasModal" title="Edit Aktivitas"
                                             data-aktivitas="{{ json_encode([

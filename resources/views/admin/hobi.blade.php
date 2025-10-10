@@ -39,8 +39,8 @@
         </div>
 
         <!-- Enhanced Stats Cards -->
-        <div class="row mb-4">
-            <div class="col-md-4">
+        <div class="row mb-4 g-3">
+            <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12">
                 <div class="card border-0 shadow-sm bg-primary bg-gradient text-white h-100">
                     <div class="card-body p-4">
                         <div class="d-flex align-items-center justify-content-between">
@@ -73,7 +73,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12">
                 <div class="card border-0 shadow-sm bg-success bg-gradient text-white h-100">
                     <div class="card-body p-4">
                         <div class="d-flex align-items-center justify-content-between">
@@ -118,7 +118,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12">
                 <div class="card border-0 shadow-sm bg-info bg-gradient text-white h-100">
                     <div class="card-body p-4">
                         <div class="d-flex align-items-center justify-content-between">
@@ -314,7 +314,7 @@
                                         @endif
                                     </td>
                                     <td class="py-3 text-center">
-                                        <div class="btn-group" role="group">
+                                        <div class="d-flex justify-content-center gap-1">
                                             <button class="btn btn-sm btn-warning" data-bs-toggle="modal"
                                                 data-bs-target="#editHobiModal" title="Edit Hobi"
                                                 data-id="{{ $hobi->id }}" data-nama="{{ $hobi->nama_hobi }}"

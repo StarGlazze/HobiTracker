@@ -415,6 +415,52 @@
         </div>
     </div>
 
+    <!-- Export Progress Modal -->
+    <div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-primary text-white border-0">
+                    <h5 class="modal-title" id="exportModalLabel">
+                        <i class="ti ti-download me-2"></i>Export PDF
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center p-4">
+                    <div id="export-loading" class="d-none">
+                        <div class="spinner-border text-primary mb-3" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="text-muted mb-1">Menyiapkan export...</p>
+                        <small class="text-muted">Proses ini berjalan di latar belakang</small>
+                    </div>
+                    <div id="export-progress" class="d-none">
+                        <div class="spinner-border text-primary mb-3" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p id="progress-text" class="text-muted mb-1">Memproses data...</p>
+                        <small id="progress-detail" class="text-muted">Menunggu pembuatan PDF</small>
+                    </div>
+                    <div id="export-complete" class="d-none">
+                        <i class="ti ti-check fs-1 text-success mb-3"></i>
+                        <h5 class="text-success mb-1">Export Selesai!</h5>
+                        <p class="text-muted mb-3">PDF siap diunduh.</p>
+                        <a id="download-link" href="#" class="btn btn-success" download>
+                            <i class="ti ti-download me-2"></i>Unduh PDF
+                        </a>
+                    </div>
+                    <div id="export-error" class="d-none">
+                        <i class="ti ti-alert-circle fs-1 text-danger mb-3"></i>
+                        <h5 class="text-danger mb-1">Export Gagal</h5>
+                        <p id="error-message" class="text-muted mb-3">Terjadi kesalahan saat membuat PDF.</p>
+                        <button id="retry-export" class="btn btn-primary">
+                            <i class="ti ti-refresh me-2"></i>Coba Lagi
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('scripts')

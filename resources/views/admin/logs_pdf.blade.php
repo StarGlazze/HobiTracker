@@ -52,15 +52,16 @@
         tr:nth-child(even) {
             background-color: #f8f9fc;
         }
-        .footer {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            text-align: center;
-            font-size: 10px;
-            color: #666;
-            border-top: 1px solid #ddd;
-            padding-top: 10px;
+        @page {
+            margin: 1in;
+            @bottom-center {
+                content: "Dokumen ini digenerate secara otomatis oleh sistem | Halaman " counter(page) " dari " counter(pages);
+                font-size: 10px;
+                color: #666;
+                border-top: 1px solid #ddd;
+                padding-top: 10px;
+                text-align: center;
+            }
         }
         .badge {
             padding: 3px 8px;
@@ -106,15 +107,15 @@
                 </tr>
                 <tr>
                     <td style="font-weight: bold; background: #f8f9fc;">Aktivitas</td>
-                    <td>{{ $log->aktivitas->nama_aktivitas }}</td>
+                    <td>{{ $log->aktivitas ? $log->aktivitas->nama_aktivitas : '-' }}</td>
                 </tr>
                 <tr>
                     <td style="font-weight: bold; background: #f8f9fc;">Hobi</td>
-                    <td>{{ $log->aktivitas->hobi->nama_hobi }}</td>
+                    <td>{{ $log->aktivitas && $log->aktivitas->target && $log->aktivitas->target->hobi ? $log->aktivitas->target->hobi->nama_hobi : '-' }}</td>
                 </tr>
                 <tr>
                     <td style="font-weight: bold; background: #f8f9fc;">Level Energi / Mood</td>
-                    <td>{{ $log->aktivitas->energy_mood_level ?? '-' }}</td>
+                    <td>{{ $log->aktivitas ? ($log->aktivitas->energy_mood_level ?? '-') : '-' }}</td>
                 </tr>
                 <tr>
                     <td style="font-weight: bold; background: #f8f9fc;">Catatan</td>
@@ -138,7 +139,7 @@
                             @endphp
                             @if(in_array($fileExt, ['jpg', 'jpeg', 'png', 'gif']) && file_exists($filePath))
                                 <div style="margin-top: 5px;">
-                                    <img src="{{ $filePath }}" style="max-width: 300px; max-height: 200px; border: 1px solid #ddd; padding: 5px;">
+                                    <img src="{{ $filePath }}" style="max-width: 200px; max-height: 150px; border: 1px solid #ddd; padding: 3px;">
                                 </div>
                             @else
                                 <p style="margin: 5px 0; font-size: 11px;">File: {{ basename($fileData) }}</p>
@@ -157,9 +158,5 @@
     @empty
         <p style="text-align: center; padding: 20px;">Tidak ada data</p>
     @endforelse
-
-    <div class="footer">
-        <p>Dokumen ini digenerate secara otomatis oleh sistem | Halaman {PAGE_NUM} dari {PAGE_COUNT}</p>
-    </div>
 </body>
 </html>
