@@ -3,15 +3,15 @@ $(function () {
   // sales overview
   // -----------------------------------------------------------------------
 
+  // Get chart data from the data attribute
+  var chartElement = document.querySelector("#sales-overview");
+  var chartData = chartElement ? JSON.parse(chartElement.getAttribute('data-chart') || '{}') : {};
+
   var options_sales_overview = {
     series: [
       {
-        name: "Ample Admin",
-        data: [355, 390, 300, 350, 390, 180],
-      },
-      {
-        name: "Pixel Admin",
-        data: [280, 250, 325, 215, 250, 310],
+        name: "Aktivitas",
+        data: chartData.series || [0, 0, 0, 0, 0],
       },
     ],
     chart: {
@@ -43,25 +43,25 @@ $(function () {
         borderRadius: 5,
       },
     },
-    colors: ["var(--bs-primary)", "var(--bs-secondary)"],
+    colors: ["var(--bs-primary)"],
     dataLabels: {
       enabled: false,
     },
     yaxis: {
       show: true,
-      min: 100,
-      max: 400,
+      min: 0,
+      max: Math.max(...(chartData.series || [0])) + 5 || 10,
       tickAmount: 3,
     },
     stroke: {
       show: true,
       width: 5,
       lineCap: "butt",
-      colors: ["var(--bs-primary)", "var(--bs-secondary)"],
+      colors: ["var(--bs-primary)"],
     },
     xaxis: {
       type: "category",
-      categories: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+      categories: chartData.categories || ["Jan", "Feb", "Mar", "Apr", "May"],
       axisBorder: {
         show: false,
       },

@@ -11,6 +11,8 @@ use App\Models\Hobi;
 use App\Models\TargetHobi;
 use App\Models\Aktivitas;
 use App\Models\KategoriHobi;
+use App\Models\LogAktivitas;
+use App\Models\ProgresTarget;
 
 class HobiTrackerSeeder extends Seeder
 {
@@ -73,19 +75,35 @@ class HobiTrackerSeeder extends Seeder
                     'jumlah_aktivitas_dibutuhkan' => 5,
                 ]);
 
+                // Create progres_targets for each target
+                $status = $faker->randomElement(['pending', 'in_progress', 'completed']);
+                ProgresTarget::create([
+                    'user_id' => $user->id,
+                    'target_id' => $target->id,
+                    'status' => $status,
+                ]);
+
                 // For each target, create 5 activities
                 for ($k = 0; $k < 5; $k++) {
-                    Aktivitas::create([
+                    $aktivitas = Aktivitas::create([
                         'target_id' => $target->id,
                         'nama_aktivitas' => 'Aktivitas ' . ($k + 1) . ' untuk ' . $target->nama_target,
                         'energy_mood_level' => $faker->randomElement(['Low', 'Medium', 'High']),
                         'catatan' => $faker->sentence,
                         'file_bukti' => json_encode([$faker->imageUrl(), $faker->imageUrl()]),
                     ]);
+
+                    // Create 1 log for each activity
+                    LogAktivitas::create([
+                        'aktivitas_id' => $aktivitas->id,
+                        'user_id' => $user->id,
+                        'file_bukti' => $aktivitas->file_bukti,
+                        'catatan' => $aktivitas->catatan,
+                    ]);
                 }
             }
         }
 
-        $this->command->info('Created 1000 hobbies, 1000 targets, and 5000 activities.');
+        $this->command->info('Created 1000 hobbies, 1000 targets, 5000 activities, and 5000 logs.');
     }
 }

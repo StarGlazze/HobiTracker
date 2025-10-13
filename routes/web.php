@@ -15,9 +15,7 @@ Route::get('/', function () {
     return view('landing.welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('admin.dashboard');
-});
+Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->middleware('auth');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/logs', [LogAktivitasController::class, 'index'])->name('admin.logs');

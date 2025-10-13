@@ -19,8 +19,8 @@ class AdminMiddleware
         // Check if user is authenticated and is admin
         $user = $request->user();
         if (!$user || $user->email !== 'admin@example.com') {
-            // Redirect non-admin users to dashboard with error message
-            return redirect('/dashboard')->with('error', 'You do not have permission to access this page.');
+            // Redirect non-admin users to home page with error message
+            return redirect('/')->with('error', 'You do not have permission to access this page.');
         }
 
         return $next($request);
