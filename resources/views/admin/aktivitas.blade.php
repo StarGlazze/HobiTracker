@@ -117,21 +117,46 @@
             </div>
         </div>
 
-        <!-- Main Content Card -->
+        <!-- Main Content Card with Enhanced Search & Sort -->
         <div class="card shadow-sm border-0">
-            <div class="card-header bg-transparent border-bottom-0 pt-4">
+            <div class="card-header bg-transparent border-bottom-0 pt-4 pb-3">
                 <div class="row align-items-center">
-                    <div class="col">
-                        <h5 class="mb-1">Daftar Aktivitas</h5>
+                    <div class="col-md-6">
+                        <h5 class="mb-1">
+                            <i class="ti ti-list text-primary me-2"></i>Daftar Aktivitas
+                        </h5>
                         <p class="text-muted small mb-0">Kelola semua aktivitas hobi Anda di sini</p>
                     </div>
-                    <div class="col-auto">
-                        <div class="input-group input-group-sm" style="width: 280px;">
-                            <span class="input-group-text bg-light border-end-0">
-                                <i class="ti ti-search text-muted"></i>
-                            </span>
-                            <input type="text" class="form-control border-start-0" placeholder="Cari aktivitas...">
-                        </div>
+                    <div class="col-md-6">
+                        <form method="GET" action="{{ route('aktivitas.index') }}" id="searchForm">
+                            <!-- Preserve sorting parameters -->
+                            <input type="hidden" name="sort_by" value="{{ $sortBy ?? 'created_at' }}">
+                            <input type="hidden" name="sort_direction" value="{{ $sortDirection ?? 'desc' }}">
+
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-white">
+                                    <i class="ti ti-search text-muted"></i>
+                                </span>
+                                <input type="text" class="form-control border-start-0"
+                                    placeholder="Cari aktivitas, target, hobi, atau mood..." name="search" id="searchInput"
+                                    value="{{ $search ?? '' }}" autocomplete="off">
+                                <button class="btn btn-outline-primary" type="submit">
+                                    <i class="ti ti-search"></i>
+                                </button>
+                            </div>
+
+                            @if (!empty($search))
+                                <div class="mt-1">
+                                    <small class="text-muted">
+                                        Hasil untuk: <strong>"{{ $search }}"</strong>
+                                        <a href="{{ route('aktivitas.index', ['sort_by' => $sortBy, 'sort_direction' => $sortDirection]) }}"
+                                            class="text-primary ms-2">
+                                            <i class="ti ti-x" style="font-size: 0.7rem;"></i> Hapus
+                                        </a>
+                                    </small>
+                                </div>
+                            @endif
+                        </form>
                     </div>
                 </div>
             </div>
@@ -141,26 +166,78 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead class="bg-light">
                         <tr>
-                            <th scope="col" class="border-0 py-3 px-4" style="width: 5%;">#</th>
-                            <th scope="col" class="border-0 py-3" style="width: 30%;">Aktivitas</th>
-                            <th scope="col" class="border-0 py-3" style="width: 20%;">Target</th>
-                            <th scope="col" class="border-0 py-3" style="width: 15%;">Mood</th>
-                            <th scope="col" class="border-0 py-3">Catatan</th>
-                            <th scope="col" class="border-0 py-3 text-center" style="width: 8%;">File</th>
-                            <th scope="col" class="border-0 py-3 text-center" style="width: 12%;">Aksi</th>
+                            <th scope="col" class="border-0 py-3 px-4" style="width: 5%;">
+                                <span class="text-muted px-2 py-1">#</span>
+                            </th>
+                            <th scope="col" class="border-0 py-3" style="width: 25%;">
+                                <a href="{{ route('aktivitas.index', array_merge(request()->except(['sort_by', 'sort_direction']), ['sort_by' => 'nama_aktivitas', 'sort_direction' => $sortBy == 'nama_aktivitas' && $sortDirection == 'asc' ? 'desc' : 'asc'])) }}"
+                                    class="text-decoration-none text-dark d-flex align-items-center sortable-header {{ $sortBy == 'nama_aktivitas' ? 'active' : '' }}">
+                                    <i class="ti ti-activity me-2 text-primary"></i>
+                                    <span class="fw-semibold">Aktivitas</span>
+                                    @if ($sortBy == 'nama_aktivitas')
+                                        <i class="ti ti-arrow-{{ $sortDirection == 'asc' ? 'up' : 'down' }} ms-2 text-primary"></i>
+                                    @else
+                                        <i class="ti ti-selector ms-2 text-muted" style="opacity: 0.3;"></i>
+                                    @endif
+                                </a>
+                            </th>
+                            <th scope="col" class="border-0 py-3" style="width: 20%;">
+                                <a href="{{ route('aktivitas.index', array_merge(request()->except(['sort_by', 'sort_direction']), ['sort_by' => 'target', 'sort_direction' => $sortBy == 'target' && $sortDirection == 'asc' ? 'desc' : 'asc'])) }}"
+                                    class="text-decoration-none text-dark d-flex align-items-center sortable-header {{ $sortBy == 'target' ? 'active' : '' }}">
+                                    <i class="ti ti-target me-2 text-danger"></i>
+                                    <span class="fw-semibold">Target</span>
+                                    @if ($sortBy == 'target')
+                                        <i class="ti ti-arrow-{{ $sortDirection == 'asc' ? 'up' : 'down' }} ms-2 text-primary"></i>
+                                    @else
+                                        <i class="ti ti-selector ms-2 text-muted" style="opacity: 0.3;"></i>
+                                    @endif
+                                </a>
+                            </th>
+                            <th scope="col" class="border-0 py-3" style="width: 15%;">
+                                <a href="{{ route('aktivitas.index', array_merge(request()->except(['sort_by', 'sort_direction']), ['sort_by' => 'energy_mood_level', 'sort_direction' => $sortBy == 'energy_mood_level' && $sortDirection == 'asc' ? 'desc' : 'asc'])) }}"
+                                    class="text-decoration-none text-dark d-flex align-items-center sortable-header {{ $sortBy == 'energy_mood_level' ? 'active' : '' }}">
+                                    <i class="ti ti-mood-happy me-2 text-info"></i>
+                                    <span class="fw-semibold">Mood</span>
+                                    @if ($sortBy == 'energy_mood_level')
+                                        <i class="ti ti-arrow-{{ $sortDirection == 'asc' ? 'up' : 'down' }} ms-2 text-primary"></i>
+                                    @else
+                                        <i class="ti ti-selector ms-2 text-muted" style="opacity: 0.3;"></i>
+                                    @endif
+                                </a>
+                            </th>
+                            <th scope="col" class="border-0 py-3" style="width: 20%;">
+                                <span class="fw-semibold text-muted">
+                                    <i class="ti ti-notes me-2"></i>Catatan
+                                </span>
+                            </th>
+                            <th scope="col" class="border-0 py-3 text-center" style="width: 8%;">
+                                <span class="fw-semibold text-muted">File</span>
+                            </th>
+                            <th scope="col" class="border-0 py-3 text-center" style="width: 12%;">
+                                <span class="fw-semibold text-muted">Aksi</span>
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($aktivitas as $index => $aktivitasItem)
-                            <tr class="border-bottom" data-aktivitas-row data-id="{{ $aktivitasItem->id }}">
-                                <td class="px-4 py-3">{{ $index + 1 }}</td>
+                            <tr class="border-bottom hover-row" data-aktivitas-row data-id="{{ $aktivitasItem->id }}">
+                                <td class="px-4 py-3">
+                                    <span class="text-muted">{{ ($aktivitas->currentPage() - 1) * $aktivitas->perPage() + $loop->iteration }}</span>
+                                </td>
                                 <td class="py-3">
-                                    <h6 class="mb-1 fw-semibold">{{ $aktivitasItem->nama_aktivitas }}</h6>
+                                    <div class="d-flex align-items-center">
+                                        <div>
+                                            <h6 class="mb-0 fw-semibold">{{ $aktivitasItem->nama_aktivitas }}</h6>
+                                            <small class="text-muted">
+                                                <i class="ti ti-calendar-event" style="font-size: 0.75rem;"></i>
+                                                {{ $aktivitasItem->created_at->format('d M Y') }}
+                                            </small>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td class="py-3">
                                     <span class="fw-semibold">{{ $aktivitasItem->target->nama_target ?? 'N/A' }}</span>
-                                    <br><small
-                                        class="text-muted">{{ $aktivitasItem->target->hobi->nama_hobi ?? 'N/A' }}</small>
+                                    <br><small class="text-muted">{{ $aktivitasItem->target->hobi->nama_hobi ?? 'N/A' }}</small>
                                 </td>
                                 <td class="py-3">
                                     <span class="fw-semibold">{{ $aktivitasItem->energy_mood_level ?? '-' }}</span>
@@ -276,17 +353,83 @@ $hasGdrive = isset($fileData['gdrive']) && !empty($fileData['gdrive']);
                         @empty
                             <tr>
                                 <td colspan="7" class="text-center py-5">
-                                    <div class="mb-4">
-                                        <i class="ti ti-activity text-muted" style="font-size: 4rem;"></i>
+                                    <div class="py-4">
+                                        <i class="ti ti-mood-sad text-muted mb-3" style="font-size: 4rem;"></i>
+                                        @if (!empty($search))
+                                            <h5 class="text-muted mb-2">Tidak ada hasil untuk "{{ $search }}"</h5>
+                                            <p class="text-muted mb-3">Coba gunakan kata kunci yang berbeda</p>
+                                            <a href="{{ route('aktivitas.index', ['sort_by' => $sortBy, 'sort_direction' => $sortDirection]) }}"
+                                                class="btn btn-primary">
+                                                <i class="ti ti-arrow-left me-2"></i>Tampilkan Semua Aktivitas
+                                            </a>
+                                        @else
+                                            <h5 class="text-muted mb-2">Belum ada aktivitas</h5>
+                                            <p class="text-muted mb-3">Mulai dengan menambahkan aktivitas hobi pertama Anda</p>
+                                            <button class="btn btn-primary" data-bs-toggle="modal"
+                                                data-bs-target="#tambahAktivitasModal">
+                                                <i class="ti ti-plus me-2"></i>Tambah Aktivitas Sekarang
+                                            </button>
+                                        @endif
                                     </div>
-                                    <h5 class="text-muted">Belum ada aktivitas</h5>
-                                    <p class="text-muted mb-4">Mulai dengan menambahkan aktivitas hobi pertama Anda</p>
                                 </td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
+
+            @if ($aktivitas->hasPages())
+                <div class="card-footer bg-transparent border-top">
+                    <div class="row align-items-center g-3">
+                        <div class="col-md-6 text-center text-md-start">
+                            <small class="text-muted">
+                                <i class="ti ti-list-details me-1"></i>
+                                Menampilkan <strong>{{ $aktivitas->firstItem() ?? 0 }}</strong> -
+                                <strong>{{ $aktivitas->lastItem() ?? 0 }}</strong> dari
+                                <strong>{{ $aktivitas->total() }}</strong> aktivitas
+                            </small>
+                        </div>
+                        <div class="col-md-6 d-flex justify-content-center justify-content-md-end">
+                            <nav aria-label="Page navigation">
+                                @if ($aktivitas->lastPage() > 1)
+                                    <ul class="pagination pagination-sm mb-0">
+                                        {{-- Previous Page Link --}}
+                                        @if ($aktivitas->onFirstPage())
+                                            <li class="page-item disabled" aria-disabled="true" aria-label="Previous">
+                                                <span class="page-link" aria-hidden="true">&laquo;</span>
+                                            </li>
+                                        @else
+                                            <li class="page-item">
+                                                <a class="page-link" href="{{ $aktivitas->appends(request()->query())->previousPageUrl() }}" rel="prev" aria-label="Previous">&laquo;</a>
+                                            </li>
+                                        @endif
+
+                                        {{-- Pagination Elements --}}
+                                        @foreach ($aktivitas->getUrlRange(max($aktivitas->currentPage() -2, 1), min($aktivitas->currentPage() + 2, $aktivitas->lastPage())) as $page => $url)
+                                            @if ($page == $aktivitas->currentPage())
+                                                <li class="page-item active" aria-current="page"><span class="page-link">{{ $page }}</span></li>
+                                            @else
+                                                <li class="page-item"><a class="page-link" href="{{ $url }}">{{ $page }}</a></li>
+                                            @endif
+                                        @endforeach
+
+                                        {{-- Next Page Link --}}
+                                        @if ($aktivitas->hasMorePages())
+                                            <li class="page-item">
+                                                <a class="page-link" href="{{ $aktivitas->appends(request()->query())->nextPageUrl() }}" rel="next" aria-label="Next">&raquo;</a>
+                                            </li>
+                                        @else
+                                            <li class="page-item disabled" aria-disabled="true" aria-label="Next">
+                                                <span class="page-link" aria-hidden="true">&raquo;</span>
+                                            </li>
+                                        @endif
+                                    </ul>
+                                @endif
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 
@@ -576,4 +719,19 @@ $hasGdrive = isset($fileData['gdrive']) && !empty($fileData['gdrive']);
 
 @section('scripts')
     <script src="{{ asset('./admin/js/aktivitas.js') }}"></script>
+    <script>
+        // Auto-submit search form on enter
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('searchForm').submit();
+            }
+        });
+
+        // Clear search on escape
+        document.getElementById('searchInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                window.location.href = '{{ route("aktivitas.index", ["sort_by" => $sortBy, "sort_direction" => $sortDirection]) }}';
+            }
+        });
+    </script>
 @endsection

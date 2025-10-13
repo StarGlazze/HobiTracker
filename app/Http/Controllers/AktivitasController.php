@@ -15,20 +15,74 @@ class AktivitasController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $userId = Auth::id();
 
-        // Mengambil semua aktivitas milik user yang sedang login
-        $aktivitas = Aktivitas::whereHas('target.hobi', function ($query) use ($userId) {
+        // Query untuk semua aktivitas (untuk statistik)
+        $allAktivitasQuery = Aktivitas::whereHas('target.hobi', function ($query) use ($userId) {
             $query->where('user_id', $userId);
-        })->with('target.hobi')->orderBy('created_at', 'desc')->get();
+        })->with('target.hobi');
+        $allAktivitas = $allAktivitasQuery->get();
+
+        // Query untuk aktivitas yang akan ditampilkan (dengan sorting, search, pagination)
+        $query = Aktivitas::whereHas('target.hobi', function ($query) use ($userId) {
+            $query->where('user_id', $userId);
+        })->with('target.hobi');
+
+        // Handle search
+        $search = $request->input('search');
+        if (!empty($search)) {
+            $query->where(function($q) use ($search) {
+                $q->where('nama_aktivitas', 'like', '%' . $search . '%')
+                  ->orWhere('catatan', 'like', '%' . $search . '%')
+                  ->orWhere('energy_mood_level', 'like', '%' . $search . '%')
+                  ->orWhereHas('target', function($q2) use ($search) {
+                      $q2->where('nama_target', 'like', '%' . $search . '%')
+                         ->orWhereHas('hobi', function($q3) use ($search) {
+                             $q3->where('nama_hobi', 'like', '%' . $search . '%');
+                         });
+                  });
+            });
+        }
+
+        // Handle sorting - gunakan parameter yang konsisten
+        $sortBy = $request->input('sort_by', 'created_at');
+        $sortDirection = $request->input('sort_direction', 'desc');
+
+        // Validasi sort direction
+        if (!in_array(strtolower($sortDirection), ['asc', 'desc'])) {
+            $sortDirection = 'desc';
+        }
+
+        // Validasi sort by dan terapkan sorting
+        switch ($sortBy) {
+            case 'nama_aktivitas':
+                $query->orderBy('nama_aktivitas', $sortDirection);
+                break;
+            case 'target':
+                // Sorting berdasarkan nama target
+                $query->join('target_hobis', 'aktivitas.target_id', '=', 'target_hobis.id')
+                      ->orderBy('target_hobis.nama_target', $sortDirection)
+                      ->select('aktivitas.*');
+                break;
+            case 'energy_mood_level':
+                $query->orderBy('energy_mood_level', $sortDirection);
+                break;
+            case 'created_at':
+            default:
+                $query->orderBy('created_at', $sortDirection);
+                break;
+        }
+
+        // Pagination dengan append query parameters
+        $aktivitas = $query->paginate(5)->withQueryString();
 
         // Menghitung statistik untuk dashboard cards
-        $totalAktivitas = $aktivitas->count();
-        $bulanIni = $aktivitas->where('created_at', '>=', now()->startOfMonth())->count();
-        $hobiAktif = $aktivitas->pluck('target.hobi')->unique('id')->count();
-        $denganMood = $aktivitas->whereNotNull('energy_mood_level')->where('energy_mood_level', '!=', '')->count();
+        $totalAktivitas = $allAktivitas->count();
+        $bulanIni = $allAktivitas->where('created_at', '>=', now()->startOfMonth())->count();
+        $hobiAktif = $allAktivitas->pluck('target.hobi')->unique('id')->count();
+        $denganMood = $allAktivitas->whereNotNull('energy_mood_level')->where('energy_mood_level', '!=', '')->count();
 
         // Mengambil target milik user untuk dropdown
         $targets = TargetHobi::whereHas('hobi', function ($query) use ($userId) {
@@ -42,6 +96,9 @@ class AktivitasController extends Controller
             'bulanIni' => $bulanIni,
             'hobiAktif' => $hobiAktif,
             'denganMood' => $denganMood,
+            'sortBy' => $sortBy,
+            'sortDirection' => $sortDirection,
+            'search' => $search,
         ]);
     }
 
