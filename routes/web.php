@@ -10,12 +10,16 @@ use App\Http\Controllers\WebSettingController;
 use App\Http\Controllers\TargetHobiController;
 use App\Http\Controllers\LogAktivitasController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {
     return view('landing.welcome');
 });
 
-Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->middleware('auth');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/chart-data', [DashboardController::class, 'getChartDataAjax'])->name('dashboard.chart.data');
+});
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/logs', [LogAktivitasController::class, 'index'])->name('admin.logs');

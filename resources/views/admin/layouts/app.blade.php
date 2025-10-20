@@ -6,12 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'HobiTracker')</title>
-    <link rel="shortcut icon" type="image/png" href="{{ asset('./admin/images/logos/favicon-v2.png')}}" />
-    <link rel="stylesheet" href="{{ asset('./admin/css/styles.min.css')}}" />
-    <link rel="stylesheet" href="{{ asset('./admin/css/hover-effects.css')}}" />
-    <link rel="stylesheet" href="{{ asset('./admin/css/hobi-custom.css')}}" />
-    <link rel="stylesheet" href="{{ asset('./admin/css/color-fixes.css')}}" />
-    <link rel="stylesheet" href="{{ asset('./admin/css/profile.css')}}" />
+    <link rel="shortcut icon" type="image/png" href="{{ asset('./admin/images/logos/favicon-v2.png') }}" />
+    <link rel="stylesheet" href="{{ asset('./admin/css/styles.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('./admin/css/hover-effects.css') }}" />
+    <link rel="stylesheet" href="{{ asset('./admin/css/hobi-custom.css') }}" />
+    <link rel="stylesheet" href="{{ asset('./admin/css/color-fixes.css') }}" />
+    <link rel="stylesheet" href="{{ asset('./admin/css/profile.css') }}" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts@3.45.1/dist/apexcharts.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <!-- Tabler Icons CSS -->
@@ -44,18 +45,19 @@
     </div>
 
     <!--  Scripts -->
-    <script src="{{ asset('./admin/libs/jquery/dist/jquery.min.js')}}"></script>
-    <script src="{{ asset('./admin/libs/bootstrap/dist/js/bootstrap.bundle.min.js')}}"></script>
-    <script src="{{ asset('./admin/js/sidebarmenu.js')}}"></script>
-    <script src="{{ asset('./admin/js/app.min.js')}}"></script>
-    <script src="{{ asset('./admin/libs/apexcharts/dist/apexcharts.min.js')}}"></script>
-    <script src="{{ asset('./admin/libs/simplebar/dist/simplebar.js')}}"></script>
-    <script src="{{ asset('./admin/js/dashboard.js')}}"></script>
+    <script src="{{ asset('./admin/libs/jquery/dist/jquery.min.js') }}"></script>
+    <script src="{{ asset('./admin/libs/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('./admin/js/sidebarmenu.js') }}"></script>
+    <script src="{{ asset('./admin/js/app.min.js') }}"></script>
+    <script src="{{ asset('./admin/libs/apexcharts/dist/apexcharts.min.js') }}"></script>
+    <script src="{{ asset('./admin/libs/simplebar/dist/simplebar.js') }}"></script>
+
     <!-- solar icons -->
     <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
 
-    <script src="{{ asset('./admin/js/hobi-custom.js')}}"></script>
-     
+    <script src="{{ asset('./admin/js/hobi-custom.js') }}"></script>
+
+    <!-- Dashboard JS (pastikan di-load setelah jQuery dan ApexCharts) -->
     @yield('scripts')
 </body>
 

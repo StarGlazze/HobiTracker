@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
@@ -47,7 +48,12 @@ class DashboardController extends Controller
             ->count();
 
         // Data untuk Chart Activity Overview (aktivitas per kategori hobi bulan ini)
-        $chartData = $this->getChartData($user->id);
+        $chartData = $this->getChartData($user->id, 'monthly');
+
+        // Check if user has any activities at all
+        $hasAnyActivities = Aktivitas::whereHas('target.hobi', function ($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })->exists();
 
         // Weekly Stats
         $weeklyStats = $this->getWeeklyStats($user->id);
@@ -66,30 +72,103 @@ class DashboardController extends Controller
             'activitiesProgress' => round($activitiesProgress),
             'activeHobbiesThisMonth' => $activeHobbiesThisMonth,
             'chartData' => $chartData,
+            'hasAnyActivities' => $hasAnyActivities,
             'weeklyStats' => $weeklyStats,
             'targetProgress' => $targetProgress,
             'recentLogs' => $recentLogs,
         ]);
     }
 
-    private function getChartData($userId)
+    // AJAX endpoint untuk filter periode chart
+    public function getChartDataAjax(Request $request)
     {
-        // Aktivitas per kategori hobi bulan ini
-        $data = Aktivitas::whereHas('target.hobi', function ($query) use ($userId) {
-            $query->where('user_id', $userId);
-        })
-            ->where('created_at', '>=', now()->startOfMonth())
-            ->with('target.hobi.kategoriHobi')
-            ->get()
-            ->groupBy('target.hobi.kategoriHobi.nama_kategori')
-            ->map(function ($group) {
-                return $group->count();
-            });
+        try {
+            $user = Auth::user();
+            $period = $request->input('period', 'monthly');
 
-        return [
-            'categories' => $data->keys()->toArray(),
-            'series' => $data->values()->toArray(),
-        ];
+            // Validasi period
+            if (!in_array($period, ['daily', 'weekly', 'monthly'])) {
+                $period = 'monthly';
+            }
+
+            $chartData = $this->getChartData($user->id, $period);
+
+            // Log untuk debugging
+            Log::info('Chart data requested', [
+                'user_id' => $user->id,
+                'period' => $period,
+                'data' => $chartData
+            ]);
+
+            return response()->json($chartData);
+        } catch (\Exception $e) {
+            Log::error('Error getting chart data', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'categories' => ['Error'],
+                'series' => [0],
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    private function getChartData($userId, $period = 'monthly')
+    {
+        try {
+            // Tentukan range tanggal berdasarkan periode
+            $startDate = match ($period) {
+                'daily' => now()->startOfDay(),
+                'weekly' => now()->startOfWeek(),
+                'monthly' => now()->startOfMonth(),
+                default => now()->startOfMonth(),
+            };
+
+            // Aktivitas per kategori hobi dalam periode tertentu
+            $aktivitas = Aktivitas::whereHas('target.hobi', function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            })
+                ->where('created_at', '>=', $startDate)
+                ->with(['target.hobi.kategoriHobi'])
+                ->get();
+
+            // Group by kategori
+            $data = $aktivitas->groupBy(function ($item) {
+                return $item->target && $item->target->hobi && $item->target->hobi->kategoriHobi
+                    ? $item->target->hobi->kategoriHobi->nama_kategori
+                    : 'Uncategorized';
+            })
+                ->map(function ($group) {
+                    return $group->count();
+                })
+                ->sortDesc();
+
+            // Jika tidak ada data, berikan data default
+            if ($data->isEmpty()) {
+                return [
+                    'categories' => ['Belum ada data'],
+                    'series' => [0],
+                ];
+            }
+
+            return [
+                'categories' => array_values($data->keys()->toArray()),
+                'series' => array_values($data->values()->toArray()),
+            ];
+        } catch (\Exception $e) {
+            Log::error('Error in getChartData', [
+                'user_id' => $userId,
+                'period' => $period,
+                'error' => $e->getMessage()
+            ]);
+
+            return [
+                'categories' => ['Error'],
+                'series' => [0],
+            ];
+        }
     }
 
     private function getWeeklyStats($userId)
@@ -104,7 +183,11 @@ class DashboardController extends Controller
             ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
             ->with('target.hobi')
             ->get()
-            ->groupBy('target.hobi.nama_hobi')
+            ->groupBy(function ($item) {
+                return $item->target && $item->target->hobi
+                    ? $item->target->hobi->nama_hobi
+                    : 'Unknown';
+            })
             ->map(function ($group) {
                 return $group->count();
             })
@@ -243,9 +326,11 @@ class DashboardController extends Controller
             ->get()
             ->map(function ($log) {
                 return [
-                    'nama_aktivitas' => $log->aktivitas->nama_aktivitas ?? 'Aktivitas',
+                    'nama_aktivitas' => $log->aktivitas ? $log->aktivitas->nama_aktivitas : 'Aktivitas',
                     'waktu' => $log->created_at->diffForHumans(),
-                    'mood' => $log->aktivitas->energy_mood_level ?? '-',
+                    'mood' => $log->aktivitas && $log->aktivitas->energy_mood_level
+                        ? $log->aktivitas->energy_mood_level
+                        : '-',
                     'energi' => 'Tinggi', // Placeholder, bisa disesuaikan
                 ];
             });
