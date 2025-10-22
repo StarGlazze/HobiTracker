@@ -33,16 +33,16 @@ class AktivitasController extends Controller
         // Handle search
         $search = $request->input('search');
         if (!empty($search)) {
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('nama_aktivitas', 'like', '%' . $search . '%')
-                  ->orWhere('catatan', 'like', '%' . $search . '%')
-                  ->orWhere('energy_mood_level', 'like', '%' . $search . '%')
-                  ->orWhereHas('target', function($q2) use ($search) {
-                      $q2->where('nama_target', 'like', '%' . $search . '%')
-                         ->orWhereHas('hobi', function($q3) use ($search) {
-                             $q3->where('nama_hobi', 'like', '%' . $search . '%');
-                         });
-                  });
+                    ->orWhere('catatan', 'like', '%' . $search . '%')
+                    ->orWhere('energy_mood_level', 'like', '%' . $search . '%')
+                    ->orWhereHas('target', function ($q2) use ($search) {
+                        $q2->where('nama_target', 'like', '%' . $search . '%')
+                            ->orWhereHas('hobi', function ($q3) use ($search) {
+                                $q3->where('nama_hobi', 'like', '%' . $search . '%');
+                            });
+                    });
             });
         }
 
@@ -63,8 +63,8 @@ class AktivitasController extends Controller
             case 'target':
                 // Sorting berdasarkan nama target
                 $query->join('target_hobis', 'aktivitas.target_id', '=', 'target_hobis.id')
-                      ->orderBy('target_hobis.nama_target', $sortDirection)
-                      ->select('aktivitas.*');
+                    ->orderBy('target_hobis.nama_target', $sortDirection)
+                    ->select('aktivitas.*');
                 break;
             case 'energy_mood_level':
                 $query->orderBy('energy_mood_level', $sortDirection);
@@ -84,10 +84,14 @@ class AktivitasController extends Controller
         $hobiAktif = $allAktivitas->pluck('target.hobi')->unique('id')->count();
         $denganMood = $allAktivitas->whereNotNull('energy_mood_level')->where('energy_mood_level', '!=', '')->count();
 
-        // Mengambil target milik user untuk dropdown
+        // Mengambil target milik user untuk dropdown, exclude yang sudah 100%
         $targets = TargetHobi::whereHas('hobi', function ($query) use ($userId) {
             $query->where('user_id', $userId);
-        })->with('hobi')->get();
+        })->with('hobi')->get()->filter(function ($target) {
+            $aktivitasCount = $target->aktivitas->count();
+            $progress = $target->jumlah_aktivitas_dibutuhkan > 0 ? ($aktivitasCount / $target->jumlah_aktivitas_dibutuhkan) * 100 : 0;
+            return $progress < 100;
+        });
 
         return view('admin.aktivitas', [
             'aktivitas' => $aktivitas,
@@ -148,6 +152,13 @@ class AktivitasController extends Controller
             })->first();
             if (!$target) {
                 return redirect()->back()->with('error', 'Target tidak ditemukan atau bukan milik Anda')->withInput();
+            }
+
+            // Check if target is already completed (100%)
+            $aktivitasCount = $target->aktivitas->count();
+            $progress = $target->jumlah_aktivitas_dibutuhkan > 0 ? ($aktivitasCount / $target->jumlah_aktivitas_dibutuhkan) * 100 : 0;
+            if ($progress >= 100) {
+                return redirect()->back()->with('error', 'Target sudah mencapai 100% dan tidak dapat menambah aktivitas lagi')->withInput();
             }
 
             $fileData = [];

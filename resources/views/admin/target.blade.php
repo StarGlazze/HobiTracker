@@ -209,23 +209,24 @@
                                     </td>
 
                                     <td class="py-3">
-                                        <div class="progress position-relative"
-                                            style="height: 24px; border-radius: 12px; background: linear-gradient(90deg, #f8f9fa 0%, #e9ecef 100%); box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);">
-                                            <div class="progress-bar position-relative overflow-hidden {{ $progress >= 100 ? 'bg-success' : ($progress >= 50 ? 'bg-warning' : 'bg-primary') }}"
-                                                role="progressbar"
-                                                style="width: {{ min($progress, 100) }}%;
-                                                border-radius: 12px;
-                                                background: {{ $progress >= 100 ? 'linear-gradient(90deg, #28a745 0%, #20c997 100%)' : ($progress >= 50 ? 'linear-gradient(90deg, #ffc107 0%, #fd7e14 100%)' : 'linear-gradient(90deg, #007bff 0%, #6610f2 100%)') }};
-                                                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-                                                transition: width 0.6s ease-in-out;"
-                                                aria-valuenow="{{ min($progress, 100) }}" aria-valuemin="0"
-                                                aria-valuemax="100">
-                                                <span
-                                                    class="position-absolute top-50 start-50 translate-middle fw-bold text-white text-shadow"
-                                                    style="font-size: 12px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">
-                                                    {{ number_format($progress, 1) }}%
-                                                </span>
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress position-relative flex-grow-1"
+                                                style="height: 24px; border-radius: 12px; background: linear-gradient(90deg, #f8f9fa 0%, #e9ecef 100%); box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);">
+                                                <div class="progress-bar position-relative overflow-hidden {{ $progress >= 100 ? 'bg-success' : ($progress >= 50 ? 'bg-warning' : 'bg-primary') }}"
+                                                    role="progressbar"
+                                                    style="width: {{ min($progress, 100) }}%;
+                                                    border-radius: 12px;
+                                                    background: {{ $progress >= 100 ? 'linear-gradient(90deg, #28a745 0%, #20c997 100%)' : ($progress >= 50 ? 'linear-gradient(90deg, #ffc107 0%, #fd7e14 100%)' : 'linear-gradient(90deg, #007bff 0%, #6610f2 100%)') }};
+                                                    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                                                    transition: width 0.6s ease-in-out;"
+                                                    aria-valuenow="{{ min($progress, 100) }}" aria-valuemin="0"
+                                                    aria-valuemax="100">
+                                                </div>
                                             </div>
+                                            <span class="ms-2 fw-bold text-dark"
+                                                style="font-size: 14px; min-width: 45px;">
+                                                {{ number_format($progress, 1) }}%
+                                            </span>
                                         </div>
                                         <small class="text-muted d-flex align-items-center mt-1">
                                             <i class="ti ti-activity me-1"></i>
