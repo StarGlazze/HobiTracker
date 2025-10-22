@@ -84,14 +84,26 @@ class AktivitasController extends Controller
         $hobiAktif = $allAktivitas->pluck('target.hobi')->unique('id')->count();
         $denganMood = $allAktivitas->whereNotNull('energy_mood_level')->where('energy_mood_level', '!=', '')->count();
 
-        // Mengambil target milik user untuk dropdown, exclude yang sudah 100%
-        $targets = TargetHobi::whereHas('hobi', function ($query) use ($userId) {
+        // Mengambil target milik user untuk dropdown
+        // Include semua target yang belum 100% progress, PLUS target yang sedang digunakan oleh aktivitas yang ada
+        $allTargets = TargetHobi::whereHas('hobi', function ($query) use ($userId) {
             $query->where('user_id', $userId);
-        })->with('hobi')->get()->filter(function ($target) {
+        })->with('hobi')->get();
+
+        // Target yang belum selesai (progress < 100%)
+        $incompleteTargets = $allTargets->filter(function ($target) {
             $aktivitasCount = $target->aktivitas->count();
             $progress = $target->jumlah_aktivitas_dibutuhkan > 0 ? ($aktivitasCount / $target->jumlah_aktivitas_dibutuhkan) * 100 : 0;
             return $progress < 100;
         });
+
+        // Target yang sudah digunakan oleh aktivitas yang ada (untuk edit)
+        $usedTargets = $allTargets->filter(function ($target) {
+            return $target->aktivitas->isNotEmpty();
+        });
+
+        // Gabungkan keduanya (remove duplicates)
+        $targets = $incompleteTargets->merge($usedTargets)->unique('id');
 
         return view('admin.aktivitas', [
             'aktivitas' => $aktivitas,
@@ -128,7 +140,7 @@ class AktivitasController extends Controller
                 'nama_aktivitas' => 'required|string|max:255',
                 'energy_mood_level' => 'nullable|string|max:50',
                 'catatan' => 'nullable|string|max:1000',
-                'file_bukti' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:51200', // Max 50MB
+                'file_bukti' => 'nullable|image|mimes:jpeg,jpg,png,gif,webp|max:5120', // Max 5MB, gambar saja
                 'gdrive_link' => 'nullable|url|max:500',
             ]);
 
@@ -154,7 +166,7 @@ class AktivitasController extends Controller
                 return redirect()->back()->with('error', 'Target tidak ditemukan atau bukan milik Anda')->withInput();
             }
 
-            // Check if target is already completed (100%)
+            // Check if target is already completed (100%) - hanya untuk CREATE baru, bukan edit
             $aktivitasCount = $target->aktivitas->count();
             $progress = $target->jumlah_aktivitas_dibutuhkan > 0 ? ($aktivitasCount / $target->jumlah_aktivitas_dibutuhkan) * 100 : 0;
             if ($progress >= 100) {
@@ -246,7 +258,7 @@ class AktivitasController extends Controller
                 'nama_aktivitas' => 'required|string|max:255',
                 'energy_mood_level' => 'nullable|string|max:50',
                 'catatan' => 'nullable|string|max:1000',
-                'file_bukti' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,mov,avi|max:51200', // Max 50MB
+                'file_bukti' => 'nullable|image|mimes:jpeg,jpg,png,gif,webp|max:5120', // Max 5MB, gambar saja
                 'gdrive_link' => 'nullable|url|max:500',
             ]);
 
@@ -272,6 +284,17 @@ class AktivitasController extends Controller
             })->first();
             if (!$target) {
                 return redirect()->back()->with('error', 'Target tidak ditemukan atau bukan milik Anda')->withInput();
+            }
+
+            // Untuk UPDATE, izinkan target yang sudah 100% jika aktivitas ini sudah menggunakan target tersebut
+            $isCurrentTarget = $aktivitas->target_id == $request->target_id;
+            if (!$isCurrentTarget) {
+                // Jika mengubah ke target lain, pastikan target baru belum 100%
+                $aktivitasCount = $target->aktivitas->count();
+                $progress = $target->jumlah_aktivitas_dibutuhkan > 0 ? ($aktivitasCount / $target->jumlah_aktivitas_dibutuhkan) * 100 : 0;
+                if ($progress >= 100) {
+                    return redirect()->back()->with('error', 'Target yang dipilih sudah mencapai 100% dan tidak dapat digunakan untuk aktivitas baru')->withInput();
+                }
             }
 
             // Parse existing file data with backward compatibility

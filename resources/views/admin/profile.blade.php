@@ -36,17 +36,17 @@
 
                         <div class="achievements-grid">
                             @foreach ([
-                                'early_bird' => ['icon' => 'ti-sun', 'title' => 'Early Bird', 'desc' => 'Login sebelum jam 7 pagi 10 kali'],
-                                'night_owl' => ['icon' => 'ti-moon', 'title' => 'Night Owl', 'desc' => 'Aktivitas setelah jam 10 malam 5 kali'],
-                                'explorer' => ['icon' => 'ti-compass', 'title' => 'Explorer', 'desc' => '5 kategori hobi berbeda'],
-                                'consistency' => ['icon' => 'ti-calendar-event', 'title' => 'Consistency King', 'desc' => 'Login 30 hari berturut'],
-                                'goal_crusher' => ['icon' => 'ti-target', 'title' => 'Goal Crusher', 'desc' => 'Selesaikan 20 target'],
-                                'storyteller' => ['icon' => 'ti-book', 'title' => 'Storyteller', 'desc' => 'Deskripsi >200 karakter'],
-                                'collector' => ['icon' => 'ti-photo', 'title' => 'Collector', 'desc' => 'Upload 50 file bukti'],
-                                'speedrunner' => ['icon' => 'ti-bolt', 'title' => 'Speedrunner', 'desc' => 'Selesaikan target < 24 jam 5 kali'],
-                                'creative_spark' => ['icon' => 'ti-bulb', 'title' => 'Creative Spark', 'desc' => 'Buat 10 hobi berbeda'],
-                                'milestone_master' => ['icon' => 'ti-trophy', 'title' => 'Milestone Master', 'desc' => 'Selesaikan 100 aktivitas'],
-                            ] as $key => $achievement)
+            'early_bird' => ['icon' => 'ti-sun', 'title' => 'Early Bird', 'desc' => 'Login sebelum jam 7 pagi 10 kali'],
+            'night_owl' => ['icon' => 'ti-moon', 'title' => 'Night Owl', 'desc' => 'Aktivitas setelah jam 10 malam 5 kali'],
+            'explorer' => ['icon' => 'ti-compass', 'title' => 'Explorer', 'desc' => '5 kategori hobi berbeda'],
+            'consistency' => ['icon' => 'ti-calendar-event', 'title' => 'Consistency King', 'desc' => 'Login 30 hari berturut'],
+            'goal_crusher' => ['icon' => 'ti-target', 'title' => 'Goal Crusher', 'desc' => 'Selesaikan 20 target'],
+            'storyteller' => ['icon' => 'ti-book', 'title' => 'Storyteller', 'desc' => 'Deskripsi >200 karakter'],
+            'collector' => ['icon' => 'ti-photo', 'title' => 'Collector', 'desc' => 'Upload 50 file bukti'],
+            'speedrunner' => ['icon' => 'ti-bolt', 'title' => 'Speedrunner', 'desc' => 'Selesaikan target < 24 jam 5 kali'],
+            'creative_spark' => ['icon' => 'ti-bulb', 'title' => 'Creative Spark', 'desc' => 'Buat 10 hobi berbeda'],
+            'milestone_master' => ['icon' => 'ti-trophy', 'title' => 'Milestone Master', 'desc' => 'Selesaikan 100 aktivitas'],
+        ] as $key => $achievement)
                                 <div class="achievement-item {{ $achievements[$key] ? 'achieved' : 'locked' }}">
                                     <span class="achievement-badge {{ $achievements[$key] ? '' : 'locked' }}">
                                         {{ $achievements[$key] ? 'Tercapai!' : 'Terkunci' }}
@@ -256,7 +256,6 @@
                                                                                 'gif',
                                                                                 'webp',
                                                                             ];
-                                                                            $videoExts = ['mp4', 'mov', 'avi', 'webm'];
                                                                             $fileType = 'file';
                                                                             $icon = 'ti-file-text';
                                                                             $title = 'Lihat file bukti';
@@ -265,12 +264,6 @@
                                                                                 $fileType = 'image';
                                                                                 $icon = 'ti-photo';
                                                                                 $title = 'Lihat gambar bukti';
-                                                                            } elseif (
-                                                                                in_array($extension, $videoExts)
-                                                                            ) {
-                                                                                $fileType = 'video';
-                                                                                $icon = 'ti-video';
-                                                                                $title = 'Lihat video bukti';
                                                                             }
                                                                         @endphp
                                                                         <div class="file-bukti-item position-relative"

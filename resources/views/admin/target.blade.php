@@ -687,16 +687,11 @@ $hasGdrive =
                                                                             'gif',
                                                                             'webp',
                                                                         ];
-                                                                        $videoExts = ['mp4', 'mov', 'avi', 'webm'];
 
                                                                         if (in_array($extension, $imageExts)) {
                                                                             $fileType = 'image';
                                                                             $icon = 'ti-photo';
                                                                             $title = 'Lihat gambar bukti';
-                                                                        } elseif (in_array($extension, $videoExts)) {
-                                                                            $fileType = 'video';
-                                                                            $icon = 'ti-video';
-                                                                            $title = 'Lihat video bukti';
                                                                         } else {
                                                                             $fileType = 'file';
                                                                             $icon = 'ti-file-text';

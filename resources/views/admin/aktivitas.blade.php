@@ -175,7 +175,8 @@
                                     <i class="ti ti-activity me-2 text-primary"></i>
                                     <span class="fw-semibold">Aktivitas</span>
                                     @if ($sortBy == 'nama_aktivitas')
-                                        <i class="ti ti-arrow-{{ $sortDirection == 'asc' ? 'up' : 'down' }} ms-2 text-primary"></i>
+                                        <i
+                                            class="ti ti-arrow-{{ $sortDirection == 'asc' ? 'up' : 'down' }} ms-2 text-primary"></i>
                                     @else
                                         <i class="ti ti-selector ms-2 text-muted" style="opacity: 0.3;"></i>
                                     @endif
@@ -187,7 +188,8 @@
                                     <i class="ti ti-target me-2 text-danger"></i>
                                     <span class="fw-semibold">Target</span>
                                     @if ($sortBy == 'target')
-                                        <i class="ti ti-arrow-{{ $sortDirection == 'asc' ? 'up' : 'down' }} ms-2 text-primary"></i>
+                                        <i
+                                            class="ti ti-arrow-{{ $sortDirection == 'asc' ? 'up' : 'down' }} ms-2 text-primary"></i>
                                     @else
                                         <i class="ti ti-selector ms-2 text-muted" style="opacity: 0.3;"></i>
                                     @endif
@@ -199,7 +201,8 @@
                                     <i class="ti ti-mood-happy me-2 text-info"></i>
                                     <span class="fw-semibold">Mood</span>
                                     @if ($sortBy == 'energy_mood_level')
-                                        <i class="ti ti-arrow-{{ $sortDirection == 'asc' ? 'up' : 'down' }} ms-2 text-primary"></i>
+                                        <i
+                                            class="ti ti-arrow-{{ $sortDirection == 'asc' ? 'up' : 'down' }} ms-2 text-primary"></i>
                                     @else
                                         <i class="ti ti-selector ms-2 text-muted" style="opacity: 0.3;"></i>
                                     @endif
@@ -222,7 +225,8 @@
                         @forelse($aktivitas as $index => $aktivitasItem)
                             <tr class="border-bottom hover-row" data-aktivitas-row data-id="{{ $aktivitasItem->id }}">
                                 <td class="px-4 py-3">
-                                    <span class="text-muted">{{ ($aktivitas->currentPage() - 1) * $aktivitas->perPage() + $loop->iteration }}</span>
+                                    <span
+                                        class="text-muted">{{ ($aktivitas->currentPage() - 1) * $aktivitas->perPage() + $loop->iteration }}</span>
                                 </td>
                                 <td class="py-3">
                                     <div class="d-flex align-items-center">
@@ -237,7 +241,8 @@
                                 </td>
                                 <td class="py-3">
                                     <span class="fw-semibold">{{ $aktivitasItem->target->nama_target ?? 'N/A' }}</span>
-                                    <br><small class="text-muted">{{ $aktivitasItem->target->hobi->nama_hobi ?? 'N/A' }}</small>
+                                    <br><small
+                                        class="text-muted">{{ $aktivitasItem->target->hobi->nama_hobi ?? 'N/A' }}</small>
                                 </td>
                                 <td class="py-3">
                                     <span class="fw-semibold">{{ $aktivitasItem->energy_mood_level ?? '-' }}</span>
@@ -283,16 +288,11 @@ $hasGdrive = isset($fileData['gdrive']) && !empty($fileData['gdrive']);
                                                         pathinfo($fileData['file'], PATHINFO_EXTENSION),
                                                     );
                                                     $imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-                                                    $videoExts = ['mp4', 'mov', 'avi', 'webm'];
 
                                                     if (in_array($extension, $imageExts)) {
                                                         $fileType = 'image';
                                                         $icon = 'ti-photo';
                                                         $title = 'Lihat gambar bukti';
-                                                    } elseif (in_array($extension, $videoExts)) {
-                                                        $fileType = 'video';
-                                                        $icon = 'ti-video';
-                                                        $title = 'Lihat video bukti';
                                                     } else {
                                                         $fileType = 'file';
                                                         $icon = 'ti-file-text';
@@ -333,7 +333,7 @@ $hasGdrive = isset($fileData['gdrive']) && !empty($fileData['gdrive']);
                                                 'target_id' => $aktivitasItem->target_id,
                                                 'energy_mood' => $aktivitasItem->energy_mood_level ?? '',
                                                 'catatan' => $aktivitasItem->catatan ?? '',
-                                                'file_bukti' => $aktivitasItem->file_bukti
+                                                'file_bukti' => $aktivitasItem->file_bukti,
                                             ]) }}">
                                             <i class="ti ti-pencil"></i>
                                         </button>
@@ -364,7 +364,8 @@ $hasGdrive = isset($fileData['gdrive']) && !empty($fileData['gdrive']);
                                             </a>
                                         @else
                                             <h5 class="text-muted mb-2">Belum ada aktivitas</h5>
-                                            <p class="text-muted mb-3">Mulai dengan menambahkan aktivitas hobi pertama Anda</p>
+                                            <p class="text-muted mb-3">Mulai dengan menambahkan aktivitas hobi pertama Anda
+                                            </p>
                                             <button class="btn btn-primary" data-bs-toggle="modal"
                                                 data-bs-target="#tambahAktivitasModal">
                                                 <i class="ti ti-plus me-2"></i>Tambah Aktivitas Sekarang
@@ -400,23 +401,29 @@ $hasGdrive = isset($fileData['gdrive']) && !empty($fileData['gdrive']);
                                             </li>
                                         @else
                                             <li class="page-item">
-                                                <a class="page-link" href="{{ $aktivitas->appends(request()->query())->previousPageUrl() }}" rel="prev" aria-label="Previous">&laquo;</a>
+                                                <a class="page-link"
+                                                    href="{{ $aktivitas->appends(request()->query())->previousPageUrl() }}"
+                                                    rel="prev" aria-label="Previous">&laquo;</a>
                                             </li>
                                         @endif
 
                                         {{-- Pagination Elements --}}
-                                        @foreach ($aktivitas->getUrlRange(max($aktivitas->currentPage() -2, 1), min($aktivitas->currentPage() + 2, $aktivitas->lastPage())) as $page => $url)
+                                        @foreach ($aktivitas->getUrlRange(max($aktivitas->currentPage() - 2, 1), min($aktivitas->currentPage() + 2, $aktivitas->lastPage())) as $page => $url)
                                             @if ($page == $aktivitas->currentPage())
-                                                <li class="page-item active" aria-current="page"><span class="page-link">{{ $page }}</span></li>
+                                                <li class="page-item active" aria-current="page"><span
+                                                        class="page-link">{{ $page }}</span></li>
                                             @else
-                                                <li class="page-item"><a class="page-link" href="{{ $url }}">{{ $page }}</a></li>
+                                                <li class="page-item"><a class="page-link"
+                                                        href="{{ $url }}">{{ $page }}</a></li>
                                             @endif
                                         @endforeach
 
                                         {{-- Next Page Link --}}
                                         @if ($aktivitas->hasMorePages())
                                             <li class="page-item">
-                                                <a class="page-link" href="{{ $aktivitas->appends(request()->query())->nextPageUrl() }}" rel="next" aria-label="Next">&raquo;</a>
+                                                <a class="page-link"
+                                                    href="{{ $aktivitas->appends(request()->query())->nextPageUrl() }}"
+                                                    rel="next" aria-label="Next">&raquo;</a>
                                             </li>
                                         @else
                                             <li class="page-item disabled" aria-disabled="true" aria-label="Next">
@@ -536,10 +543,10 @@ $hasGdrive = isset($fileData['gdrive']) && !empty($fileData['gdrive']);
                                 <i class="ti ti-paperclip text-success me-2"></i>Opsi 1: Upload File Bukti
                             </label>
                             <input class="form-control @error('file_bukti') is-invalid @enderror" type="file"
-                                id="fileBukti" name="file_bukti" accept="image/*,video/*">
+                                id="fileBukti" name="file_bukti" accept="image/*">
                             <div class="form-text">
                                 <i class="ti ti-info-circle me-1"></i>
-                                Format yang didukung: Gambar (jpg, png, gif) dan Video (mp4, mov, avi) - maksimal 50MB
+                                Format yang didukung: Gambar (jpg, png, gif, webp) - maksimal 5MB
                             </div>
                             @error('file_bukti')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -606,7 +613,8 @@ $hasGdrive = isset($fileData['gdrive']) && !empty($fileData['gdrive']);
                                         <option value="" selected disabled>Pilih Target Terkait...</option>
                                         @foreach ($targets ?? [] as $target)
                                             <option value="{{ $target->id }}">{{ $target->nama_target }}
-                                                ({{ $target->hobi->nama_hobi }})</option>
+                                                ({{ $target->hobi->nama_hobi }})
+                                            </option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -659,10 +667,10 @@ $hasGdrive = isset($fileData['gdrive']) && !empty($fileData['gdrive']);
                                 <i class="ti ti-paperclip text-success me-2"></i>File Bukti Baru (Opsional)
                             </label>
                             <input class="form-control" type="file" id="editFileBukti" name="file_bukti"
-                                accept="image/*,video/*">
+                                accept="image/*">
                             <div class="form-text">
                                 <i class="ti ti-info-circle me-1"></i>
-                                Upload file baru jika ingin mengganti bukti yang ada
+                                Upload gambar baru jika ingin mengganti bukti yang ada (maks 5MB)
                             </div>
                         </div>
 
@@ -730,7 +738,8 @@ $hasGdrive = isset($fileData['gdrive']) && !empty($fileData['gdrive']);
         // Clear search on escape
         document.getElementById('searchInput').addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
-                window.location.href = '{{ route("aktivitas.index", ["sort_by" => $sortBy, "sort_direction" => $sortDirection]) }}';
+                window.location.href =
+                    '{{ route('aktivitas.index', ['sort_by' => $sortBy, 'sort_direction' => $sortDirection]) }}';
             }
         });
     </script>
