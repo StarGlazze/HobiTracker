@@ -9,20 +9,18 @@ File: js
 // ==============================================================
 $(function () {
   "use strict";
-  var url = window.location + "";
-  var path = url.replace(
-    window.location.protocol + "//" + window.location.host + "/",
-    ""
-  );
+  var currentPath = window.location.pathname;
   var element = $("ul#sidebarnav a").filter(function () {
-    return this.href === url || this.href === path; // || url.href.indexOf(this.href) === 0;
+    var linkPath = this.pathname || this.href.replace(window.location.protocol + "//" + window.location.host + "/", "");
+    return linkPath === currentPath;
   });
 
   function findMatchingElement() {
-    var currentUrl = window.location.href;
+    var currentPath = window.location.pathname;
     var anchors = document.querySelectorAll("#sidebarnav a");
     for (var i = 0; i < anchors.length; i++) {
-      if (anchors[i].href === currentUrl) {
+      var linkPath = anchors[i].pathname || anchors[i].href.replace(window.location.protocol + "//" + window.location.host + "/", "");
+      if (linkPath === currentPath) {
         return anchors[i];
       }
     }
