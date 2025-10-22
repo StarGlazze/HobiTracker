@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\TargetHobi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class TargetHobiController extends Controller
 {
@@ -21,14 +22,14 @@ class TargetHobiController extends Controller
         // Handle search
         $search = $request->input('search');
         if (!empty($search)) {
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('target_hobis.nama_target', 'like', '%' . $search . '%')
-                  ->orWhereHas('hobi', function($q2) use ($search) {
-                      $q2->where('nama_hobi', 'like', '%' . $search . '%')
-                         ->orWhereHas('kategoriHobi', function($q3) use ($search) {
-                             $q3->where('nama_kategori', 'like', '%' . $search . '%');
-                         });
-                  });
+                    ->orWhereHas('hobi', function ($q2) use ($search) {
+                        $q2->where('nama_hobi', 'like', '%' . $search . '%')
+                            ->orWhereHas('kategoriHobi', function ($q3) use ($search) {
+                                $q3->where('nama_kategori', 'like', '%' . $search . '%');
+                            });
+                    });
             });
         }
 
@@ -48,14 +49,14 @@ class TargetHobiController extends Controller
                 break;
             case 'hobi':
                 $query->leftJoin('hobis', 'target_hobis.hobi_id', '=', 'hobis.id')
-                      ->orderBy('hobis.nama_hobi', $sortDirection)
-                      ->select('target_hobis.*');
+                    ->orderBy('hobis.nama_hobi', $sortDirection)
+                    ->select('target_hobis.*');
                 break;
             case 'kategori':
                 $query->leftJoin('hobis as hobis_for_sort', 'target_hobis.hobi_id', '=', 'hobis_for_sort.id')
-                      ->leftJoin('kategori_hobis', 'hobis_for_sort.kategori_id', '=', 'kategori_hobis.id')
-                      ->orderBy('kategori_hobis.nama_kategori', $sortDirection)
-                      ->select('target_hobis.*');
+                    ->leftJoin('kategori_hobis', 'hobis_for_sort.kategori_id', '=', 'kategori_hobis.id')
+                    ->orderBy('kategori_hobis.nama_kategori', $sortDirection)
+                    ->select('target_hobis.*');
                 break;
             case 'target_deadline':
                 $query->orderBy('target_hobis.target_deadline', $sortDirection);
@@ -75,8 +76,8 @@ class TargetHobiController extends Controller
         $targets->load('hobi.kategoriHobi', 'aktivitas');
 
         $hobis = \App\Models\Hobi::with('kategoriHobi')
-                    ->where('user_id', $userId)
-                    ->get();
+            ->where('user_id', $userId)
+            ->get();
 
         return view('admin.target', [
             'targets' => $targets,
@@ -101,11 +102,11 @@ class TargetHobiController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'hobi_id' => 'required|exists:hobis,id',
             'nama_target' => 'required|string|max:255',
             'target_deadline' => 'required|date|after:yesterday',
-            'jumlah_aktivitas_dibutuhkan' => 'required|integer|min:1',
+            'jumlah_aktivitas_dibutuhkan' => 'required|integer|min:1|max:1000',
         ], [
             'target_deadline.after' => 'Batas waktu harus setelah hari kemarin.',
             'hobi_id.required' => 'Silakan pilih hobi.',
@@ -114,16 +115,22 @@ class TargetHobiController extends Controller
             'jumlah_aktivitas_dibutuhkan.required' => 'Jumlah aktivitas dibutuhkan wajib diisi.',
             'jumlah_aktivitas_dibutuhkan.integer' => 'Jumlah aktivitas harus berupa angka.',
             'jumlah_aktivitas_dibutuhkan.min' => 'Jumlah aktivitas minimal 1.',
+            'jumlah_aktivitas_dibutuhkan.max' => 'Jumlah aktivitas maksimal 1000.',
         ]);
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput()->with('show_modal', 'tambah');
+        }
 
         // Verify hobi belongs to user
         $hobi = \App\Models\Hobi::where('id', $request->hobi_id)
-                                ->where('user_id', Auth::id())
-                                ->first();
-        
+            ->where('user_id', Auth::id())
+            ->first();
+
         if (!$hobi) {
             return back()->withErrors(['hobi_id' => 'Hobi yang dipilih tidak valid.'])
-                        ->withInput();
+                ->withInput()
+                ->with('show_modal', 'tambah');
         }
 
         TargetHobi::create([
@@ -135,7 +142,7 @@ class TargetHobiController extends Controller
         ]);
 
         return redirect()->route('admin.target.index')
-                        ->with('success', 'Target berhasil ditambahkan.');
+            ->with('success', 'Target berhasil ditambahkan.');
     }
 
     /**
@@ -171,11 +178,11 @@ class TargetHobiController extends Controller
             abort(403);
         }
 
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'hobi_id' => 'required|exists:hobis,id',
             'nama_target' => 'required|string|max:255',
             'target_deadline' => 'required|date|after:yesterday',
-            'jumlah_aktivitas_dibutuhkan' => 'required|integer|min:1',
+            'jumlah_aktivitas_dibutuhkan' => 'required|integer|min:1|max:1000',
         ], [
             'target_deadline.after' => 'Batas waktu harus setelah hari kemarin.',
             'hobi_id.required' => 'Silakan pilih hobi.',
@@ -184,24 +191,31 @@ class TargetHobiController extends Controller
             'jumlah_aktivitas_dibutuhkan.required' => 'Jumlah aktivitas dibutuhkan wajib diisi.',
             'jumlah_aktivitas_dibutuhkan.integer' => 'Jumlah aktivitas harus berupa angka.',
             'jumlah_aktivitas_dibutuhkan.min' => 'Jumlah aktivitas minimal 1.',
+            'jumlah_aktivitas_dibutuhkan.max' => 'Jumlah aktivitas maksimal 1000.',
         ]);
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput()->with('show_modal', 'edit')->with('target_id', $target->id);
+        }
 
         // Verify hobi belongs to user (except for admin)
         if (Auth::user()->email !== 'admin@example.com') {
             $hobi = \App\Models\Hobi::where('id', $request->hobi_id)
-                                    ->where('user_id', Auth::id())
-                                    ->first();
-            
+                ->where('user_id', Auth::id())
+                ->first();
+
             if (!$hobi) {
                 return back()->withErrors(['hobi_id' => 'Hobi yang dipilih tidak valid.'])
-                            ->withInput();
+                    ->withInput()
+                    ->with('show_modal', 'edit')
+                    ->with('target_id', $target->id);
             }
         }
 
         $target->update($request->only(['hobi_id', 'nama_target', 'target_deadline', 'jumlah_aktivitas_dibutuhkan']));
 
         return redirect()->route('admin.target.index')
-                        ->with('success', 'Target berhasil diperbarui.');
+            ->with('success', 'Target berhasil diperbarui.');
     }
 
     /**
@@ -216,7 +230,7 @@ class TargetHobiController extends Controller
         $target->delete();
 
         return redirect()->route('admin.target.index')
-                        ->with('success', 'Target berhasil dihapus.');
+            ->with('success', 'Target berhasil dihapus.');
     }
 
     /**
@@ -227,26 +241,26 @@ class TargetHobiController extends Controller
         $user_id = Auth::id();
 
         $targets = TargetHobi::with('aktivitas')
-                    ->where('user_id', $user_id)
-                    ->get();
+            ->where('user_id', $user_id)
+            ->get();
 
         $summary = [
             'total' => $targets->count(),
-            'completed' => $targets->filter(function($target) {
+            'completed' => $targets->filter(function ($target) {
                 $aktivitasCount = $target->aktivitas->count();
                 return $aktivitasCount >= $target->jumlah_aktivitas_dibutuhkan;
             })->count(),
-            'on_progress' => $targets->filter(function($target) {
+            'on_progress' => $targets->filter(function ($target) {
                 $aktivitasCount = $target->aktivitas->count();
                 $isExpired = $target->target_deadline < now()->startOfDay();
                 return $aktivitasCount < $target->jumlah_aktivitas_dibutuhkan && !$isExpired;
             })->count(),
-            'failed' => $targets->filter(function($target) {
+            'failed' => $targets->filter(function ($target) {
                 $aktivitasCount = $target->aktivitas->count();
                 $isExpired = $target->target_deadline < now()->startOfDay();
                 return $aktivitasCount < $target->jumlah_aktivitas_dibutuhkan && $isExpired;
             })->count(),
-            'expired' => $targets->filter(function($target) {
+            'expired' => $targets->filter(function ($target) {
                 return $target->target_deadline < now()->startOfDay();
             })->count(),
         ];

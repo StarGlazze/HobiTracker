@@ -124,6 +124,15 @@ $(document).ready(function() {
         }, 1500);
     }
 
+    // Show modal if there are validation errors
+    if (typeof showModal !== 'undefined' && showModal) {
+        if (showModal === 'tambah') {
+            $('#tambahTargetModal').modal('show');
+        } else if (showModal === 'edit' && typeof targetId !== 'undefined' && targetId) {
+            $('#editTargetModal' + targetId).modal('show');
+        }
+    }
+
     // Auto-update expired targets - SKIP COMPLETED TARGETS
     setInterval(function() {
         var currentDate = new Date();

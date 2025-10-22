@@ -50,10 +50,13 @@ class DashboardController extends Controller
         // Data untuk Chart Activity Overview (aktivitas per kategori hobi bulan ini)
         $chartData = $this->getChartData($user->id, 'monthly');
 
-        // Check if user has any activities at all
+        // Check if user has set up hobbies/targets but no activities
+        $hasHobbiesOrTargets = Hobi::where('user_id', $user->id)->exists() ||
+            TargetHobi::where('user_id', $user->id)->exists();
         $hasAnyActivities = Aktivitas::whereHas('target.hobi', function ($query) use ($user) {
             $query->where('user_id', $user->id);
         })->exists();
+        $showNoDataOverlay = $hasHobbiesOrTargets && !$hasAnyActivities;
 
         // Weekly Stats
         $weeklyStats = $this->getWeeklyStats($user->id);
@@ -72,7 +75,7 @@ class DashboardController extends Controller
             'activitiesProgress' => round($activitiesProgress),
             'activeHobbiesThisMonth' => $activeHobbiesThisMonth,
             'chartData' => $chartData,
-            'hasAnyActivities' => $hasAnyActivities,
+            'showNoDataOverlay' => $showNoDataOverlay,
             'weeklyStats' => $weeklyStats,
             'targetProgress' => $targetProgress,
             'recentLogs' => $recentLogs,

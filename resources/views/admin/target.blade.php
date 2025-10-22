@@ -402,7 +402,8 @@
                                 <select class="form-select" id="hobi_id" name="hobi_id" required>
                                     <option value="">Pilih Hobi</option>
                                     @foreach ($hobis as $hobi)
-                                        <option value="{{ $hobi->id }}">{{ $hobi->nama_hobi }}
+                                        <option value="{{ $hobi->id }}"
+                                            {{ old('hobi_id') == $hobi->id ? 'selected' : '' }}>{{ $hobi->nama_hobi }}
                                             ({{ $hobi->kategoriHobi->nama_kategori ?? 'N/A' }})
                                         </option>
                                     @endforeach
@@ -414,7 +415,7 @@
                                     <i class="ti ti-target text-primary me-2"></i>Nama Target
                                 </label>
                                 <input type="text" class="form-control" id="nama_target" name="nama_target"
-                                    placeholder="Masukkan nama target" required>
+                                    placeholder="Masukkan nama target" value="{{ old('nama_target') }}" required>
                             </div>
 
                             <div class="mb-3">
@@ -422,7 +423,8 @@
                                     <i class="ti ti-calendar text-success me-2"></i>Batas Waktu
                                 </label>
                                 <input type="date" class="form-control" id="target_deadline" name="target_deadline"
-                                    min="{{ date('Y-m-d', strtotime('today')) }}" required>
+                                    min="{{ date('Y-m-d', strtotime('today')) }}" value="{{ old('target_deadline') }}"
+                                    required>
                                 @error('target_deadline')
                                     <div class="text-danger small">{{ $message }}</div>
                                 @enderror
@@ -433,7 +435,8 @@
                                     <i class="ti ti-number text-info me-2"></i>Jumlah Aktivitas Dibutuhkan
                                 </label>
                                 <input type="number" class="form-control" id="jumlah_aktivitas_dibutuhkan"
-                                    name="jumlah_aktivitas_dibutuhkan" min="1" value="1" required>
+                                    name="jumlah_aktivitas_dibutuhkan" min="1"
+                                    value="{{ old('jumlah_aktivitas_dibutuhkan', 1) }}" required>
                                 @error('jumlah_aktivitas_dibutuhkan')
                                     <div class="text-danger small">{{ $message }}</div>
                                 @enderror
@@ -490,7 +493,7 @@
                                         <option value="">Pilih Hobi</option>
                                         @foreach ($hobis as $hobi)
                                             <option value="{{ $hobi->id }}"
-                                                {{ $target->hobi_id == $hobi->id ? 'selected' : '' }}>
+                                                {{ old('hobi_id', $target->hobi_id) == $hobi->id ? 'selected' : '' }}>
                                                 {{ $hobi->nama_hobi }} ({{ $hobi->kategoriHobi->nama_kategori ?? 'N/A' }})
                                             </option>
                                         @endforeach
@@ -502,7 +505,8 @@
                                         <i class="ti ti-target text-primary me-2"></i>Nama Target
                                     </label>
                                     <input type="text" class="form-control" id="nama_target{{ $target->id }}"
-                                        name="nama_target" value="{{ $target->nama_target }}" required>
+                                        name="nama_target" value="{{ old('nama_target', $target->nama_target) }}"
+                                        required>
                                 </div>
 
                                 <div class="mb-3">
@@ -510,7 +514,8 @@
                                         <i class="ti ti-calendar text-success me-2"></i>Batas Waktu
                                     </label>
                                     <input type="date" class="form-control" id="target_deadline{{ $target->id }}"
-                                        name="target_deadline" value="{{ $target->target_deadline->format('Y-m-d') }}"
+                                        name="target_deadline"
+                                        value="{{ old('target_deadline', $target->target_deadline->format('Y-m-d')) }}"
                                         min="{{ date('Y-m-d', strtotime('today')) }}" required>
                                     @error('target_deadline')
                                         <div class="text-danger small">{{ $message }}</div>
@@ -525,7 +530,8 @@
                                     <input type="number" class="form-control"
                                         id="jumlah_aktivitas_dibutuhkan{{ $target->id }}"
                                         name="jumlah_aktivitas_dibutuhkan"
-                                        value="{{ $target->jumlah_aktivitas_dibutuhkan }}" min="1" required>
+                                        value="{{ old('jumlah_aktivitas_dibutuhkan', $target->jumlah_aktivitas_dibutuhkan) }}"
+                                        min="1" required>
                                     @error('jumlah_aktivitas_dibutuhkan')
                                         <div class="text-danger small">{{ $message }}</div>
                                     @enderror
@@ -794,6 +800,8 @@ $hasGdrive =
 @section('scripts')
     <script>
         var hasSuccess = {!! session('success') ? 'true' : 'false' !!};
+        var showModal = '{{ session('show_modal') }}';
+        var targetId = '{{ session('target_id') }}';
     </script>
     <script src="{{ asset('admin/js/target.js') }}"></script>
 @endsection

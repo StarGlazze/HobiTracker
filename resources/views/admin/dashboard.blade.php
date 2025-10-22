@@ -213,20 +213,6 @@
 
                         <div class="chart-container position-relative" style="width: 100%; min-height: 350px;">
                             <div id="sales-overview" class="mt-3" data-chart='@json($chartData ?? ['categories' => ['Belum ada data'], 'series' => [0]])'></div>
-                            @if (!$hasAnyActivities)
-                                <div class="no-data-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
-                                    style="background: rgba(255,255,255,0.9); z-index: 10;">
-                                    <div class="text-center">
-                                        <i class="ti ti-chart-line text-muted mb-3" style="font-size: 3rem;"></i>
-                                        <h5 class="text-muted mb-2">Belum Ada Data Aktivitas</h5>
-                                        <p class="text-muted small mb-3">Mulai catat aktivitas hobi Anda untuk melihat
-                                            visualisasi data</p>
-                                        <a href="/aktivitas" class="btn btn-primary btn-sm">
-                                            <i class="ti ti-plus me-1"></i>Tambah Aktivitas
-                                        </a>
-                                    </div>
-                                </div>
-                            @endif
                         </div>
 
                         <div class="row g-3 mt-3 pt-3 border-top">
