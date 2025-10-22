@@ -76,7 +76,7 @@ class AktivitasController extends Controller
         }
 
         // Pagination dengan append query parameters
-        $aktivitas = $query->paginate(5)->withQueryString();
+        $aktivitas = $query->paginate(10)->withQueryString();
 
         // Menghitung statistik untuk dashboard cards
         $totalAktivitas = $allAktivitas->count();

@@ -70,7 +70,7 @@ class TargetHobiController extends Controller
         }
 
         // Pagination dengan append query parameters
-        $targets = $query->paginate(5)->withQueryString();
+        $targets = $query->paginate(10)->withQueryString();
 
         // Load relations setelah pagination
         $targets->load('hobi.kategoriHobi', 'aktivitas');

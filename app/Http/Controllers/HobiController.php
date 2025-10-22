@@ -23,12 +23,12 @@ class HobiController extends Controller
         // Handle search
         $search = $request->input('search');
         if (!empty($search)) {
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('nama_hobi', 'like', '%' . $search . '%')
-                  ->orWhere('deskripsi', 'like', '%' . $search . '%')
-                  ->orWhereHas('kategoriHobi', function($q2) use ($search) {
-                      $q2->where('nama_kategori', 'like', '%' . $search . '%');
-                  });
+                    ->orWhere('deskripsi', 'like', '%' . $search . '%')
+                    ->orWhereHas('kategoriHobi', function ($q2) use ($search) {
+                        $q2->where('nama_kategori', 'like', '%' . $search . '%');
+                    });
             });
         }
 
@@ -46,8 +46,8 @@ class HobiController extends Controller
             case 'kategori':
                 // Sorting berdasarkan nama kategori
                 $query->join('kategori_hobis', 'hobis.kategori_id', '=', 'kategori_hobis.id')
-                      ->orderBy('kategori_hobis.nama_kategori', $sortDirection)
-                      ->select('hobis.*');
+                    ->orderBy('kategori_hobis.nama_kategori', $sortDirection)
+                    ->select('hobis.*');
                 break;
             case 'deskripsi':
                 $query->orderBy('deskripsi', $sortDirection);
@@ -62,7 +62,7 @@ class HobiController extends Controller
         }
 
         // Pagination dengan append query parameters
-        $hobis = $query->paginate(5)->withQueryString();
+        $hobis = $query->paginate(10)->withQueryString();
 
         $kategoriHobis = \App\Models\KategoriHobi::all();
 
@@ -71,7 +71,7 @@ class HobiController extends Controller
         $hobiTerpopuler = null;
         $maxAktivitas = 0;
         foreach ($allHobis as $hobi) {
-            $aktivitasCount = $hobi->targetHobi->sum(function($target) {
+            $aktivitasCount = $hobi->targetHobi->sum(function ($target) {
                 return $target->aktivitas ? $target->aktivitas->count() : 0;
             });
             if ($aktivitasCount > $maxAktivitas) {
