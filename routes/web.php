@@ -54,6 +54,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::middleware(['auth'])->group(function () {
     Route::resource('hobi', HobiController::class);
+    Route::post('hobi/import', [HobiController::class, 'import'])->name('hobi.import');
     Route::resource('aktivitas', AktivitasController::class)->parameters([
         'aktivitas' => 'aktivitas'
     ]);

@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Hobi;
+use App\Imports\HobiImport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\DB;
 
 class HobiController extends Controller
 {
@@ -165,5 +168,44 @@ class HobiController extends Controller
         $hobi->delete();
 
         return redirect()->route('hobi.index')->with('success', 'Hobi berhasil dihapus');
+    }
+
+    // Import hobi dari file Excel
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls|max:2048', // Max 2MB
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $import = new HobiImport();
+            Excel::import($import, $request->file('file'));
+
+            $errors = $import->getErrors();
+            $successCount = $import->getSuccessCount();
+            $updateCount = $import->getUpdateCount();
+
+            DB::commit();
+
+            $message = '';
+            if ($successCount > 0) {
+                $message .= "{$successCount} hobi berhasil diimpor. ";
+            }
+            if ($updateCount > 0) {
+                $message .= "{$updateCount} hobi berhasil diperbarui. ";
+            }
+
+            if (!empty($errors)) {
+                $message .= "Namun ada beberapa error: " . implode('; ', $errors);
+                return redirect()->route('hobi.index')->with('error', $message);
+            }
+
+            return redirect()->route('hobi.index')->with('success', trim($message));
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('hobi.index')->with('error', 'Gagal mengimpor file: ' . $e->getMessage());
+        }
     }
 }

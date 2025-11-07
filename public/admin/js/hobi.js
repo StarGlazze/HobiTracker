@@ -54,6 +54,49 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+// Import hobi functionality
+document.addEventListener('DOMContentLoaded', function () {
+    const importForm = document.getElementById('importHobiForm');
+    const importSubmitBtn = document.getElementById('importSubmitBtn');
+    const importFileInput = document.getElementById('importFile');
+
+    if (importForm && importSubmitBtn) {
+        // Disable submit button during form submission
+        importForm.addEventListener('submit', function(e) {
+            importSubmitBtn.disabled = true;
+            importSubmitBtn.innerHTML = '<i class="ti ti-loader me-2"></i>Mengimpor...';
+
+            // Re-enable after 30 seconds as fallback
+            setTimeout(function() {
+                importSubmitBtn.disabled = false;
+                importSubmitBtn.innerHTML = '<i class="ti ti-file-upload me-2"></i>Import Sekarang';
+            }, 30000);
+        });
+
+        // Validate file type on change
+        if (importFileInput) {
+            importFileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const allowedTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
+                    if (!allowedTypes.includes(file.type)) {
+                        alert('Format file tidak didukung. Harap pilih file Excel (.xlsx atau .xls)');
+                        e.target.value = '';
+                        return;
+                    }
+
+                    // Check file size (2MB)
+                    if (file.size > 2 * 1024 * 1024) {
+                        alert('Ukuran file terlalu besar. Maksimal 2MB.');
+                        e.target.value = '';
+                        return;
+                    }
+                }
+            });
+        }
+    }
+});
+
 // Global function to clear search
 function clearSearch(event) {
     if (event) {

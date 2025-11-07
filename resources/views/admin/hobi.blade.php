@@ -30,6 +30,9 @@
                         <p class="text-muted mb-0">Tambah, edit, dan kelola semua hobi favorit Anda</p>
                     </div>
                     <div class="d-flex gap-2">
+                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#importHobiModal">
+                            <i class="ti ti-file-upload me-2"></i>Import Excel
+                        </button>
                         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tambahHobiModal">
                             <i class="ti ti-plus me-2"></i>Tambah Hobi
                         </button>
@@ -507,6 +510,81 @@
                         </button>
                         <button type="submit" class="btn btn-primary">
                             <i class="ti ti-device-floppy me-2"></i>Simpan Hobi
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Hobi Modal -->
+    <div class="modal fade" id="importHobiModal" tabindex="-1" aria-labelledby="importHobiModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow">
+                <form method="POST" action="{{ route('hobi.import') }}" enctype="multipart/form-data"
+                    id="importHobiForm">
+                    @csrf
+                    <div class="modal-header bg-success text-white border-0">
+                        <h5 class="modal-title" id="importHobiModalLabel">
+                            <i class="ti ti-file-upload me-2"></i>Import Hobi dari Excel
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <p class="text-muted mb-4">
+                            <i class="ti ti-info-circle me-2"></i>
+                            Upload file Excel untuk mengimpor hobi secara massal. Hobi dengan nama sama akan diperbarui.
+                        </p>
+
+                        <div class="alert alert-info border-0">
+                            <h6 class="fw-semibold mb-2">
+                                <i class="ti ti-file-spreadsheet me-2"></i>Format File Excel
+                            </h6>
+                            <p class="mb-2">File Excel harus memiliki header pada baris pertama:</p>
+                            <ul class="mb-0 small">
+                                <li><strong>nama_hobi</strong> (wajib) - Nama hobi</li>
+                                <li><strong>kategori_id</strong> (wajib) - ID kategori hobi</li>
+                                <li><strong>deskripsi</strong> (opsional) - Deskripsi hobi</li>
+                            </ul>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="importFile" class="form-label fw-semibold">
+                                <i class="ti ti-file me-2"></i>Pilih File Excel
+                            </label>
+                            <input type="file" class="form-control @error('file') is-invalid @enderror"
+                                id="importFile" name="file" accept=".xlsx,.xls" required>
+                            @error('file')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <div class="form-text">
+                                <i class="ti ti-bulb me-1"></i>
+                                Format yang didukung: .xlsx, .xls (maksimal 2MB)
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6 class="fw-semibold mb-2">Daftar Kategori Hobi:</h6>
+                            <div class="row g-2">
+                                @foreach ($kategoriHobis as $kategori)
+                                    <div class="col-md-6">
+                                        <div
+                                            class="badge bg-{{ $kategori->background_color ?? 'primary' }}-subtle text-dark px-3 py-2 w-100">
+                                            <strong>{{ $kategori->id }}</strong> - {{ $kategori->nama_kategori }}
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                            <i class="ti ti-x me-2"></i>Batal
+                        </button>
+                        <button type="submit" class="btn btn-success" id="importSubmitBtn">
+                            <i class="ti ti-file-upload me-2"></i>Import Sekarang
                         </button>
                     </div>
                 </form>
