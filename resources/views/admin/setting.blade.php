@@ -38,11 +38,13 @@
                         </ul>
 
                         <!-- Tab panes -->
-                        <div class="tab-content mt-4" id="settingsTabContent">
-                            <!-- General Tab -->
-                            <div class="tab-pane fade show active" id="general" role="tabpanel"
-                                aria-labelledby="general-tab">
-                                <form>
+                        <form id="settingsForm" method="POST" action="{{ route('setting.save') }}"
+                            enctype="multipart/form-data">
+                            @csrf
+                            <div class="tab-content mt-4" id="settingsTabContent">
+                                <!-- General Tab -->
+                                <div class="tab-pane fade show active" id="general" role="tabpanel"
+                                    aria-labelledby="general-tab">
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="mb-3">
@@ -50,7 +52,7 @@
                                                     <i class="ti ti-world me-2 text-primary"></i>Nama Website
                                                 </label>
                                                 <input type="text" class="form-control form-control-lg" id="site_name"
-                                                    name="site_name" placeholder="Masukkan nama situs"
+                                                    name="nama_website" placeholder="Masukkan nama situs"
                                                     value="{{ $webSettings->nama_website ?? 'HobiTracker' }}">
                                             </div>
                                         </div>
@@ -59,7 +61,7 @@
                                                 <label for="site_description" class="form-label fw-semibold">
                                                     <i class="ti ti-file-description me-2 text-info"></i>Deskripsi Website
                                                 </label>
-                                                <textarea class="form-control form-control-lg" id="site_description" name="site_description" rows="2"
+                                                <textarea class="form-control form-control-lg" id="site_description" name="deskripsi" rows="2"
                                                     placeholder="Deskripsi singkat website">{{ $webSettings->deskripsi ?? '' }}</textarea>
                                             </div>
                                         </div>
@@ -71,10 +73,10 @@
                                                 <label for="site_logo" class="form-label fw-semibold">
                                                     <i class="ti ti-photo me-2 text-warning"></i>Logo Website
                                                 </label>
-                                                <input type="file" class="form-control" id="site_logo" name="site_logo"
+                                                <input type="file" class="form-control" id="site_logo" name="logo"
                                                     accept="image/*">
                                                 <div class="mt-2">
-                                                    <img src="{{ $webSettings->logo_url ?? '/admin/images/logos/HobiTracker.png' }}"
+                                                    <img src="{{ $webSettings->logo_url ?? asset('admin/images/logos/HobiTracker.png') }}"
                                                         alt="Logo Situs" class="img-thumbnail rounded-3"
                                                         style="max-height: 100px;">
                                                 </div>
@@ -88,7 +90,7 @@
                                                 <input type="file" class="form-control" id="favicon" name="favicon"
                                                     accept="image/*">
                                                 <div class="mt-2">
-                                                    <img src="{{ $webSettings->favicon_url ?? '/admin/images/logos/favicon-v2.png' }}"
+                                                    <img src="{{ $webSettings->favicon_url ?? asset('admin/images/logos/favicon-v2.png') }}"
                                                         alt="Favicon" class="img-thumbnail rounded-3"
                                                         style="max-height: 50px;">
                                                 </div>
@@ -109,12 +111,10 @@
                                                 hobi</small>
                                         </div>
                                     </div>
-                                </form>
-                            </div>
+                                </div>
 
-                            <!-- Contact Tab -->
-                            <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
-                                <form>
+                                <!-- Contact Tab -->
+                                <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="mb-3">
@@ -122,8 +122,7 @@
                                                     <i class="ti ti-mail me-2 text-info"></i>Email Kontak
                                                 </label>
                                                 <input type="email" class="form-control form-control-lg"
-                                                    id="contact_email" name="contact_email"
-                                                    placeholder="Masukkan email kontak"
+                                                    id="contact_email" name="email" placeholder="Masukkan email kontak"
                                                     value="{{ $webSettings->email ?? '' }}">
                                             </div>
                                         </div>
@@ -133,7 +132,7 @@
                                                     <i class="ti ti-phone me-2 text-success"></i>Nomor Telepon
                                                 </label>
                                                 <input type="text" class="form-control form-control-lg"
-                                                    id="contact_phone" name="contact_phone"
+                                                    id="contact_phone" name="telepon"
                                                     placeholder="Masukkan telepon kontak"
                                                     value="{{ $webSettings->telepon ?? '' }}">
                                             </div>
@@ -144,7 +143,7 @@
                                         <label for="address" class="form-label fw-semibold">
                                             <i class="ti ti-map-pin me-2 text-danger"></i>Alamat Lengkap
                                         </label>
-                                        <textarea class="form-control form-control-lg" id="address" name="address" rows="3"
+                                        <textarea class="form-control form-control-lg" id="address" name="alamat" rows="3"
                                             placeholder="Masukkan alamat lengkap">{{ $webSettings->alamat ?? '' }}</textarea>
                                     </div>
 
@@ -170,12 +169,10 @@
                                             </div>
                                         </div>
                                     </div>
-                                </form>
-                            </div>
+                                </div>
 
-                            <!-- Social Media Tab -->
-                            <div class="tab-pane fade" id="social" role="tabpanel" aria-labelledby="social-tab">
-                                <form>
+                                <!-- Social Media Tab -->
+                                <div class="tab-pane fade" id="social" role="tabpanel" aria-labelledby="social-tab">
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="mb-3">
@@ -230,108 +227,108 @@
                                             name="youtube" placeholder="https://youtube.com/channel/UC..."
                                             value="{{ $webSettings->youtube ?? '' }}">
                                     </div>
-                                </form>
+                                </div>
                             </div>
 
-                        </div>
-
-                        <!-- Hobby Categories Modal -->
-                        <div class="modal fade" id="hobbyCategoriesModal" tabindex="-1"
-                            aria-labelledby="hobbyCategoriesModalLabel" aria-hidden="true">
-                            <div class="modal-dialog modal-lg">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="hobbyCategoriesModalLabel">
-                                            <i class="ti ti-list-check me-2"></i>Kelola Kategori Hobi
-                                        </h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                            aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div class="mb-3">
-                                            <label for="new_category" class="form-label">Tambah Kategori Baru</label>
-                                            <div class="row">
-                                                <div class="col-md-4">
-                                                    <input type="text" class="form-control" id="new_category_name"
-                                                        placeholder="Nama kategori">
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <select class="form-select" id="new_category_icon">
-                                                        <option value="">Pilih Icon</option>
-                                                        <option value="ti-barbell">Dumbbell (Olahraga)</option>
-                                                        <option value="ti-palette">Palette (Seni)</option>
-                                                        <option value="ti-music">Music (Musik)</option>
-                                                        <option value="ti-book">Book (Membaca)</option>
-                                                        <option value="ti-device-gamepad text-white">gamepad (Gaming)</option>
-                                                        <option value="ti-chef-hat">Chef Hat (Kuliner)</option>
-                                                        <option value="ti-map-pin">Map Pin (Travel)</option>
-                                                        <option value="ti-users">Users (Sosial)</option>
-                                                        <option value="ti-archive">Archive (Koleksi)</option>
-                                                        <option value="ti-cpu">CPU (Teknologi)</option>
-                                                        <option value="ti-spa">Spa (Relaksasi)</option>
-                                                        <option value="ti-dots">Dots (Lainnya)</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <select class="form-select" id="new_category_color">
-                                                        <option value="">Pilih Warna</option>
-                                                        <option value="bg-success">Hijau (Success)</option>
-                                                        <option value="bg-warning">Kuning (Warning)</option>
-                                                        <option value="bg-info">Biru Muda (Info)</option>
-                                                        <option value="bg-primary">Biru (Primary)</option>
-                                                        <option value="bg-dark">Hitam (Dark)</option>
-                                                        <option value="bg-danger">Merah (Danger)</option>
-                                                        <option value="bg-secondary">Abu-abu (Secondary)</option>
-                                                        <option value="bg-indigo">Indigo (Biru + Ungu dikit)</option>
-                                                        <option value="bg-purple">Purple (Ungu)</option>
-                                                        <option value="bg-teal">Teal (Ijo Godong)</option>
-                                                        <option value="bg-orange">Orange (Oren)</option>
-                                                        <option value="bg-pink">Pink (Pink)</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-2">
-                                                    <button class="btn btn-primary w-100" type="button"
-                                                        id="addCategoryBtn">
-                                                        <i class="ti ti-plus me-1"></i>Tambah
-                                                    </button>
-                                                </div>
-                                            </div>
+                            <!-- Hobby Categories Modal -->
+                            <div class="modal fade" id="hobbyCategoriesModal" tabindex="-1"
+                                aria-labelledby="hobbyCategoriesModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="hobbyCategoriesModalLabel">
+                                                <i class="ti ti-list-check me-2"></i>Kelola Kategori Hobi
+                                            </h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
                                         </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">Daftar Kategori</label>
-                                            <div id="categoriesList" class="list-group">
-                                                @foreach ($kategoriHobis as $kategori)
-                                                    <div class="list-group-item d-flex justify-content-between align-items-center"
-                                                        data-id="{{ $kategori->id }}">
-                                                        <div class="d-flex align-items-center">
-                                                            <i class="ti {{ $kategori->icon ?? 'ti-book' }} me-2"></i>
-                                                            <span>{{ $kategori->nama_kategori }}</span>
-                                                            <span
-                                                                class="badge {{ $kategori->background_color ?? 'bg-primary' }} ms-2">{{ $kategori->hobis_count ?? 0 }}
-                                                                hobi</span>
-                                                        </div>
-                                                        <button class="btn btn-sm btn-outline-danger"
-                                                            onclick="removeCategory({{ $kategori->id }})">
-                                                            <i class="ti ti-trash"></i>
+                                        <div class="modal-body">
+                                            <div class="mb-3">
+                                                <label for="new_category" class="form-label">Tambah Kategori Baru</label>
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <input type="text" class="form-control" id="new_category_name"
+                                                            placeholder="Nama kategori">
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <select class="form-select" id="new_category_icon">
+                                                            <option value="">Pilih Icon</option>
+                                                            <option value="ti-barbell">Dumbbell (Olahraga)</option>
+                                                            <option value="ti-palette">Palette (Seni)</option>
+                                                            <option value="ti-music">Music (Musik)</option>
+                                                            <option value="ti-book">Book (Membaca)</option>
+                                                            <option value="ti-device-gamepad">Gamepad (Gaming)</option>
+                                                            <option value="ti-chef-hat">Chef Hat (Kuliner)</option>
+                                                            <option value="ti-map-pin">Map Pin (Travel)</option>
+                                                            <option value="ti-users">Users (Sosial)</option>
+                                                            <option value="ti-archive">Archive (Koleksi)</option>
+                                                            <option value="ti-cpu">CPU (Teknologi)</option>
+                                                            <option value="ti-spa">Spa (Relaksasi)</option>
+                                                            <option value="ti-dots">Dots (Lainnya)</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <select class="form-select" id="new_category_color">
+                                                            <option value="">Pilih Warna</option>
+                                                            <option value="bg-success">Hijau (Success)</option>
+                                                            <option value="bg-warning">Kuning (Warning)</option>
+                                                            <option value="bg-info">Biru Muda (Info)</option>
+                                                            <option value="bg-primary">Biru (Primary)</option>
+                                                            <option value="bg-dark">Hitam (Dark)</option>
+                                                            <option value="bg-danger">Merah (Danger)</option>
+                                                            <option value="bg-secondary">Abu-abu (Secondary)</option>
+                                                            <option value="bg-indigo">Indigo</option>
+                                                            <option value="bg-purple">Purple</option>
+                                                            <option value="bg-teal">Teal</option>
+                                                            <option value="bg-orange">Orange</option>
+                                                            <option value="bg-pink">Pink</option>
+                                                            <option value="bg-cyan">Cyan (Biru Terang)</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <button class="btn btn-primary w-100" type="button"
+                                                            id="addCategoryBtn">
+                                                            <i class="ti ti-plus me-1"></i>Tambah
                                                         </button>
                                                     </div>
-                                                @endforeach
+                                                </div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Daftar Kategori</label>
+                                                <div id="categoriesList" class="list-group">
+                                                    @foreach ($kategoriHobis as $kategori)
+                                                        <div class="list-group-item d-flex justify-content-between align-items-center"
+                                                            data-id="{{ $kategori->id }}">
+                                                            <div class="d-flex align-items-center">
+                                                                <i class="ti {{ $kategori->icon ?? 'ti-book' }} me-2"></i>
+                                                                <span>{{ $kategori->nama_kategori }}</span>
+                                                                <span
+                                                                    class="badge {{ $kategori->background_color ?? 'bg-primary' }} ms-2">{{ $kategori->hobis_count ?? 0 }}
+                                                                    hobi</span>
+                                                            </div>
+                                                            <button class="btn btn-sm btn-outline-danger"
+                                                                onclick="removeCategory({{ $kategori->id }})">
+                                                                <i class="ti ti-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary"
-                                            data-bs-dismiss="modal">Tutup</button>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Tutup</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="d-flex justify-content-end mt-4">
-                            <button type="button" class="btn btn-primary rounded-3 px-4">
-                                <i class="ti ti-device-floppy me-2"></i>Simpan Pengaturan
-                            </button>
-                        </div>
+                            <div class="d-flex justify-content-end mt-4">
+                                <button type="submit" class="btn btn-primary rounded-3 px-4" id="saveSettingsBtn">
+                                    <i class="ti ti-device-floppy me-2"></i>Simpan Pengaturan
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>

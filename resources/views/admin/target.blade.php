@@ -649,21 +649,21 @@
                                                                 $fileData = $decoded;
                                                             } else {
                                                                 // Old format: plain string, check if it's GDrive URL
-        $fileData = str_contains(
-            $rawFileBukti,
-            'drive.google.com',
-        )
-            ? ['gdrive' => $rawFileBukti]
-            : ['file' => $rawFileBukti];
-    }
-} else {
-    $fileData = [];
-}
-
-$hasFile =
-    isset($fileData['file']) && !empty($fileData['file']);
-$hasGdrive =
-    isset($fileData['gdrive']) && !empty($fileData['gdrive']);
+                                                                $fileData = str_contains(
+                                                                    $rawFileBukti,
+                                                                    'drive.google.com',
+                                                                )
+                                                                    ? ['gdrive' => $rawFileBukti]
+                                                                    : ['file' => $rawFileBukti];
+                                                            }
+                                                        } else {
+                                                            $fileData = [];
+                                                        }
+                                                        
+                                                        $hasFile =
+                                                            isset($fileData['file']) && !empty($fileData['file']);
+                                                        $hasGdrive =
+                                                            isset($fileData['gdrive']) && !empty($fileData['gdrive']);
                                                     @endphp
 
                                                     @if ($hasFile || $hasGdrive)

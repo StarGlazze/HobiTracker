@@ -37,9 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Save settings functionality
-    const saveSettingsBtn = Array.from(document.querySelectorAll('button')).find(btn =>
-        btn.textContent.trim().includes('Simpan Pengaturan')
-    );
+    const saveSettingsBtn = document.getElementById('saveSettingsBtn');
     if (saveSettingsBtn) {
         saveSettingsBtn.addEventListener('click', function(e) {
             e.preventDefault();
@@ -49,46 +47,8 @@ document.addEventListener('DOMContentLoaded', function() {
             this.innerHTML = '<i class="ti ti-loader-2 me-2"></i>Menyimpan...';
             this.disabled = true;
 
-            // Collect form data from all tabs
-            const formData = new FormData();
-
-            // General tab - sesuaikan dengan struktur database yang benar
-            const siteName = document.getElementById('site_name')?.value || '';
-            const siteDescription = document.getElementById('site_description')?.value || '';
-            const siteLogo = document.getElementById('site_logo')?.files[0];
-            const favicon = document.getElementById('favicon')?.files[0];
-
-            // Gunakan nama kolom yang sesuai dengan database
-            if (siteName) formData.append('nama_website', siteName);
-            if (siteDescription) formData.append('deskripsi', siteDescription);
-            if (siteLogo) formData.append('logo', siteLogo);
-            if (favicon) formData.append('favicon', favicon);
-
-            // Contact tab
-            const contactEmail = document.getElementById('contact_email')?.value || '';
-            const contactPhone = document.getElementById('contact_phone')?.value || '';
-            const address = document.getElementById('address')?.value || '';
-            const whatsapp = document.getElementById('whatsapp')?.value || '';
-            const telegram = document.getElementById('telegram')?.value || '';
-
-            if (contactEmail) formData.append('email', contactEmail);
-            if (contactPhone) formData.append('telepon', contactPhone);
-            if (address) formData.append('alamat', address);
-            if (whatsapp) formData.append('whatsapp', whatsapp);
-            if (telegram) formData.append('telegram', telegram);
-
-            // Social media tab
-            const facebook = document.getElementById('facebook')?.value || '';
-            const instagram = document.getElementById('instagram')?.value || '';
-            const twitter = document.getElementById('twitter')?.value || '';
-            const linkedin = document.getElementById('linkedin')?.value || '';
-            const youtube = document.getElementById('youtube')?.value || '';
-
-            if (facebook) formData.append('facebook', facebook);
-            if (instagram) formData.append('instagram', instagram);
-            if (twitter) formData.append('twitter', twitter);
-            if (linkedin) formData.append('linkedin', linkedin);
-            if (youtube) formData.append('youtube', youtube);
+            // Get form data
+            const formData = new FormData(document.getElementById('settingsForm'));
 
             // Send AJAX request
             fetch('/setting/save-settings', {
@@ -121,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Reset button state
                 saveSettingsBtn.innerHTML = originalText;
                 saveSettingsBtn.disabled = false;
-                
+
                 console.error('Error:', error);
                 showAlert('error', 'Terjadi kesalahan saat menyimpan pengaturan: ' + error.message);
             });
@@ -225,7 +185,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             // Check for duplicates
-            const existingCategories = Array.from(categoriesList.children).map(el => 
+            const existingCategories = Array.from(categoriesList.children).map(el =>
                 el.querySelector('span').textContent.trim()
             );
             if (existingCategories.includes(categoryName)) {
@@ -309,7 +269,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Reset button
                 addCategoryBtn.innerHTML = originalText;
                 addCategoryBtn.disabled = false;
-                
+
                 console.error('Error:', error);
                 showAlert('error', 'Terjadi kesalahan saat menambahkan kategori: ' + error.message);
             });

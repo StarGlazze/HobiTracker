@@ -44,7 +44,7 @@ class WebSetting extends Model
             // Ambil dari storage/app/public/uploads/logos/
             return asset('storage/' . $this->logo);
         }
-        return asset('admin/images/logos/HobiTrackerr.png'); // Default logo
+        return asset('admin/images/logos/HobiTracker.png'); // Default logo
     }
 
     /**
