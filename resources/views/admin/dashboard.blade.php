@@ -16,6 +16,8 @@
                         <h3 class="fw-bold mb-1 text-dark">
                             <i class="ti ti-dashboard text-primary me-2"></i>Dashboard HobiTracker
                         </h3>
+                        <small
+                            class="text-muted mb-2">{{ \Carbon\Carbon::now()->locale('id')->isoFormat('dddd, D MMMM YYYY | HH:mm') }}</small>
                         <p class="text-muted mb-0">
                             Pantau dan kelola hobi serta aktivitas Anda dengan mudah dan menyenangkan.
                         </p>

@@ -20,7 +20,7 @@
 
         <!-- Stats Cards -->
         <div class="row mb-4">
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <div class="card border-0 shadow-sm bg-primary bg-gradient text-white">
                     <div class="card-body p-3">
                         <div class="d-flex align-items-center">
@@ -35,7 +35,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <div class="card border-0 shadow-sm bg-success bg-gradient text-white">
                     <div class="card-body p-3">
                         <div class="d-flex align-items-center">
@@ -50,7 +50,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <div class="card border-0 shadow-sm bg-info bg-gradient text-white">
                     <div class="card-body p-3">
                         <div class="d-flex align-items-center">
@@ -60,21 +60,6 @@
                             </div>
                             <div class="ms-3">
                                 <i class="ti ti-file-text fs-1 text-white-50"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card border-0 shadow-sm bg-warning bg-gradient text-white">
-                    <div class="card-body p-3">
-                        <div class="d-flex align-items-center">
-                            <div class="flex-grow-1">
-                                <h6 class="text-white-50 mb-1">Bulan Ini</h6>
-                                <h4 class="mb-0">{{ $bulanIni }}</h4>
-                            </div>
-                            <div class="ms-3">
-                                <i class="ti ti-calendar fs-1 text-white-50"></i>
                             </div>
                         </div>
                     </div>
@@ -302,15 +287,10 @@
 
                     <!-- Export Button -->
                     <div class="col-12 col-md-4 d-flex justify-content-md-end justify-content-center">
-                        <form method="POST" action="{{ route('logs.export') }}" style="display: inline;">
-                            @csrf
-                            @foreach (request()->query() as $key => $value)
-                                <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-                            @endforeach
-                            <button type="submit" class="btn btn-danger btn-sm" id="exportBtn">
-                                <i class="ti ti-download me-1"></i> Export PDF
-                            </button>
-                        </form>
+                        <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
+                            data-bs-target="#exportModal">
+                            <i class="ti ti-download me-1"></i> Export PDF
+                        </button>
                     </div>
                 </div>
             </div>
@@ -358,6 +338,57 @@
             }
         </style>
 
+    </div>
+
+    <!-- Export Modal -->
+    <div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-danger text-white border-0">
+                    <h5 class="modal-title" id="exportModalLabel">
+                        <i class="ti ti-download me-2"></i>Export PDF Log Aktivitas
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <form method="POST" action="{{ route('logs.export') }}">
+                    @csrf
+                    @foreach (request()->query() as $key => $value)
+                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                    @endforeach
+                    <div class="modal-body">
+                        <div class="alert alert-info">
+                            <i class="ti ti-info-circle me-2"></i>
+                            <strong>Info:</strong> Export akan menghasilkan PDF dari {{ $logs->count() }} log aktivitas
+                            yang sedang ditampilkan di halaman ini.
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="includeImages" name="include_images"
+                                    value="1" checked>
+                                <label class="form-check-label" for="includeImages">
+                                    <strong>Sertakan gambar bukti</strong>
+                                </label>
+                            </div>
+                            <small class="text-muted">
+                                <i class="ti ti-info-circle me-1"></i>
+                                Menyertakan gambar akan membuat file PDF lebih besar dan memakan waktu lebih lama untuk
+                                di-generate.
+                            </small>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="ti ti-x me-2"></i>Batal
+                        </button>
+                        <button type="submit" class="btn btn-danger" id="confirmExportBtn">
+                            <i class="ti ti-download me-2"></i>Export PDF
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <!-- Detail Modal -->
@@ -431,7 +462,6 @@
 @endsection
 
 @section('scripts')
-    <!-- CSRF Token untuk AJAX -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="{{ asset('./admin/js/logs.js') }}"></script>
 @endsection

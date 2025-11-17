@@ -152,13 +152,9 @@
                     <div style="margin-top: 10px;">
                         <strong>Bukti:</strong>
                         @if ($fileData)
-                            @php
-                                $filePath = storage_path('app/public/' . $fileData);
-                                $fileExt = pathinfo($fileData, PATHINFO_EXTENSION);
-                            @endphp
-                            @if (in_array($fileExt, ['jpg', 'jpeg', 'png', 'gif', 'webp']) && file_exists($filePath))
+                            @if (isset($log->image_base64))
                                 <div style="margin-top: 5px;">
-                                    <img src="{{ $filePath }}"
+                                    <img src="{{ $log->image_base64 }}"
                                         style="max-width: 200px; max-height: 150px; border: 1px solid #ddd; padding: 3px;">
                                 </div>
                             @else

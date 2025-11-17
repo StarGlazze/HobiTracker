@@ -46,12 +46,29 @@ class LogAktivitasController extends Controller
 
         $logs = $query->orderBy($sortBy, $direction)->paginate(10);
 
-        $userId = !$isAdmin ? Auth::id() : null;
-        $whereUser = $userId ? "AND l.user_id = $userId" : "";
-        $whereDate = ($startDate && $endDate) ? "AND l.created_at BETWEEN '$startDate' AND '$endDate'" : "";
+        if ($isAdmin) {
+            // For admin, show all logs
+            $totalAktivitas = LogAktivitas::when($startDate && $endDate, function ($q) use ($startDate, $endDate) {
+                return $q->whereBetween('created_at', [$startDate, $endDate]);
+            })->count();
 
-        $totalAktivitas = DB::select("SELECT COUNT(*) as count FROM log_aktivitas l WHERE 1=1 $whereUser $whereDate")[0]->count;
-        $bulanIni = DB::select("SELECT COUNT(*) as count FROM log_aktivitas l WHERE MONTH(created_at) = ? $whereUser $whereDate", [now()->month])[0]->count;
+            $bulanIni = LogAktivitas::whereMonth('created_at', now()->month)
+                ->when($startDate && $endDate, function ($q) use ($startDate, $endDate) {
+                    return $q->whereBetween('created_at', [$startDate, $endDate]);
+                })->count();
+        } else {
+            // For regular users, show only their logs
+            $totalAktivitas = LogAktivitas::where('user_id', Auth::id())
+                ->when($startDate && $endDate, function ($q) use ($startDate, $endDate) {
+                    return $q->whereBetween('created_at', [$startDate, $endDate]);
+                })->count();
+
+            $bulanIni = LogAktivitas::where('user_id', Auth::id())
+                ->whereMonth('created_at', now()->month)
+                ->when($startDate && $endDate, function ($q) use ($startDate, $endDate) {
+                    return $q->whereBetween('created_at', [$startDate, $endDate]);
+                })->count();
+        }
 
         return view('admin.logs', compact('logs', 'totalAktivitas', 'bulanIni', 'search', 'startDate', 'endDate'));
     }
@@ -178,7 +195,39 @@ class LogAktivitasController extends Controller
      */
     public function export(Request $request)
     {
-        $logsExport = new LogsExport($request);
+        $search = $request->get('search');
+        $startDate = $request->get('start_date');
+        $endDate = $request->get('end_date');
+        $sortBy = $request->get('sort', 'created_at');
+        $direction = $request->get('direction', 'desc');
+
+        $isAdmin = Auth::user()->email === 'admin@example.com';
+
+        $query = LogAktivitas::with(['aktivitas.target.hobi']);
+
+        if (!$isAdmin) {
+            $query->where('user_id', Auth::id());
+        }
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('aktivitas', fn($sub) => $sub->where('nama_aktivitas', 'like', "%{$search}%"))
+                    ->orWhere('catatan', 'like', "%{$search}%");
+            });
+        }
+
+        if ($startDate && $endDate) {
+            $query->whereBetween('created_at', [$startDate, $endDate]);
+        }
+
+        // Get current page logs only (same as pagination)
+        $perPage = 10;
+        $currentPage = $request->get('page', 1);
+        $logs = $query->orderBy($sortBy, $direction)
+            ->paginate($perPage, ['*'], 'page', $currentPage);
+
+        // Create export with current page data
+        $logsExport = new LogsExport($request, $logs, $request->has('include_images'));
         return $logsExport->export();
     }
 

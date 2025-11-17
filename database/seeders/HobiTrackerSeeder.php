@@ -31,9 +31,9 @@ class HobiTrackerSeeder extends Seeder
             return;
         }
 
-        // Create 100 users
+        // Create 99 users (excluding admin)
         $users = [];
-        for ($i = 0; $i < 100; $i++) {
+        for ($i = 0; $i < 99; $i++) {
             $user = User::create([
                 'name' => $faker->name,
                 'email' => $faker->unique()->safeEmail,
@@ -58,10 +58,26 @@ class HobiTrackerSeeder extends Seeder
                     'user_id' => $user->id,
                     'kategori_id' => $faker->randomElement($kategoriIds),
                     'nama_hobi' => $faker->randomElement([
-                        'Berenang', 'Membaca Novel', 'Bermain Gitar', 'Memasak', 'Lari Pagi',
-                        'Menggambar', 'Bermain Piano', 'Fotografi', 'Berkebun', 'Menari',
-                        'Bermain Basket', 'Menulis Cerita', 'Bermain Drum', 'Memasak Kue', 'Yoga',
-                        'Melukis', 'Bermain Saxophone', 'Traveling', 'Koleksi Buku', 'Bermain Catur'
+                        'Berenang',
+                        'Membaca Novel',
+                        'Bermain Gitar',
+                        'Memasak',
+                        'Lari Pagi',
+                        'Menggambar',
+                        'Bermain Piano',
+                        'Fotografi',
+                        'Berkebun',
+                        'Menari',
+                        'Bermain Basket',
+                        'Menulis Cerita',
+                        'Bermain Drum',
+                        'Memasak Kue',
+                        'Yoga',
+                        'Melukis',
+                        'Bermain Saxophone',
+                        'Traveling',
+                        'Koleksi Buku',
+                        'Bermain Catur'
                     ]),
                     'deskripsi' => $faker->sentence,
                 ]);
@@ -104,6 +120,6 @@ class HobiTrackerSeeder extends Seeder
             }
         }
 
-        $this->command->info('Created 1000 hobbies, 1000 targets, 5000 activities, and 5000 logs.');
+        $this->command->info('Created 990 hobbies, 990 targets, 4950 activities, and 4950 logs.');
     }
 }

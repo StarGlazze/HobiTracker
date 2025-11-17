@@ -532,7 +532,7 @@ $hasGdrive = isset($fileData['gdrive']) && !empty($fileData['gdrive']);
                                 <p class="mb-2">Pilih salah satu atau kedua opsi di bawah ini untuk memberikan bukti
                                     aktivitas:</p>
                                 <small class="text-muted">
-                                    <i class="ti ti-check me-1"></i>Upload file langsung (maks 50MB)<br>
+                                    <i class="ti ti-check me-1"></i>Upload file langsung (maks 5MB)<br>
                                     <i class="ti ti-check me-1"></i>Atau berikan link Google Drive
                                 </small>
                             </div>
