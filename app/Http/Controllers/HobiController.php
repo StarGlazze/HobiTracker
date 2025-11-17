@@ -174,7 +174,7 @@ class HobiController extends Controller
     public function import(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:xlsx,xls|max:2048', // Max 2MB
+            'file' => 'required|mimes:xlsx,xls|max:5120', // Max 5MB
         ]);
 
         try {

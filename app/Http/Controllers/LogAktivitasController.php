@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\LogAktivitas;
 use App\Models\TargetHobi;
+use App\Exports\LogsExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -177,41 +178,8 @@ class LogAktivitasController extends Controller
      */
     public function export(Request $request)
     {
-        $search = $request->get('search');
-        $startDate = $request->get('start_date');
-        $endDate = $request->get('end_date');
-        $isAdmin = Auth::user()->email === 'admin@example.com';
-
-        $query = LogAktivitas::with(['aktivitas.target.hobi']);
-
-        if (!$isAdmin) {
-            $query->where('user_id', Auth::id());
-        }
-
-        if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->whereHas('aktivitas', fn($sub) => $sub->where('nama_aktivitas', 'like', "%{$search}%"))
-                    ->orWhere('catatan', 'like', "%{$search}%");
-            });
-        }
-
-        if ($startDate && $endDate) {
-            $query->whereBetween('created_at', [$startDate, $endDate]);
-        }
-
-        $logs = $query->orderBy('created_at', 'desc')->get();
-
-        $data = [
-            'logs' => $logs,
-            'startDate' => $startDate,
-            'endDate' => $endDate,
-            'generatedDate' => now()->format('d F Y H:i')
-        ];
-
-        $pdf = Pdf::loadView('admin.logs_pdf', $data);
-        $filename = 'logs_aktivitas_' . now()->format('Y-m-d_H-i-s') . '.pdf';
-
-        return $pdf->download($filename);
+        $logsExport = new LogsExport($request);
+        return $logsExport->export();
     }
 
     /**

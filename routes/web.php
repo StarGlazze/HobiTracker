@@ -23,7 +23,7 @@ Route::middleware(['auth'])->group(function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/logs', [LogAktivitasController::class, 'index'])->name('admin.logs');
-    Route::get('/logs/export', [LogAktivitasController::class, 'export'])->name('logs.export');
+    Route::post('/logs/export', [LogAktivitasController::class, 'export'])->name('logs.export');
     Route::resource('log-aktivitas', LogAktivitasController::class)->parameters([
         'log-aktivitas' => 'logAktivitas'
     ]);

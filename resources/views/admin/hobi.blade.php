@@ -561,7 +561,7 @@
                             @enderror
                             <div class="form-text">
                                 <i class="ti ti-bulb me-1"></i>
-                                Format yang didukung: .xlsx, .xls (maksimal 2MB)
+                                Format yang didukung: .xlsx, .xls (maksimal 5MB)
                             </div>
                         </div>
 

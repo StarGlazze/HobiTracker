@@ -85,9 +85,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         return;
                     }
 
-                    // Check file size (2MB)
-                    if (file.size > 2 * 1024 * 1024) {
-                        alert('Ukuran file terlalu besar. Maksimal 2MB.');
+                    // Check file size (5MB)
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert('Ukuran file terlalu besar. Maksimal 5MB.');
                         e.target.value = '';
                         return;
                     }
